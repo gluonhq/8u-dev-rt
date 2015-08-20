@@ -224,13 +224,14 @@ allprojects() {
     }
 
     dependencies {
-        retroconfig 'net.orfjackal.retrolambda:retrolambda:1.1.4'
+        retroconfig 'net.orfjackal.retrolambda:retrolambda:2.0.5'
     }
     task retroClass() <<{
             file classdirs = file ("$buildDir/classes");
             lf = classdirs.listFiles();
             classdirs.eachDir{t -> 
                 javaexec {
+                    executable = "$JDK_HOME/bin/java"
                     inputdir = t
                     basecp = files(lf, "modules/base/build/classes/main", "modules/graphics/build/classes/main", "modules/controls/build/classes/main").asPath
                     myconfig = configurations.retroconfig;
