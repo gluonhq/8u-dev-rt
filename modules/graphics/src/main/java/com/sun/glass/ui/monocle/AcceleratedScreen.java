@@ -122,8 +122,13 @@ public class AcceleratedScreen {
 
     private void createSurface() {
         nativeWindow = platformGetNativeWindow();
-        eglSurface = egl._eglCreateWindowSurface(eglDisplay, eglConfigs[0],
+        if (nativeWindow != 0) {
+            eglSurface = egl._eglCreateWindowSurface(eglDisplay, eglConfigs[0],
                                                    nativeWindow, null);
+        }
+        else {
+            System.err.println ("[AcceleratedScreen] Can't create surface when we have no native Window");
+        }
     }
 
 
