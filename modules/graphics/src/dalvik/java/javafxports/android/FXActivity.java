@@ -27,6 +27,7 @@ package javafxports.android;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -89,7 +90,8 @@ public class FXActivity extends Activity  {
     private static SurfaceView mView;
 
     private static String appDataDir;
-    private static DeviceConfiguration configuration;
+
+    private static IntentHandler intentHandler;
 
 
 
@@ -144,12 +146,6 @@ public class FXActivity extends Activity  {
         setContentView(mViewGroup);
         instance = this;
 
-        configuration = new DeviceConfiguration();
-        configuration.setConfiguration(getResources().getConfiguration());
-        Log.v(TAG, String.format("Confiuration orientation: %s",
-                configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-                ? "LANDSCAPE" : configuration.orientation == Configuration.ORIENTATION_PORTRAIT
-                                ? "PORTRAIT" : "UNDEFINED"));
         appDataDir = getApplicationInfo().dataDir;
         instance = this;
         _setDataDir(appDataDir);
@@ -219,6 +215,18 @@ public class FXActivity extends Activity  {
         super.onStop();
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        Log.v(TAG, "onActivityResult with requestCode " + requestCode+" and resultCode = "+resultCode+" and intent = "+intent);
+        if (intentHandler != null) {
+            intentHandler.gotActivityResult (requestCode, resultCode, intent);
+        }
+    }
+
+    public void setOnActivityResultHandler (IntentHandler handler) {
+        intentHandler = handler;
+    }
+
     public static FXActivity getInstance() {
         return instance;
     }
@@ -237,54 +245,7 @@ public class FXActivity extends Activity  {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         Log.v(TAG, "Called onConfigurationChanged");
-        configuration.setConfiguration(getResources().getConfiguration());
     }
-
-    private native void _jfxEventsLoop();
 
     private native void _setDataDir(String dir);
-
-    private native void _setSurface(Surface surface);
-
-    class DeviceConfiguration {
-
-        private static final int ORIENTATION_CHANGE = 1;
-        private int change = 0;
-        private int orientation;
-
-        DeviceConfiguration() {
-        }
-
-        void setConfiguration(Configuration config) {
-            if (orientation != config.orientation) {
-                orientation = config.orientation;
-                change |= ORIENTATION_CHANGE;
-            }
-        }
-
-        int getOrientation() {
-            return orientation;
-        }
-
-        boolean isChanged() {
-            return change > 0;
-        }
-
-        void dispatch() {
-            if ((change & ORIENTATION_CHANGE) > 0) {
-                Log.v(TAG, "Dispatching orientation change to");
-                try {
-                    onConfigurationChangedNativeMethod.invoke(null, SCREEN_ORIENTATION);
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onConfigurationChangedNative method by reflection", e);
-                }
-       
-            }
-            change = 0;
-        }
-    }
-
-
-
-
 }
