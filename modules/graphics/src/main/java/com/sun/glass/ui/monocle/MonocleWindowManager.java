@@ -176,8 +176,12 @@ final class MonocleWindowManager {
             @Override
             public void run() {
                 Screen.notifySettingsChanged();
-                instance.getFocusedWindow().setFullScreen(true);
-                instance.repaintAll();
+                if (instance != null) {
+                    if (instance.getFocusedWindow() != null) {
+                        instance.getFocusedWindow().setFullScreen(true);
+                        instance.repaintAll();
+                    }
+                }
                 Toolkit.getToolkit().requestNextPulse();
             }
         });
