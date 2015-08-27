@@ -67,10 +67,10 @@ public class FXDalvikEntity implements SurfaceHolder.Callback,
     private Method onMultiTouchEventMethod;
     private Method onKeyEventMethod;
     private static Method onGlobalLayoutChangedMethod;
-    private Method onSurfaceChangedNativeMethod1;
-    private Method onSurfaceChangedNativeMethod2;
-    private Method onSurfaceRedrawNeededNativeMethod;
-    private Method onConfigurationChangedNativeMethod;
+    private static Method onSurfaceChangedNativeMethod1;
+    private static Method onSurfaceChangedNativeMethod2;
+    private static Method onSurfaceRedrawNeededNativeMethod;
+    private static Method onConfigurationChangedNativeMethod;
     private static Method initializeMonocleMethod;
     
     private static InputMethodManager imm;
