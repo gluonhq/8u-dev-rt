@@ -38,6 +38,8 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import com.sun.javafx.application.PlatformImpl;
 import com.sun.javafx.application.PlatformImpl.FinishListener;
+import java.util.Arrays;
+import java.util.List;
 
 public class DalvikLauncher implements Launcher {
 
@@ -49,6 +51,8 @@ public class DalvikLauncher implements Launcher {
     private static final String ANDROID_PROPERTY_PREFIX = "android.";
     private static final String JAVAFX_PLATFORM_PROPERTIES = "javafx.platform.properties";
     private static final String JAVA_CUSTOM_PROPERTIES = "java.custom.properties";
+
+    private static final String PROPERTY_JAVAFXPORTS_OVERRIDE_TMPDIR = "javafxports.override.tmpdir";
 
     private static final Class[] LAUNCH_APPLICATION_ARGS = new Class[]{
         Class.class, Class.class, (new String[0]).getClass()};
@@ -118,6 +122,32 @@ public class DalvikLauncher implements Launcher {
                 } catch (IOException e) {
                     Log.v(TAG, "Exception closing " + JAVA_CUSTOM_PROPERTIES + " InputStream", e);
                 }
+            }
+        }
+
+        // Check if we need to override the system property 'java.io.tmpdir'
+        // with the cache dir of the android activity. We check the value of the
+        // system property 'javafxports.override.tmpdir'. If it is 'true', it is
+        // overridden. Otherwise, it's a list of paths separated by a colon. If
+        // the current value of the system property 'java.io.tmpdir' is found
+        // in the list of paths, the property is overridden as well.
+        String overrideTmpDirWithCacheDir = System.getProperty(PROPERTY_JAVAFXPORTS_OVERRIDE_TMPDIR);
+        if (overrideTmpDirWithCacheDir != null) {
+            boolean overrideCacheDir = Boolean.parseBoolean(overrideTmpDirWithCacheDir);
+            if (!overrideCacheDir) {
+                String[] splitPaths = overrideTmpDirWithCacheDir.split(":");
+                List paths = Arrays.asList(splitPaths);
+                String currentTmpDir = System.getProperty("java.io.tmpdir");
+                overrideCacheDir = paths.contains(currentTmpDir);
+                Log.v(TAG, "Does value of system property 'java.io.tmpdir' (" + currentTmpDir + ") match any of the overriding paths (" + paths + ")? " + overrideCacheDir);
+            }
+
+            if (overrideCacheDir) {
+                Log.v(TAG, "Overriding system property 'java.io.tmpdir' with activity cache dir.");
+                String activityCacheDir = activity.getCacheDir().getAbsolutePath();
+                System.setProperty("java.io.tmpdir", activityCacheDir);
+            } else {
+                Log.v(TAG, "Not overriding system property 'java.io.tmpdir'.");
             }
         }
 
