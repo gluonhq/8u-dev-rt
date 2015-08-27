@@ -28,10 +28,13 @@ package com.sun.javafx.scene.control.skin;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TextField;
+import javafx.scene.control.PasswordField;
 
 import com.sun.javafx.scene.control.behavior.TextFieldBehavior;
 
 public class TextFieldSkinAndroid extends TextFieldSkin {
+
+    public static final char MOBILEBULLET = '\u2022';
 
     public TextFieldSkinAndroid(final TextField textField) {
         super(textField);
@@ -53,4 +56,20 @@ public class TextFieldSkinAndroid extends TextFieldSkin {
     public TextFieldSkinAndroid(final TextField textField, final TextFieldBehavior behavior) {
         super(textField, behavior);
     }
+
+    @Override 
+    protected String maskText(String txt) {
+        if (getSkinnable() instanceof PasswordField) {
+            int n = txt.length();
+            StringBuilder passwordBuilder = new StringBuilder(n);
+            for (int i = 0; i < n; i++) {
+                passwordBuilder.append(MOBILEBULLET);
+            }
+
+            return passwordBuilder.toString();
+        } else {
+            return txt;
+        }
+    }
+
 }
