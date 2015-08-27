@@ -69,7 +69,7 @@ public class AcceleratedScreen {
 
         int major[] = {0}, minor[]={0};
         long nativeDisplay = platformGetNativeDisplay();
-        long nativeWindow = platformGetNativeWindow();
+        nativeWindow = platformGetNativeWindow();
 
         if (nativeDisplay == -1l) { // error condition
             throw new GLException(0, "Could not get native display");

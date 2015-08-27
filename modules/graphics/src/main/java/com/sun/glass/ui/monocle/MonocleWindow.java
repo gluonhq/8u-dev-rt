@@ -53,6 +53,8 @@ final class MonocleWindow extends Window {
 
     MonocleWindow(Window owner, Screen screen, int styleMask) {
         super(owner, screen, styleMask);
+        setPlatformScale(screen.getUIScale());
+        setRenderScale(screen.getRenderScale());
     }
 
     MonocleWindow(long parent) {
@@ -288,8 +290,8 @@ final class MonocleWindow extends Window {
             }
             x = 0;
             y = 0;
-            width = screen.getWidth();
-            height = screen.getHeight();
+            width = (int)(screen.getWidth() * screen.getScale());
+            height = (int)(screen.getHeight() * screen.getScale());
             MonocleView view = (MonocleView) getView();
             if (view != null) {
                 view.notifyView(ViewEvent.FULLSCREEN_ENTER);
