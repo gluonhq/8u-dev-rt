@@ -203,7 +203,7 @@ jstring createJString(JNIEnv *env, NSString *nsStr) {
 
 - (void)webViewDidStartLoad:(UIWebView *)webView{
     [windowView addSubview:loadingLabel];
-    loadingLabel.hidden = hidden;
+    loadingLabel.hidden = YES; // don't show ugly loading message
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
 
     JNIEnv *env = [self getJNIEnv];
