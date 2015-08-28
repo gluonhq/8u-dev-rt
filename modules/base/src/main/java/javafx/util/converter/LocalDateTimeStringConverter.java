@@ -180,7 +180,7 @@ public class LocalDateTimeStringConverter extends StringConverter<LocalDateTime>
             this.type = type;
             this.formatter = formatter;
             this.parser = (parser != null) ? parser : formatter;
-            this.locale = (locale != null) ? locale : Locale.getDefault(Locale.Category.FORMAT);
+            this.locale = (locale != null) ? locale : Locale.getDefault(/*Locale.Category.FORMAT*/);
             this.chronology = (chronology != null) ? chronology : IsoChronology.INSTANCE;
 
             if (type == LocalDate.class || type == LocalDateTime.class) {

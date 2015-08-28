@@ -240,11 +240,12 @@ public class DatePicker extends ComboBoxBase<LocalDate> {
     public final Chronology getChronology() {
         Chronology chrono = chronology.get();
         if (chrono == null) {
-            try {
-                chrono = Chronology.ofLocale(Locale.getDefault(Locale.Category.FORMAT));
-            } catch (Exception ex) {
-                System.err.println(ex);
-            }
+            // no static interface in Java 7
+//            try {
+//                chrono = Chronology.ofLocale(Locale.getDefault());//Locale.Category.FORMAT));
+//            } catch (Exception ex) {
+//                System.err.println(ex);
+//            }
             if (chrono == null) {
                 chrono = IsoChronology.INSTANCE;
             }
@@ -266,7 +267,7 @@ public class DatePicker extends ComboBoxBase<LocalDate> {
      */
     public final BooleanProperty showWeekNumbersProperty() {
         if (showWeekNumbers == null) {
-            String country = Locale.getDefault(Locale.Category.FORMAT).getCountry();
+            String country = Locale.getDefault(/*Locale.Category.FORMAT*/).getCountry();
             boolean localizedDefault =
                 (!country.isEmpty() &&
                  ControlResources.getNonTranslatableString("DatePicker.showWeekNumbers").contains(country));
@@ -441,7 +442,7 @@ public class DatePicker extends ComboBoxBase<LocalDate> {
       */
     private static class StyleableProperties {
         private static final String country =
-            Locale.getDefault(Locale.Category.FORMAT).getCountry();
+            Locale.getDefault(/*Locale.Category.FORMAT*/).getCountry();
         private static final CssMetaData<DatePicker, Boolean> SHOW_WEEK_NUMBERS =
               new CssMetaData<DatePicker, Boolean>("-fx-show-week-numbers",
                    BooleanConverter.getInstance(),

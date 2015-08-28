@@ -143,7 +143,7 @@ public class DateTimeStringConverter extends StringConverter<Date> {
 
     DateTimeStringConverter(Locale locale, String pattern, DateFormat dateFormat,
                             int dateStyle, int timeStyle) {
-        this.locale = (locale != null) ? locale : Locale.getDefault(Locale.Category.FORMAT);
+        this.locale = (locale != null) ? locale : Locale.getDefault(/*Locale.Category.FORMAT*/);
         this.pattern = pattern;
         this.dateFormat = dateFormat;
         this.dateStyle = dateStyle;
