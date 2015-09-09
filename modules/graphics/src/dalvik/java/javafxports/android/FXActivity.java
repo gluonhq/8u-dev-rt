@@ -119,7 +119,7 @@ public class FXActivity extends Activity  {
     private FXDalvikEntity fxDalvikEntity;
 
     static {
-        Log.v(TAG, "Initializing JavaFX Platform, Using "+JFX_BUILD);
+        Log.v(TAG, "Initializing JavaFX Platform, using "+JFX_BUILD);
         System.loadLibrary(ACTIVITY_LIB);
     }
         
@@ -127,7 +127,7 @@ public class FXActivity extends Activity  {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.fxDalvikEntity = new FXDalvikEntity(metadata, this);
-        Log.v(TAG, "onCreate called, Using "+JFX_BUILD);
+        Log.v(TAG, "onCreate called, using "+JFX_BUILD);
         if (launcher != null) {
             Log.v(TAG, "JavaFX application is already running");
             return;

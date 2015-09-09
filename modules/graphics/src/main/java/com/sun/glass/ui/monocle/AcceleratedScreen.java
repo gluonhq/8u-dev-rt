@@ -120,7 +120,7 @@ public class AcceleratedScreen {
         }
     }
 
-    private void createSurface() {
+    protected void createSurface() {
         nativeWindow = platformGetNativeWindow();
         if (nativeWindow != 0) {
             eglSurface = egl._eglCreateWindowSurface(eglDisplay, eglConfigs[0],
@@ -189,6 +189,7 @@ public class AcceleratedScreen {
             result = egl.eglSwapBuffers(eglDisplay, eglSurface);
 // TODO this shouldn't happen. In case the surface is invalid, we need to have recreated it before this method is called
             if (!result) {
+                System.err.println ("[WARNING] this shouldn't happen. swapBuffers failed with eglSurface "+eglSurface+", recreate surface and try again.");
                 createSurface();
                 result = egl.eglSwapBuffers(eglDisplay, eglSurface);
             }

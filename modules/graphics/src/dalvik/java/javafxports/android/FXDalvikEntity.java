@@ -67,6 +67,7 @@ public class FXDalvikEntity implements SurfaceHolder.Callback,
     private Method onMultiTouchEventMethod;
     private Method onKeyEventMethod;
     private static Method onGlobalLayoutChangedMethod;
+    private static Method onSurfaceCreatedMethod;
     private static Method onSurfaceChangedNativeMethod1;
     private static Method onSurfaceChangedNativeMethod2;
     private static Method onSurfaceRedrawNeededNativeMethod;
@@ -144,6 +145,9 @@ public class FXDalvikEntity implements SurfaceHolder.Callback,
             getLauncherAndLaunchApplication();
         } else {
             try {
+                Log.v(TAG, "Surface created, application was already launched and we will recreate eglSurface now");
+                onSurfaceCreatedMethod.invoke(null);
+                Log.v(TAG, "Surface created, application was already launched and we will invoke native surface changed method: "+onSurfaceChangedNativeMethod1);
                 onSurfaceChangedNativeMethod1.invoke(null);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onSurfaceChangedNative1 method by reflection", e);
@@ -155,11 +159,6 @@ public class FXDalvikEntity implements SurfaceHolder.Callback,
     public void surfaceChanged(SurfaceHolder holder, int format, int width,
             int height) {
         Log.v(TAG, String.format("Called Surface changed [%d, %d], format %d", width, height, format));
-        if (glassHasStarted) {
-//            if (configuration.isChanged()) {
-//                configuration.dispatch();
-//            }
-        }
         surfaceDetails = new SurfaceDetails(holder.getSurface(), format, width, height);
         _setSurface(surfaceDetails.surface);
         if (glassHasStarted) {
@@ -189,6 +188,7 @@ public class FXDalvikEntity implements SurfaceHolder.Callback,
     public void surfaceRedrawNeeded(SurfaceHolder holder) {
         Log.v(TAG, "Called Surface redraw needed");
         if (holder.getSurface() != surfaceDetails.surface) {
+            Log.v(TAG, "Surface redraw needed and we have a new surface");
             surfaceDetails = new SurfaceDetails(holder.getSurface());
             _setSurface(surfaceDetails.surface);
         }
@@ -221,6 +221,10 @@ public class FXDalvikEntity implements SurfaceHolder.Callback,
 
     protected void setOnGlobalLayoutChangedMethod(Method method) {
         onGlobalLayoutChangedMethod = method;
+    }
+
+    protected void setOnSurfaceCreatedMethod(Method method) {
+        onSurfaceCreatedMethod = method;
     }
 
     protected void setOnSurfaceChangedNativeMethod1(
@@ -383,6 +387,9 @@ private static long softInput = 0L;
         }
     }
 
+    private void setSurface(Surface surface) {
+        _setSurface(surface);
+    }
     
     class DeviceConfiguration {
 

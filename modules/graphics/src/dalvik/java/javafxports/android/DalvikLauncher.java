@@ -225,6 +225,8 @@ public class DalvikLauncher implements Launcher {
         fxDalvikEntity.setOnSurfaceChangedNativeMethod2(dalvikInputClass.getMethod("onSurfaceChangedNative", int.class, int.class, int.class));
         fxDalvikEntity.setOnSurfaceRedrawNeededNativeMethod(dalvikInputClass.getMethod("onSurfaceRedrawNeededNative"));
         fxDalvikEntity.setOnConfigurationChangedNativeMethod(dalvikInputClass.getMethod("onConfigurationChangedNative", int.class));
+        Class<?> androidAcceleratedScreen = getApplicationClassLoader().loadClass("com.sun.glass.ui.monocle.AndroidAcceleratedScreen");
+        fxDalvikEntity.setOnSurfaceCreatedMethod(androidAcceleratedScreen.getMethod("createEglSurface"));
         boolean hasAccessToFXClasses = false;
         try {
             // this.getClass().getClassLoader().loadClass("com.sun.javafx.application.PlatformImpl.FinishListener");

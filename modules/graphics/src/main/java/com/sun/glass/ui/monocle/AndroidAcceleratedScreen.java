@@ -34,9 +34,18 @@ import java.security.PrivilegedAction;
  */
 class AndroidAcceleratedScreen extends AcceleratedScreen {
 
+    private static AndroidAcceleratedScreen instance;
 
     AndroidAcceleratedScreen(int[] attributes) throws GLException {
         super(attributes);
+        instance = this;
+    }
+
+    public static void createEglSurface() {
+// no reason to call this method when there is no instance yet, as the createSurface will be called on instance creation as well.
+        if (instance != null) {
+            instance.createSurface();
+        }
     }
 
     boolean initPlatformLibraries() {
