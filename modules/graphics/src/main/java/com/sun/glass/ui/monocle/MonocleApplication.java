@@ -161,7 +161,8 @@ public final class MonocleApplication extends Application {
 
     @Override
     public View createView() {
-        return new MonocleView();
+        NativeScreen ns = platform.getScreen();
+        return new MonocleView(ns.getScale());
     }
 
     @Override
