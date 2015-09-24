@@ -1044,7 +1044,15 @@ public class DialogPane extends Pane {
 
         boolean hasDefault = false;
         for (ButtonType cmd : getButtonTypes()) {
-            Node button = buttonNodes.computeIfAbsent(cmd, dialogButton -> createButton(cmd));
+
+            // replace computeIfAbsent
+            if (buttonNodes.get(cmd) == null) {
+                Node newValue = createButton(cmd);
+                if (newValue != null) buttonNodes.put(cmd, newValue);
+            }
+            Node button = buttonNodes.get(cmd);
+
+            // Node button = buttonNodes.computeIfAbsent(cmd, dialogButton -> createButton(cmd));
             
             // keep only first default button
             if (button instanceof Button) {
