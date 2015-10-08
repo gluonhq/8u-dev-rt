@@ -368,10 +368,10 @@ public class ButtonBar extends Control {
         final Object key = ButtonBarSkin.BUTTON_DATA_PROPERTY;
         ObjectProperty<ButtonData> property = (ObjectProperty<ButtonData>)properties.get(key);
         if (property == null) {
-          property = new SimpleObjectProperty<>(button, "buttonData", buttonData);
-          properties.put(key, property);
+            property = new SimpleObjectProperty<>(button, "buttonData", buttonData);
+            properties.put(key, property);
         } else {
-          property.set(buttonData);
+            property.set(buttonData);
         }
     }
     
@@ -423,7 +423,7 @@ public class ButtonBar extends Control {
     public static boolean isButtonUniformSize(Node button) {
         Boolean value = (Boolean)button.getProperties().get(ButtonBarSkin.BUTTON_SIZE_INDEPENDENCE);
         if (value == null) {
-          value = Boolean.TRUE;
+            value = Boolean.TRUE;
         }
         return value.booleanValue();
     }
