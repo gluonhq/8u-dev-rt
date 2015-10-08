@@ -365,13 +365,14 @@ public class ButtonBar extends Control {
      */
     public static void setButtonData(Node button, ButtonData buttonData) {
         final Map<Object,Object> properties = button.getProperties();
-        final ObjectProperty<ButtonData> property =
-                (ObjectProperty<ButtonData>) properties.getOrDefault(
-                        ButtonBarSkin.BUTTON_DATA_PROPERTY,
-                        new SimpleObjectProperty<>(button, "buttonData", buttonData));
-
-        property.set(buttonData);
-        properties.putIfAbsent(ButtonBarSkin.BUTTON_DATA_PROPERTY, property);
+        final Object key = ButtonBarSkin.BUTTON_DATA_PROPERTY;
+        ObjectProperty<ButtonData> property = (ObjectProperty<ButtonData>)properties.get(key);
+        if (property == null) {
+          property = new SimpleObjectProperty<>(button, "buttonData", buttonData);
+          properties.put(key, property);
+        } else {
+          property.set(buttonData);
+        }
     }
     
     /**
@@ -384,7 +385,7 @@ public class ButtonBar extends Control {
         final Map<Object,Object> properties = button.getProperties();
         if (properties.containsKey(ButtonBarSkin.BUTTON_DATA_PROPERTY)) {
             ObjectProperty<ButtonData> property = (ObjectProperty<ButtonData>) properties.get(ButtonBarSkin.BUTTON_DATA_PROPERTY);
-            return property == null ? null : property.get();
+            return (property == null) ? null : property.get();
         }
         return null;
     }
@@ -420,7 +421,11 @@ public class ButtonBar extends Control {
      * {@link #setButtonUniformSize(Node, boolean)}) will return true here.
      */
     public static boolean isButtonUniformSize(Node button) {
-        return (boolean) button.getProperties().getOrDefault(ButtonBarSkin.BUTTON_SIZE_INDEPENDENCE, true);
+        Boolean value = (Boolean)button.getProperties().get(ButtonBarSkin.BUTTON_SIZE_INDEPENDENCE);
+        if (value == null) {
+          value = Boolean.TRUE;
+        }
+        return value.booleanValue();
     }
 
 
