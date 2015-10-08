@@ -1043,27 +1043,31 @@ public class DialogPane extends Pane {
         }
 
         boolean hasDefault = false;
-        for (ButtonType cmd : getButtonTypes()) {
-
-            // replace computeIfAbsent
-            if (buttonNodes.get(cmd) == null) {
-                Node newValue = createButton(cmd);
-                if (newValue != null) buttonNodes.put(cmd, newValue);
+        for (ButtonType buttonType : getButtonTypes()) {
+            Node buttonNode = buttonNodes.get(buttonType);
+            if (buttonNode == null) {
+                final Node newButtonNode = createButton(buttonType);
+                if (newButtonNode != null) {
+                    buttonNodes.put(buttonType, newButtonNode);
+                    buttonNode = newButtonNode;
+                }
             }
-            Node button = buttonNodes.get(cmd);
 
-            // Node button = buttonNodes.computeIfAbsent(cmd, dialogButton -> createButton(cmd));
-            
             // keep only first default button
-            if (button instanceof Button) {
-                ButtonData buttonType = cmd.getButtonData();
+            if (buttonNode instanceof Button) {
+        	final Button button = (Button)buttonNode;
+                final ButtonData buttonData = buttonType.getButtonData();
                 
-                ((Button)button).setDefaultButton(!hasDefault && buttonType != null && buttonType.isDefaultButton());
-                ((Button)button).setCancelButton(buttonType != null && buttonType.isCancelButton());
-                
-                hasDefault |= buttonType != null && buttonType.isDefaultButton();
+        	if (buttonData != null) {
+        	    button.setDefaultButton(!hasDefault && buttonData.isDefaultButton());
+        	    button.setCancelButton(buttonData.isCancelButton());
+        	    hasDefault |= buttonData.isDefaultButton();
+        	} else {
+        	    button.setDefaultButton(false);
+        	    button.setCancelButton(false);
+        	}
             }
-            buttonBar.getButtons().add(button);
+            buttonBar.getButtons().add(buttonNode);
         }
     }
     
