@@ -226,14 +226,14 @@ public class DialogPane extends Pane {
         buttons.addListener((ListChangeListener<ButtonType>) c -> {
             while (c.next()) {
                 if (c.wasRemoved()) {
-                    for (ButtonType cmd : c.getRemoved()) {
-                        buttonNodes.remove(cmd);
+                    for (ButtonType buttonType : c.getRemoved()) {
+                        buttonNodes.remove(buttonType);
                     }
                 }
                 if (c.wasAdded()) {
-                    for (ButtonType cmd : c.getAddedSubList()) {
-                        if (! buttonNodes.containsKey(cmd)) {
-                            buttonNodes.put(cmd, createButton(cmd));
+                    for (ButtonType buttonType : c.getAddedSubList()) {
+                        if (! buttonNodes.containsKey(buttonType)) {
+                            buttonNodes.put(buttonType, createButton(buttonType));
                         }
                     }
                 }
