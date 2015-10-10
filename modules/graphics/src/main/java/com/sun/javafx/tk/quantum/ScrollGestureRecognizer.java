@@ -48,7 +48,7 @@ class ScrollGestureRecognizer implements GestureRecognizer {
     private static double SCROLL_THRESHOLD = 10; //in pixels
     private static boolean SCROLL_INERTIA_ENABLED = true;
     private static double MAX_INITIAL_VELOCITY = 1000;
-    private static double SCROLL_INERTIA_MILLIS = 1500;
+    private static double SCROLL_INERTIA_MILLIS = 3000;
     static {
         AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
             String s = System.getProperty("com.sun.javafx.gestures.scroll.threshold");
@@ -58,6 +58,14 @@ class ScrollGestureRecognizer implements GestureRecognizer {
             s = System.getProperty("com.sun.javafx.gestures.scroll.inertia");
             if (s != null) {
                 SCROLL_INERTIA_ENABLED = Boolean.valueOf(s);
+            }
+            s = System.getProperty("com.sun.javafx.gestures.scroll.inertia.time");
+            if (s != null) {
+                SCROLL_INERTIA_MILLIS = Integer.valueOf(s);
+            }
+            s = System.getProperty("com.sun.javafx.gestures.scroll.inertia.velocity");
+            if (s != null) {
+                MAX_INITIAL_VELOCITY = Integer.valueOf(s);
             }
             return null;
         });
