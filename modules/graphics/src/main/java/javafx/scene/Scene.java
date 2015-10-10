@@ -1813,8 +1813,12 @@ public class Scene implements EventTarget {
             gesture.target = null;
             gesture.finished = false;
         }
-
-        if (gesture.target != null && (!gesture.finished || e.isInertia())) {
+        
+       // if (gesture.target != null && (!gesture.finished || e.isInertia())) {
+        // when inertia is enabled, we don't re-use the target that is already on 
+        // the gesture, but we use the one that is computed with the event.
+        // with intertia, the existing target may be invalid by now.
+        if (gesture.target != null && (!gesture.finished)) {
             pickedTarget = gesture.target;
         } else {
             pickedTarget = e.getPickResult().getIntersectedNode();
