@@ -67,6 +67,8 @@ import java.util.List;
  */
 public class VirtualFlow<T extends IndexedCell> extends Region {
 
+    private boolean allowHiDPI = Boolean.valueOf(System.getProperty("prism.allowhidpi", "false"));
+
     /**
      * Scroll events may request to scroll about a number of "lines". We first
      * decide how big one "line" is - for fixed cell size it's clear,
@@ -2885,5 +2887,15 @@ public class VirtualFlow<T extends IndexedCell> extends Region {
     protected void scrollBarOn() {
         tempVisibility = true;
         requestLayout();
+    }
+
+    @Override
+    protected double snapSize(double v) {
+        if (allowHiDPI) {
+            return v;
+        }
+	else {
+	    return super.snapSize(v);
+        }
     }
 }
