@@ -213,7 +213,7 @@ public class Tooltip extends PopupControl {
         return textAlignmentProperty().getValue();
     }
     private final ObjectProperty<TextAlignment> textAlignment =
-            new SimpleStyleableObjectProperty<>(TEXT_ALIGNMENT, this, "textAlignment", TextAlignment.LEFT);;
+            new SimpleStyleableObjectProperty<>(TEXT_ALIGNMENT, this, "textAlignment", TextAlignment.LEFT);
 
     /**
      * Specifies the behavior to use if the text of the {@code Tooltip}

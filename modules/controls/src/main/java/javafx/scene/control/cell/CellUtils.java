@@ -145,7 +145,7 @@ class CellUtils {
                 cell.setGraphic(graphic);
             }
         }
-    };
+    }
     
     static <T> ChoiceBox<T> createChoiceBox(
             final Cell<T> cell,
@@ -295,7 +295,7 @@ class CellUtils {
                 cell.setGraphic(graphic);
             }
         }
-    };
+    }
     
     static <T> ComboBox<T> createComboBox(final Cell<T> cell,
                                           final ObservableList<T> items,

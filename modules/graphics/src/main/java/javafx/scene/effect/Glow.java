@@ -80,7 +80,7 @@ public class Glow extends Effect {
     @Override
     com.sun.scenario.effect.Glow impl_createImpl() {
         return new com.sun.scenario.effect.Glow();
-    };
+    }
     /**
      * The input for this {@code Effect}.
      * If set to {@code null}, or left unspecified, a graphical image of

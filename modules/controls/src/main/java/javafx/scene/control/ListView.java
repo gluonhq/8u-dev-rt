@@ -509,7 +509,7 @@ public class ListView<T> extends Control {
      */
     public final void setOrientation(Orientation value) {
         orientationProperty().set(value);
-    };
+    }
     
     /**
      * Returns the current orientation of the ListView, which dictates whether

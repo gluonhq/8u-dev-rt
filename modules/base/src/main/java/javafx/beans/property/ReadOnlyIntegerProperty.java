@@ -166,6 +166,6 @@ public abstract class ReadOnlyIntegerProperty extends IntegerExpression
                 return ReadOnlyIntegerProperty.this.getValue();
             }
         };
-    };
+    }
 
 }

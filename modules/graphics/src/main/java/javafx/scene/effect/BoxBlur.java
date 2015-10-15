@@ -92,7 +92,7 @@ public class BoxBlur extends Effect {
     @Override
     com.sun.scenario.effect.BoxBlur impl_createImpl() {
         return new com.sun.scenario.effect.BoxBlur();
-    };
+    }
     /**
      * The input for this {@code Effect}.
      * If set to {@code null}, or left unspecified, a graphical image of

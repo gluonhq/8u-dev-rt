@@ -164,6 +164,6 @@ public abstract class ReadOnlyLongProperty extends LongExpression implements
                 return ReadOnlyLongProperty.this.getValue();
             }
         };
-    };
+    }
 
 }

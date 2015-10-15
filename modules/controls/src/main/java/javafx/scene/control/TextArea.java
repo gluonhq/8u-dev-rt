@@ -418,7 +418,7 @@ public class TextArea extends TextInputControl {
         protected int[] getPermutation() {
             return new int[0];
         }
-    };
+    }
 
     /**
      * The default value for {@link #prefColumnCount}.

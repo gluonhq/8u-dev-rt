@@ -187,5 +187,5 @@ public class ReadOnlyStringWrapper extends SimpleStringProperty {
         public String getName() {
             return ReadOnlyStringWrapper.this.getName();
         }
-    };
+    }
 }

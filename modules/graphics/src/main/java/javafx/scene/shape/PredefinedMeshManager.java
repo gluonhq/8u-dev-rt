@@ -176,4 +176,4 @@ final class PredefinedMeshManager {
                 INSTANCE = new HashMap<Integer, TriangleMesh>(INITAL_CAPACITY, LOAD_FACTOR);
     }
 
-};
+}

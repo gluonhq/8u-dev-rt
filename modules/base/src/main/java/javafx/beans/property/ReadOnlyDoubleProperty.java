@@ -165,8 +165,6 @@ public abstract class ReadOnlyDoubleProperty extends DoubleExpression implements
                 return ReadOnlyDoubleProperty.this.getValue();
             }
         };
-    };
-    
-    
+    }
 
 }

@@ -185,5 +185,5 @@ public class ReadOnlyFloatWrapper extends SimpleFloatProperty {
         public String getName() {
             return ReadOnlyFloatWrapper.this.getName();
         }
-    };
+    }
 }

@@ -110,7 +110,7 @@ public final class SortedList<E> extends TransformationList<E, E>{
             updateUnsorted(c);
             fireChange(new SourceAdapterChange<>(this, c));
         }
-    };
+    }
 
     /**
      * The comparator that denotes the order of this SortedList.

@@ -165,6 +165,6 @@ public abstract class ReadOnlyBooleanProperty extends BooleanExpression
                 return ReadOnlyBooleanProperty.this.getValue();
             }
         };
-    };
+    }
 
 }

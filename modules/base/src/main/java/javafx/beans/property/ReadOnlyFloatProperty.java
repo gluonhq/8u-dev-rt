@@ -165,6 +165,6 @@ public abstract class ReadOnlyFloatProperty extends FloatExpression implements
                 return ReadOnlyFloatProperty.this.getValue();
             }
         };
-    };
+    }
 
 }
