@@ -26,6 +26,8 @@
 #include <jni.h>
 #ifdef ANDROID_NDK
 #include <stddef.h>
+#include <time.h>
+#include <android/log.h>
 #endif
 #include "com_sun_prism_impl_shape_NativePiscesRasterizer.h"
 
@@ -34,6 +36,9 @@
 #include "Dasher.h"
 #include "Transformer.h"
 #include "AlphaConsumer.h"
+#ifdef ANDROID_NDK
+#define ALOG(...)  ((void)__android_log_print(ANDROID_LOG_INFO,"PRISM", __VA_ARGS__))
+#endif
 
 #define SEG(T) com_sun_prism_impl_shape_NativePiscesRasterizer_SEG_ ## T
 
@@ -63,6 +68,13 @@
         }                                               \
     } while (0)
 
+#ifdef ANDROID_NDK
+int64_t getTimeNsec() {
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    return (int64_t) now.tv_sec*1000000000LL + now.tv_nsec;
+}
+#endif
 
 static void Throw(JNIEnv *env, char *throw_class_name, char *detail) {
     jclass throw_class = (*env)->FindClass(env, throw_class_name);
@@ -172,6 +184,10 @@ Java_com_sun_prism_impl_shape_NativePiscesRasterizer_produceFillAlphas
      jdouble mxx, jdouble mxy, jdouble mxt, jdouble myx, jdouble myy, jdouble myt,
      jintArray boundsArray, jbyteArray maskArray)
 {
+#ifdef ANDROID_NDK
+ALOG("[JVDBG]FPA1 %l -- %d ", getTimeNsec());
+#endif
+
     jint bounds[4];
     Transformer transformer;
     Renderer renderer;

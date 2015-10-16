@@ -674,7 +674,7 @@ DALVIK.prism.compiler = compiler
 DALVIK.prism.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags].flatten()
 DALVIK.prism.linker = linker
-DALVIK.prism.linkFlags = [linkFlags].flatten()
+DALVIK.prism.linkFlags = [linkFlags, "-ldl", "-landroid", "-llog"].flatten()
 DALVIK.prism.lib = "prism_common"
 
 DALVIK.prismSW = [:]
