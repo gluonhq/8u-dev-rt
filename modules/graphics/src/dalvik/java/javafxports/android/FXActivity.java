@@ -41,6 +41,7 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.TextureView;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
@@ -87,7 +88,7 @@ public class FXActivity extends Activity  {
     private static FXActivity instance;
     private static Launcher launcher;
     private static FrameLayout mViewGroup;
-    private static SurfaceView mView;
+    private static TextureView mView;
 
     private static String appDataDir;
 

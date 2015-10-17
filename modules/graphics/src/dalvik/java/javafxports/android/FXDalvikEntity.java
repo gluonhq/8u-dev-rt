@@ -28,6 +28,7 @@ package javafxports.android;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.DisplayMetrics;
@@ -36,12 +37,13 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.TextureView;
+import android.view.TextureView.SurfaceTextureListener;
 import android.view.inputmethod.InputMethodManager;
 import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
 
-public class FXDalvikEntity implements SurfaceHolder.Callback,
-        SurfaceHolder.Callback2 {
+public class FXDalvikEntity implements SurfaceTextureListener {
     private static final String ACTIVITY_LIB = "activity";
     private static final String META_DATA_LAUNCHER_CLASS = "launcher.class";
     private static final String DEFAULT_LAUNCHER_CLASS = "javafxports.android.DalvikLauncher";
@@ -75,10 +77,11 @@ public class FXDalvikEntity implements SurfaceHolder.Callback,
     private static Method initializeMonocleMethod;
     
     private static InputMethodManager imm;
-    private static InternalSurfaceView myView;
+    private static TextureView myView;
     private static CountDownLatch cdlEvLoopFinished;
 
     private float density;
+    private SurfaceTexture surfaceTexture;
 
     public FXDalvikEntity (Bundle metadata, Activity activity) {
         this.metadata = metadata;
@@ -124,19 +127,22 @@ public class FXDalvikEntity implements SurfaceHolder.Callback,
     }
 
 
-    public SurfaceView createView () {
-        myView = new InternalSurfaceView(activity);
-        myView.getHolder().addCallback(this);
+    public TextureView createView () {
+        myView = new InternalTextureView(activity);
+        myView.setSurfaceTextureListener(this);
+        //myView.getHolder().addCallback(this);
         return myView;
     }
     
-  @Override
-    public void surfaceCreated(SurfaceHolder holder) {
+    @Override
+    public void onSurfaceTextureAvailable(SurfaceTexture st, int width, int height) {
         Log.v(TAG, "Surface created.");
         DisplayMetrics metrics = new DisplayMetrics();
         activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
         Log.v(TAG, "metrics = "+metrics);
-        surfaceDetails = new SurfaceDetails(holder.getSurface(), metrics.density);
+        this.surfaceTexture = st;
+        Surface surface = new Surface(st);
+        surfaceDetails = new SurfaceDetails(surface, metrics.density);
         _setSurface(surfaceDetails.surface);
         density = metrics.density;
         _setDensity(surfaceDetails.density);
@@ -154,12 +160,12 @@ public class FXDalvikEntity implements SurfaceHolder.Callback,
             }
         }
     }
-
+  
     @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width,
-            int height) {
-        Log.v(TAG, String.format("Called Surface changed [%d, %d], format %d", width, height, format));
-        surfaceDetails = new SurfaceDetails(holder.getSurface(), format, width, height);
+    public void onSurfaceTextureSizeChanged(SurfaceTexture st, int width, int height) {
+        Log.v(TAG, String.format("Called Surface changed [%d, %d]", width, height));
+        Surface surface = new Surface(st);
+        surfaceDetails = new SurfaceDetails(surface, width, height);
         _setSurface(surfaceDetails.surface);
         if (glassHasStarted) {
             try {
@@ -168,11 +174,12 @@ public class FXDalvikEntity implements SurfaceHolder.Callback,
                 throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onSurfaceChangedNative2 method by reflection", e);
             }
         }
+        
     }
 
     @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        Log.v(TAG, "Called Surface destroyed");
+    public boolean onSurfaceTextureDestroyed(SurfaceTexture st) {
+            Log.v(TAG, "Called Surface destroyed");
         surfaceDetails = new SurfaceDetails();
         _setSurface(surfaceDetails.surface);
         if (glassHasStarted) {
@@ -182,14 +189,17 @@ public class FXDalvikEntity implements SurfaceHolder.Callback,
                 throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onSurfaceChangedNative1 method by reflection", e);
             }
         }
+        return true;
     }
 
     @Override
-    public void surfaceRedrawNeeded(SurfaceHolder holder) {
+    public void onSurfaceTextureUpdated(SurfaceTexture st) {
+       
         Log.v(TAG, "Called Surface redraw needed");
-        if (holder.getSurface() != surfaceDetails.surface) {
+        if (st != surfaceTexture) {
+            Surface surface = new Surface(st);
             Log.v(TAG, "Surface redraw needed and we have a new surface");
-            surfaceDetails = new SurfaceDetails(holder.getSurface());
+            surfaceDetails = new SurfaceDetails(surface);
             _setSurface(surfaceDetails.surface);
         }
         if (glassHasStarted) {
@@ -313,11 +323,12 @@ private static long softInput = 0L;
     private native void _setSurface(Surface surface);
 
     private native void _setDensity(float density);
-    
-    
-    class InternalSurfaceView extends SurfaceView {
 
-        public InternalSurfaceView(Context context) {
+
+    
+    class InternalTextureView extends TextureView {
+
+        public InternalTextureView(Context context) {
             super(context);
             setFocusableInTouchMode(true);
         }
@@ -450,6 +461,12 @@ private static long softInput = 0L;
             this.density = density;
         }
 
+        SurfaceDetails(Surface surface, int width, int height) {
+            this.surface = surface;
+            this.width = width;
+            this.height = height;
+        }
+        
         SurfaceDetails(Surface surface, int format, int width, int height) {
             this.surface = surface;
             this.format = format;
