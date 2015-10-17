@@ -280,9 +280,8 @@ public class TreeTableRow<T> extends IndexedCell<T> {
      *                                                                         *
      *************************************************************************
      * @param oldIndex
-     * @param newIndex*/
-
-    
+     * @param newIndex
+     */
     @Override void indexChanged(int oldIndex, int newIndex) {
         index = getIndex();
 

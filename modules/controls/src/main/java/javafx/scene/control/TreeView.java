@@ -28,7 +28,6 @@ package javafx.scene.control;
 import com.sun.javafx.collections.NonIterableChange;
 import com.sun.javafx.css.converters.SizeConverter;
 import com.sun.javafx.scene.control.behavior.TreeCellBehavior;
-import com.sun.javafx.scene.control.skin.ListViewSkin;
 import com.sun.javafx.scene.control.skin.TreeViewSkin;
 
 import javafx.application.Platform;

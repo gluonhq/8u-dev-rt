@@ -25,7 +25,6 @@
 
 package com.sun.javafx.scene.control.behavior;
 
-import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.control.TableColumnBase;
 import javafx.scene.control.TablePositionBase;

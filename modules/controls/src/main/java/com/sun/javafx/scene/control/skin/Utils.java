@@ -39,7 +39,6 @@ import javafx.application.Platform;
 import javafx.application.ConditionalFeature;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.geometry.Bounds;
@@ -60,7 +59,6 @@ import com.sun.javafx.scene.control.behavior.TextBinding;
 import com.sun.javafx.scene.text.HitInfo;
 import com.sun.javafx.scene.text.TextLayout;
 import com.sun.javafx.tk.Toolkit;
-import javafx.util.Callback;
 
 /**
  * BE REALLY CAREFUL WITH RESTORING OR RESETTING STATE OF helper NODE AS LEFTOVER

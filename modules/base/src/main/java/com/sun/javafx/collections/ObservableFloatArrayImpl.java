@@ -152,7 +152,7 @@ public final class ObservableFloatArrayImpl extends ObservableArrayBase<Observab
     }
 
     @Override
-    public void setAll(float[] src) {
+    public void setAll(float... src) {
         setAllInternal(src, 0, src.length);
     }
 

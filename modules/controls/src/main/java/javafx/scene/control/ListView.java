@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.sun.javafx.scene.control.behavior.ListCellBehavior;
-import com.sun.javafx.scene.control.skin.TableViewSkinBase;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.WeakInvalidationListener;
@@ -43,8 +42,6 @@ import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.WeakChangeListener;
 import javafx.beans.value.WritableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;

@@ -27,7 +27,6 @@ package javafx.collections;
 
 import com.sun.javafx.collections.ListListenerHelper;
 import java.util.AbstractList;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;

@@ -28,7 +28,6 @@ package com.sun.javafx.scene.control.behavior;
 import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Control;

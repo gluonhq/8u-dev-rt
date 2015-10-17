@@ -24,8 +24,6 @@
  */
 package javafx.scene.control;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -39,10 +37,6 @@ import javafx.scene.layout.HBox;
 
 import com.sun.javafx.util.Utils;
 import com.sun.javafx.scene.control.skin.ButtonBarSkin;
-import com.sun.javafx.scene.traversal.Algorithm;
-import com.sun.javafx.scene.traversal.Direction;
-import com.sun.javafx.scene.traversal.ParentTraversalEngine;
-import com.sun.javafx.scene.traversal.TraversalContext;
 import javafx.beans.value.WritableValue;
 import javafx.css.StyleableProperty;
 
