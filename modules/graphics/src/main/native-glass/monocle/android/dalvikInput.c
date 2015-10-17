@@ -30,7 +30,7 @@
 #include "com_sun_glass_events_TouchEvent.h"    
 #include "com_sun_glass_ui_android_SoftwareKeyboard.h"
 #include "com_sun_glass_ui_android_Activity.h"
-#include "javafxports_android_FXDalvikEntity_InternalSurfaceView.h"
+#include "javafxports_android_FXDalvikEntity_InternalTextureView.h"
 #include "com_sun_glass_ui_android_DalvikInput.h"
 
 #define asPtr(x) ((void *) (unsigned long) (x))
