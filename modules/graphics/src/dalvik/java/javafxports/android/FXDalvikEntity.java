@@ -194,7 +194,10 @@ public class FXDalvikEntity implements SurfaceTextureListener {
 
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture st) {
+        Log.v(TAG, "surfacetextureupdated...");
        
+	return;
+	/*
         Log.v(TAG, "Called Surface redraw needed");
         if (st != surfaceTexture) {
             Surface surface = new Surface(st);
@@ -216,6 +219,7 @@ public class FXDalvikEntity implements SurfaceTextureListener {
                 throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onSurfaceRedrawNeededNative method by reflection", e);
             }
         }
+	*/
     }
     protected void setInitializeMonocleMethod (Method v ) {
         initializeMonocleMethod  = v ;
