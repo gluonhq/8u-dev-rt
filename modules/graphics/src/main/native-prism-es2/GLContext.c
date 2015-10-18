@@ -29,21 +29,19 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#ifdef ANDROID_DEBUG
 #ifdef ANDROID_NDK
 #include <stddef.h>
 #include <time.h>
 #include <android/log.h>
-#endif
 
-#ifdef ANDROID_NDK
 #define ALOG(...)  ((void)__android_log_print(ANDROID_LOG_INFO,"PRISM", __VA_ARGS__))
-#endif
-#ifdef ANDROID_NDK
 int64_t getTimeNsec() {
     struct timespec now;
     clock_gettime(CLOCK_MONOTONIC, &now);
     return (int64_t) now.tv_sec*1000000000LL + now.tv_nsec;
 }
+#endif
 #endif
 
 
@@ -1645,7 +1643,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nDrawIndexedQuads
     float *pFloat;
     char *pByte;
     int numQuads = numVertices / 4;
-#ifdef ANDROID_NDK
+#ifdef ANDROID_DEBUG
     long s0, s1, s2, s3, dur;
     s0 = (long)getTimeNsec();
     // ALOG("[JVDBG] nDrawIndexQuads1  = %ld ", (long)getTimeNsec());
@@ -1660,14 +1658,14 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nDrawIndexedQuads
 
     if (pFloat && pByte) {
         setVertexAttributePointers(ctxInfo, pFloat, pByte);
-#ifdef ANDROID_NDK
+#ifdef ANDROID_DEBUG
     s1 = (long)getTimeNsec();
     dur = s1 - s0;
     ALOG("[JVDBG] nDrawIndexQuads2  = %ld ", dur);
 #endif
         glDrawElements(GL_TRIANGLES, numQuads * 2 * 3, GL_UNSIGNED_SHORT, 0);
     }
-#ifdef ANDROID_NDK
+#ifdef ANDROID_DEBUG
     s2 = (long)getTimeNsec();
     dur = s2 - s0;
     ALOG("[JVDBG] nDrawIndexQuads3  = %ld ", dur);
@@ -1675,7 +1673,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nDrawIndexedQuads
 
     if (pByte)  (*env)->ReleasePrimitiveArrayCritical(env, datab, pByte, JNI_ABORT);
     if (pFloat) (*env)->ReleasePrimitiveArrayCritical(env, dataf, pFloat, JNI_ABORT);
-#ifdef ANDROID_NDK
+#ifdef ANDROID_DEBUG
     s3 = (long)getTimeNsec();
     dur = s3 - s0;
     ALOG("[JVDBG] nDrawIndexQuads4  = %ld ", dur);
