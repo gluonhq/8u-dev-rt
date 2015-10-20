@@ -51,6 +51,9 @@ public class TextFieldSkinAndroid extends TextFieldSkin {
                 }
             }
         });
+        if (textField.isFocused() && textField.isEditable()) {
+            com.sun.glass.ui.android.SoftwareKeyboard.show();
+        }
     }
 
     public TextFieldSkinAndroid(final TextField textField, final TextFieldBehavior behavior) {
