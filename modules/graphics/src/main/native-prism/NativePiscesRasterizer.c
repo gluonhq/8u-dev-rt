@@ -184,7 +184,7 @@ Java_com_sun_prism_impl_shape_NativePiscesRasterizer_produceFillAlphas
      jdouble mxx, jdouble mxy, jdouble mxt, jdouble myx, jdouble myy, jdouble myt,
      jintArray boundsArray, jbyteArray maskArray)
 {
-#ifdef ANDROID_NDK
+#ifdef ANDROID_DEBUG
 ALOG("[JVDBG]FPA1 %l -- %d ", getTimeNsec());
 #endif
 

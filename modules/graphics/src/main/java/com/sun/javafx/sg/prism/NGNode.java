@@ -356,10 +356,10 @@ public abstract class NGNode {
         // images of any ancestors will be invalidated.
         boolean useHint = false;
 
-System.out.println ("[JVDBG] CACHE? parent = "+parent+ ((parent == null) ? "" : " and f = " + parent.cacheFilter));
+// System.out.println ("[JVDBG] CACHE? parent = "+parent+ ((parent == null) ? "" : " and f = " + parent.cacheFilter));
         // If the parent is cached, try to check if the transformation is only a translation
         if (parent != null && parent.cacheFilter != null && PrismSettings.scrollCacheOpt) {
-System.out.println ("[JVDBG] CACHE SUGGESTED!");
+// System.out.println ("[JVDBG] CACHE SUGGESTED!");
             if (hint == null) {
                 // If there's no hint created yet, this is the first setTransformMatrix
                 // call and we have nothing to compare to yet.
@@ -376,7 +376,7 @@ System.out.println ("[JVDBG] CACHE SUGGESTED!");
                         && transform.getMzz() == tx.getMzz()
                         && transform.getMzt() == tx.getMzt()) {
                     useHint = true;
-System.out.println ("[JVDBG] CACHE ACCEPTED!");
+// System.out.println ("[JVDBG] CACHE ACCEPTED!");
                     hint.translateXDelta = tx.getMxt() - transform.getMxt();
                     hint.translateYDelta = tx.getMyt() - transform.getMyt();
                 }
