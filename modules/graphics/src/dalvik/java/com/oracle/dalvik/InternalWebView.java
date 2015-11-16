@@ -343,8 +343,7 @@ public class InternalWebView {
     private void _fireLoadEvent(int id, int frameID, int state, String url,
             String contentType, int progress, int errorCode) {
         try {
-            ClassLoader cl = Thread.currentThread().getContextClassLoader();
-            Class clazz = Class.forName("com.sun.webkit.NativeWebView", true, cl);
+            Class clazz  = Class.forName("com.sun.webkit.NativeWebView");
             Method m = clazz.getMethod("fire_load_event", int.class, int.class, int.class, 
                                        String.class, String.class, int.class, int.class);
             m.invoke(null, id, frameID, state, url, contentType, progress, errorCode);
