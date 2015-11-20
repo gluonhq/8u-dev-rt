@@ -962,4 +962,7 @@ public abstract class Toolkit {
     public String getThemeName() {
         return null;
     }
+    
+    public void pauseRenderer(){};
+    public void resumeRenderer(){};
 }

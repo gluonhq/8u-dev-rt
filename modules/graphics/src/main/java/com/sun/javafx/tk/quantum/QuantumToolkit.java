@@ -484,7 +484,9 @@ public final class QuantumToolkit extends Toolkit {
     }
 
     private boolean setPulseRunning() {
-        return (pulseRunning.getAndSet(true));
+        boolean answer = (pulseRunning.getAndSet(true));
+        System.out.println("[JVDBG] setPulseRunning returns "+answer);
+        return answer;
     }
 
     private void endPulseRunning() {
@@ -500,7 +502,12 @@ public final class QuantumToolkit extends Toolkit {
     }
 
     void pulse(boolean collect) {
+
         try {
+            if (pause) {
+                System.out.println("skip pulse as we are pausing");
+                return;
+            }
             inPulse++;
             if (PULSE_LOGGING_ENABLED) {
                 PulseLogger.pulseStart();
@@ -1596,4 +1603,19 @@ public final class QuantumToolkit extends Toolkit {
     public String getThemeName() {
         return Application.GetApplication().getHighContrastTheme();
     }
+    
+    private boolean pause;
+        
+    public void pauseRenderer(){
+        System.out.println("[JVDBG] pausing renderer");
+        Application.invokeAndWait(() -> this.pause = true);
+    };
+    
+    public void resumeRenderer(){
+        System.out.println("[JVDBG] resuming renderer");
+
+        Application.invokeAndWait(() -> {this.pause = false;
+            System.out.println("[JVDBG] RESUMING DONE");
+        });
+    };
 }

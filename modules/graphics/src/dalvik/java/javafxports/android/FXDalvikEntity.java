@@ -155,6 +155,7 @@ public class FXDalvikEntity implements SurfaceTextureListener {
                 onSurfaceCreatedMethod.invoke(null);
                 Log.v(TAG, "Surface created, application was already launched and we will invoke native surface changed method: "+onSurfaceChangedNativeMethod1);
                 onSurfaceChangedNativeMethod1.invoke(null);
+com.sun.javafx.tk.Toolkit.getToolkit().resumeRenderer();
             } catch (Exception e) {
                 throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onSurfaceChangedNative1 method by reflection", e);
             }
@@ -180,6 +181,7 @@ public class FXDalvikEntity implements SurfaceTextureListener {
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture st) {
         Log.v(TAG, "Called Surface destroyed");
+com.sun.javafx.tk.Toolkit.getToolkit().pauseRenderer();
         surfaceDetails = new SurfaceDetails();
         _setSurface(surfaceDetails.surface);
         if (glassHasStarted) {
