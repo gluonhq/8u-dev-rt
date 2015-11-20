@@ -361,7 +361,8 @@ public abstract class Toolkit {
                 new WeakHashMap<TKPulseListener,AccessControlContext>();
         final Map<TKPulseListener,AccessControlContext> postScenePulseList =
                 new WeakHashMap<TKPulseListener,AccessControlContext>();
-
+        System.out.println("thread = "+Thread.currentThread());
+        System.out.println("[JVDBG] Toolkit, firePuls. s1 = "+stagePulseListeners+", s2 = "+scenePulseListeners+", s3 = "+postScenePulseListeners+", last = "+lastTkPulseListener);
         synchronized (this) {
             stagePulseList.putAll(stagePulseListeners);
             scenePulseList.putAll(scenePulseListeners);

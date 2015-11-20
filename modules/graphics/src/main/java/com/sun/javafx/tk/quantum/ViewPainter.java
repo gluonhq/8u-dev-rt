@@ -426,6 +426,7 @@ abstract class ViewPainter implements Runnable {
 
     protected boolean validateStageGraphics() {
         if (!sceneState.isValid()) {
+            System.out.println("[JVDBG] VALIDATESTAGEGRAPHICS false");
             // indicates something happened between the scheduling of the
             // job and the running of this job.
             return false;

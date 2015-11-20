@@ -316,7 +316,12 @@ public final class QuantumToolkit extends Toolkit {
              */
             renderer.createResourceFactory();
 
-            pulseRunnable = () -> QuantumToolkit.this.pulse();
+            pulseRunnable = () -> {
+                System.out.println("[JVDBG] PULSERUNNABLE");
+            QuantumToolkit.this.pulse();
+                System.out.println("[JVDBG] PULSERUNNABLE DONE");
+            
+            };
             timerRunnable = () -> {
                 try {
                     QuantumToolkit.this.postPulse();
@@ -325,7 +330,6 @@ public final class QuantumToolkit extends Toolkit {
                 }
             };
             pulseTimer = Application.GetApplication().createTimer(timerRunnable);
-
             Application.GetApplication().setEventHandler(new Application.EventHandler() {
                 @Override public void handleQuitAction(Application app, long time) {
                     GlassStage.requestClosingAllWindows();
@@ -402,11 +406,15 @@ public final class QuantumToolkit extends Toolkit {
      * @return the return value from calling supplier.get()
      */
     public static <T> T runWithRenderLock(Supplier<T> supplier) {
+        System.out.println("[JVDBG] QT runWithRenderLock asked");
         ViewPainter.renderLock.lock();
+        System.out.println("[JVDBG] QT runWithRenderLock acquired");
         try {
             return supplier.get();
         } finally {
+            System.out.println("[JVDBG] QT runWithRenderLock releasing");
             ViewPainter.renderLock.unlock();
+            System.out.println("[JVDBG] QT runWithRenderLock released");
         }
     }
 
@@ -487,6 +495,7 @@ public final class QuantumToolkit extends Toolkit {
     }
 
     protected void pulse() {
+        System.out.println("[JVDBG] QT, pulse called");
         pulse(true);
     }
 
@@ -519,6 +528,7 @@ public final class QuantumToolkit extends Toolkit {
     }
 
     void vsyncHint() {
+        System.out.println("[JVDBG] VSYNCHINT, POSTPULSE!!!!!!!!!!!!!");
         if (isVsyncEnabled()) {
             if (debug) {
                 System.err.println("QT.vsyncHint: postPulse: " + System.nanoTime());

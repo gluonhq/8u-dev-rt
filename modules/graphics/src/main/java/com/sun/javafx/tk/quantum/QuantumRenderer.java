@@ -50,6 +50,7 @@ import com.sun.prism.impl.PrismSettings;
 import com.sun.scenario.effect.impl.Renderer;
 import com.sun.scenario.effect.impl.prism.PrFilterContext;
 import java.util.HashMap;
+import java.util.concurrent.Callable;
 
 /*
  * Quantum Renderer
@@ -83,6 +84,8 @@ final class QuantumRenderer extends ThreadPoolExecutor  {
         private Runnable    work;
 
         public PipelineRunnable(Runnable runner) {
+            System.out.println("Create new pipelinerunnable, stack = ");
+            Thread.dumpStack();
             work = runner;
         }
         
@@ -121,7 +124,9 @@ final class QuantumRenderer extends ThreadPoolExecutor  {
         
         @Override public void run() {
             try {
+                System.err.println("I will init a runnable");
                 init();
+                System.out.println("I will run a runnable");
                 work.run();
             } finally {
                 cleanup();
@@ -215,7 +220,29 @@ final class QuantumRenderer extends ThreadPoolExecutor  {
     }
     
     protected Future submitRenderJob(RenderJob r) {
+      //  System.out.println("[JVDBG] submitRenderJob to QuantumRenderer, r = "+r);
+       // Thread.dumpStack();
         return (submit(r));
+    }
+
+    @Override
+    public <T> Future<T> submit(Callable<T> task) {
+        System.out.println("[JVDBG] RENDERER, submit called with task "+task);
+        return super.submit(task); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public <T> Future<T> submit(Runnable task, T result) {
+                System.out.println("[JVDBG] RENDERER, submit called with task "+task+ " and result "+result);
+
+        return super.submit(task, result); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Future<?> submit(Runnable task) {
+                        System.out.println("[JVDBG] RENDERER, submit called with runnable "+task);
+
+        return super.submit(task); //To change body of generated methods, choose Tools | Templates.
     }
    
     /* java.util.concurrent.ThreadPoolExecutor */

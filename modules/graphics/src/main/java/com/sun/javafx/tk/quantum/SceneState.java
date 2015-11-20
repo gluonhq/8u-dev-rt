@@ -83,6 +83,7 @@ class SceneState extends PresentableState {
      * render lock.
      */
     public boolean isValid() {
+        System.out.println("[JVDBG] getWindow = "+(getWindow()!= null)+", getView = "+(getView()!= null)+", isVC "+isViewClosed()+", gw = "+getWidth()+", gh = "+getHeight());
         return getWindow() != null && getView() != null && !isViewClosed() && getWidth() > 0 && getHeight() > 0;
     }
 
@@ -107,6 +108,8 @@ class SceneState extends PresentableState {
         //sync time.
         if (camera != null) {
             viewWidth = (int)camera.getViewWidth();
+            System.out.println("[JVDBG] SceneState update, set viewWidth = "+viewWidth+" obtained from camera "+camera);
+        //    Thread.dumpStack();
             viewHeight = (int)camera.getViewHeight();
         }
     }

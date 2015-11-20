@@ -34,7 +34,7 @@ class PaintRenderJob extends RenderJob {
     
     public PaintRenderJob(GlassScene gs, CompletionListener cl, Runnable r) {
         super(r, cl);
-
+        System.out.println("[JVDBG] CREATED PAINTRENDERJOB, r = "+r);
         this.scene = gs;
     }
     

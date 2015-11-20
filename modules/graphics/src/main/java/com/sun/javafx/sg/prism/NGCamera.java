@@ -79,6 +79,7 @@ public abstract class NGCamera extends NGNode {
     }
 
     public void setViewWidth(double viewWidth) {
+        System.out.println("[JVDBG] setViewWidth of camera "+this+" to "+viewWidth);
         this.viewWidth = viewWidth;
     }
 
