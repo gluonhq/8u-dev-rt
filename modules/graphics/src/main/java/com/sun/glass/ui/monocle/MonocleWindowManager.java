@@ -33,6 +33,10 @@ import com.sun.javafx.tk.Toolkit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 
 final class MonocleWindowManager {
@@ -171,20 +175,36 @@ final class MonocleWindowManager {
     }
 
     static void repaintFromNative () {
+        final CountDownLatch latch = new CountDownLatch(1);
         Platform.runLater(new Runnable () {
-
             @Override
             public void run() {
                 Screen.notifySettingsChanged();
                 if (instance != null) {
                     if (instance.getFocusedWindow() != null) {
-                        instance.getFocusedWindow().setFullScreen(true);
+                        Screen mainScreen = Screen.getMainScreen();
+                        int x = mainScreen.getX();
+                        int y = mainScreen.getY();
+                        int w = mainScreen.getWidth();
+                        int h = mainScreen.getHeight();
+                        System.out.println("[JVDBG] resize/move window, w = "+w);
+                        instance.getFocusedWindow().notifyResizeAndMove(x, y, w, h);
+                     //   instance.getFocusedWindow().setFullScreen(true);
                         instance.repaintAll();
                     }
                 }
                 Toolkit.getToolkit().requestNextPulse();
+                System.out.println("[JVDBG] runnable in repaintFromNative about to return, decrease latch");
+                latch.countDown();
             }
         });
+        try {
+            System.out.println("[JVDBG] repaintFromNative about to return, waiting for latch");
+            latch.await(5, TimeUnit.SECONDS);
+            System.out.println("[JVDBG] repaintFromNative will return");
+        } catch (InterruptedException ex) {
+            Logger.getLogger(MonocleWindowManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
 }

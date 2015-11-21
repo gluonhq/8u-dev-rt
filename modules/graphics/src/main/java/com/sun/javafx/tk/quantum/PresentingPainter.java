@@ -42,7 +42,9 @@ final class PresentingPainter extends ViewPainter {
     }
 
     @Override public void run() {
+        System.out.println("[JVDBG] PRESENTINGPAINTER: run");
         renderLock.lock();
+        System.out.println("[JVDBG] PRESENTINGPAINTER: run got lock");
 
         boolean locked = false;
         boolean valid = false;
@@ -51,9 +53,9 @@ final class PresentingPainter extends ViewPainter {
         try {
             valid = validateStageGraphics();
             if (!valid) {
-                if (QuantumToolkit.verbose) {
+              //  if (QuantumToolkit.verbose) {
                     System.err.println("PresentingPainter: validateStageGraphics failed");
-                }
+              //  }
                 paintImpl(null);
                 return;
             }
@@ -70,6 +72,7 @@ final class PresentingPainter extends ViewPainter {
             }
             if (factory == null || !factory.isDeviceReady()) {
                 sceneState.getScene().entireSceneNeedsRepaint();
+                System.out.println("[JVDBG] EntireSceneNeedsRepaint, return");
                 return;
             }
 
@@ -82,7 +85,7 @@ final class PresentingPainter extends ViewPainter {
                 penHeight = viewHeight;
                 freshBackBuffer = true;
             }
-            
+            System.out.println("[JVDBG] PresentingPainterRun, presentatble = "+presentable);
             if (presentable != null) {
                 Graphics g = presentable.createGraphics();
 
@@ -125,8 +128,9 @@ final class PresentingPainter extends ViewPainter {
             if (factory != null) {
                 factory.getTextureResourcePool().freeDisposalRequestedAndCheckResources(errored);
             }
-
+        System.out.println("[JVDBG] PRESENTINGPAINTER: rundone");
             renderLock.unlock();
+        System.out.println("[JVDBG] PRESENTINGPAINTER: rundoneunlock");
         }
     }
 }

@@ -179,7 +179,7 @@ public class FXDalvikEntity implements SurfaceTextureListener {
 
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture st) {
-            Log.v(TAG, "Called Surface destroyed");
+        Log.v(TAG, "Called Surface destroyed");
         surfaceDetails = new SurfaceDetails();
         _setSurface(surfaceDetails.surface);
         if (glassHasStarted) {
@@ -189,6 +189,7 @@ public class FXDalvikEntity implements SurfaceTextureListener {
                 throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onSurfaceChangedNative1 method by reflection", e);
             }
         }
+        Log.v(TAG, "Called Surface destroyed will now return");
         return true;
     }
 

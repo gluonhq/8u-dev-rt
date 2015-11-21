@@ -195,6 +195,7 @@ class ES2Context extends BaseShaderContext {
         int y = target.getContentY();
         int w = target.getContentWidth();
         int h = target.getContentHeight();
+      //  System.out.println("[JVDBG] ES2Context, updateRendertarget = "+target+" and w = "+w);
         glContext.updateViewportAndDepthTest(x, y, w, h, depthTest);
         glContext.updateMSAAState(msaa);
 

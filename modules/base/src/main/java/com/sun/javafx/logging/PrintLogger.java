@@ -214,6 +214,7 @@ class PrintLogger extends Logger {
      */
     @Override
     public void renderStart() {
+        System.out.println("[JVDBG] LOG renderStart");
         newPhase(null); // finish the current phase on the FX thread
         fxData.pushedRender = true;
         renderData = fxData;
@@ -229,6 +230,7 @@ class PrintLogger extends Logger {
      */
     @Override
     public void pulseEnd() {
+        System.out.println("[JVDBG] LOG pulseEnd");
         if (fxData != null && !fxData.pushedRender) {
             fxData.state = COMPLETE;
             if (active.incrementAndGet() == 1) {
@@ -246,6 +248,7 @@ class PrintLogger extends Logger {
      */
     @Override
     public void renderEnd() {
+        System.out.println("[JVDBG] LOG renderEnd");
         newPhase(null); // finish the current phase on the render thread
         renderData.state = COMPLETE;
         for (;;) {
@@ -366,6 +369,7 @@ class PrintLogger extends Logger {
         }
         
         void printAndReset() {
+            System.out.println("[JVDBG] LOG, printAndReset");
             long endTime = System.nanoTime();
             long totalTime = (endTime - startTime)/1000000L;
             

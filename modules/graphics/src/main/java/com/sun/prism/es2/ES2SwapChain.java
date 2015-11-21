@@ -258,6 +258,7 @@ class ES2SwapChain implements ES2RenderTarget, Presentable, GraphicsResource {
     }
 
     public int getContentWidth() {
+        System.out.println("[JVDBG] ES2SwapChain, contentWidth asked for state = "+pState+" and ow = "+pState.getOutputWidth());
         return pState.getOutputWidth();
     }
 
