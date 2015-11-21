@@ -1609,6 +1609,9 @@ public final class QuantumToolkit extends Toolkit {
     public void pauseRenderer(){
         System.out.println("[JVDBG] pausing renderer");
         Application.invokeAndWait(() -> this.pause = true);
+        System.out.println("[JVDBG] wait for renderingToComplete...");
+        PaintCollector.getInstance().waitForRenderingToComplete();
+        System.out.println("[JVDBG] wait for renderingToComplete done...");
     };
     
     public void resumeRenderer(){
