@@ -403,7 +403,7 @@ public abstract class Window {
 
     protected void setScreen(Screen screen) {
         Application.checkEventThread();
-
+        System.out.println("[JVDBG] Window.setScreen called with new screen = "+screen);
         final Screen old = this.screen;
         this.screen = screen;
 

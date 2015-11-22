@@ -139,7 +139,7 @@ final class MonocleWindow extends Window {
         notifyResizeAndMove(x, y, width, height);
     }
 
-    private void notifyResizeAndMove(int x, int y, int width, int height) {
+    public void notifyResizeAndMove(int x, int y, int width, int height) {
         MonocleView view = (MonocleView) getView();
         boolean repaintView = false;
 

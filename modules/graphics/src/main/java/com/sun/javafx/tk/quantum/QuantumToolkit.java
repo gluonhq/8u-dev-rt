@@ -316,7 +316,12 @@ public final class QuantumToolkit extends Toolkit {
              */
             renderer.createResourceFactory();
 
-            pulseRunnable = () -> QuantumToolkit.this.pulse();
+            pulseRunnable = () -> {
+                System.out.println("[JVDBG] PULSERUNNABLE");
+            QuantumToolkit.this.pulse();
+                System.out.println("[JVDBG] PULSERUNNABLE DONE");
+            
+            };
             timerRunnable = () -> {
                 try {
                     QuantumToolkit.this.postPulse();
@@ -325,7 +330,6 @@ public final class QuantumToolkit extends Toolkit {
                 }
             };
             pulseTimer = Application.GetApplication().createTimer(timerRunnable);
-
             Application.GetApplication().setEventHandler(new Application.EventHandler() {
                 @Override public void handleQuitAction(Application app, long time) {
                     GlassStage.requestClosingAllWindows();
@@ -402,11 +406,15 @@ public final class QuantumToolkit extends Toolkit {
      * @return the return value from calling supplier.get()
      */
     public static <T> T runWithRenderLock(Supplier<T> supplier) {
+        System.out.println("[JVDBG] QT runWithRenderLock asked");
         ViewPainter.renderLock.lock();
+        System.out.println("[JVDBG] QT runWithRenderLock acquired");
         try {
             return supplier.get();
         } finally {
+            System.out.println("[JVDBG] QT runWithRenderLock releasing");
             ViewPainter.renderLock.unlock();
+            System.out.println("[JVDBG] QT runWithRenderLock released");
         }
     }
 
@@ -476,7 +484,9 @@ public final class QuantumToolkit extends Toolkit {
     }
 
     private boolean setPulseRunning() {
-        return (pulseRunning.getAndSet(true));
+        boolean answer = (pulseRunning.getAndSet(true));
+        System.out.println("[JVDBG] setPulseRunning returns "+answer);
+        return answer;
     }
 
     private void endPulseRunning() {
@@ -487,11 +497,17 @@ public final class QuantumToolkit extends Toolkit {
     }
 
     protected void pulse() {
+        System.out.println("[JVDBG] QT, pulse called");
         pulse(true);
     }
 
     void pulse(boolean collect) {
+
         try {
+            if (pause) {
+                System.out.println("skip pulse as we are pausing");
+                return;
+            }
             inPulse++;
             if (PULSE_LOGGING_ENABLED) {
                 PulseLogger.pulseStart();
@@ -519,6 +535,7 @@ public final class QuantumToolkit extends Toolkit {
     }
 
     void vsyncHint() {
+        System.out.println("[JVDBG] VSYNCHINT, POSTPULSE!!!!!!!!!!!!!");
         if (isVsyncEnabled()) {
             if (debug) {
                 System.err.println("QT.vsyncHint: postPulse: " + System.nanoTime());
@@ -1586,4 +1603,22 @@ public final class QuantumToolkit extends Toolkit {
     public String getThemeName() {
         return Application.GetApplication().getHighContrastTheme();
     }
+    
+    private boolean pause;
+        
+    public void pauseRenderer(){
+        System.out.println("[JVDBG] pausing renderer");
+        Application.invokeAndWait(() -> this.pause = true);
+        System.out.println("[JVDBG] wait for renderingToComplete...");
+        PaintCollector.getInstance().waitForRenderingToComplete();
+        System.out.println("[JVDBG] wait for renderingToComplete done...");
+    };
+    
+    public void resumeRenderer(){
+        System.out.println("[JVDBG] resuming renderer");
+
+        Application.invokeAndWait(() -> {this.pause = false;
+            System.out.println("[JVDBG] RESUMING DONE");
+        });
+    };
 }

@@ -39,10 +39,13 @@ public class RenderJob extends FutureTask {
 
     public RenderJob(Runnable pen) {
         super(pen, null);
+        System.out.println("[JVDBG] CREATED RENDERJOB, pen = "+pen);
     }
 
     public RenderJob(Runnable pen, CompletionListener cl) {
         super(pen, null);
+                System.out.println("[JVDBG] CREATED RENDERJOB2, pen = "+pen);
+
         setCompletionListener(cl);
     }
     

@@ -151,10 +151,13 @@ final class PaintCollector implements CompletionListener {
      * continuing.
      */
     void waitForRenderingToComplete() {
+        System.out.println("[JVDBG] PaintCollector.waitForrenderingToComplete");
         while (true) {
             try {
                 // We need to keep waiting until things are done!
                 allWorkCompletedLatch.await();
+                System.out.println("[JVDBG] PaintCollector.waitForrenderingToComplete will return");
+
                 return;
             } catch (InterruptedException ex) {
                 // An interrupted exception at this point is a

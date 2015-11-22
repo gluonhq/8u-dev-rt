@@ -80,6 +80,7 @@ public class AcceleratedScreen {
 
         eglDisplay =
                 egl.eglGetDisplay(nativeDisplay);
+        System.out.println("[JVDBG] eglDisplay = "+eglDisplay);
         if (eglDisplay == EGL.EGL_NO_DISPLAY) {
             throw new GLException(egl.eglGetError(),
                                  "Could not get EGL display");
@@ -106,6 +107,8 @@ public class AcceleratedScreen {
         eglSurface =
                 egl.eglCreateWindowSurface(eglDisplay, eglConfigs[0],
                                                    nativeWindow, null);
+        
+        System.out.println("[JVDBG] eglSurface = "+eglSurface);
         if (eglSurface == EGL.EGL_NO_SURFACE) {
             throw new GLException(egl.eglGetError(),
                                   "Could not get EGL surface");
@@ -122,9 +125,11 @@ public class AcceleratedScreen {
 
     protected void createSurface() {
         nativeWindow = platformGetNativeWindow();
+        System.out.println("[JVDBG] AcceleratedScreen, create eglSurface for nativeWindow "+nativeWindow);
         if (nativeWindow != 0) {
             eglSurface = egl._eglCreateWindowSurface(eglDisplay, eglConfigs[0],
                                                    nativeWindow, null);
+            System.out.println("[JVDBG] AcceleratedScreen, eglSurface = "+eglSurface);
         }
         else {
             System.err.println ("[AcceleratedScreen] Can't create surface when we have no native Window");
@@ -137,6 +142,7 @@ public class AcceleratedScreen {
      * @param flag
      */
     public void enableRendering(boolean flag) {
+        System.out.println("[JVDBG] ACCELERATEDSCREEN, enableRendering "+flag);
         if (flag) {
             egl.eglMakeCurrent(eglDisplay, eglSurface, eglSurface,
                                        eglContext);
@@ -189,7 +195,7 @@ public class AcceleratedScreen {
             result = egl.eglSwapBuffers(eglDisplay, eglSurface);
 // TODO this shouldn't happen. In case the surface is invalid, we need to have recreated it before this method is called
             if (!result) {
-                System.err.println ("[WARNING] this shouldn't happen. swapBuffers failed with eglSurface "+eglSurface+", recreate surface and try again.");
+                System.err.println ("[WARNING] this shouldn't happen. swapBuffers failed with eglSurface "+eglSurface+" and display = "+eglDisplay+", recreate surface and try again.");
                 createSurface();
                 result = egl.eglSwapBuffers(eglDisplay, eglSurface);
             }

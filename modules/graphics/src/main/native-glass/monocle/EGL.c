@@ -29,6 +29,15 @@
 #include "Monocle.h"
 
 #include <stdlib.h>
+#ifdef ANDROID_NDK
+#include <sys/types.h>
+#include <dlfcn.h>
+#include "dalvikInput.h"
+#include "dalvikUtils.h"
+
+#define GLASS_LOG(...)  ((void)__android_log_print(ANDROID_LOG_INFO,"GLASSEGL", __VA_ARGS__))
+#endif
+
 
 void setEGLAttrs(jint *attrs, int *eglAttrs) {
     int index = 0;
@@ -81,6 +90,9 @@ JNIEXPORT jboolean JNICALL Java_com_sun_glass_ui_monocle_EGL_eglInitialize
      jintArray minorArray){
 
     EGLint major, minor;
+#ifdef ANDROID_NDK
+GLASS_LOG("eglInitialize display = %p\n", asPtr(eglDisplay));
+#endif
     if (eglInitialize(asPtr(eglDisplay), &major, &minor)) {
          (*env)->SetIntArrayRegion(env, majorArray, 0, 1, &major);
          (*env)->SetIntArrayRegion(env, minorArray, 0, 1, &minor);
@@ -93,6 +105,9 @@ JNIEXPORT jboolean JNICALL Java_com_sun_glass_ui_monocle_EGL_eglInitialize
 JNIEXPORT jboolean JNICALL Java_com_sun_glass_ui_monocle_EGL_eglBindAPI
     (JNIEnv *UNUSED(env), jclass UNUSED(clazz), jint api) {
 
+#ifdef ANDROID_NDK
+GLASS_LOG("eglBindAPI api = %d\n", api);
+#endif
     if (eglBindAPI(api)) {
         return JNI_TRUE;
     } else {
@@ -147,6 +162,9 @@ JNIEXPORT jlong JNICALL Java_com_sun_glass_ui_monocle_EGL__1eglCreateWindowSurfa
     eglSurface =  eglCreateWindowSurface(asPtr(eglDisplay), asPtr(config),
                                          (EGLNativeWindowType) asPtr(nativeWindow),
                                          (EGLint *) NULL);
+#ifdef ANDROID_NDK
+GLASS_LOG("eglCreateWindowSurface display = %p surface = %p, nativeWindow = %p\n", asPtr(eglDisplay), asPtr(eglSurface), asPtr(nativeWindow));
+#endif
     if (attrArray != NULL) {
         (*env)->ReleaseIntArrayElements(env, attribs, attrArray, JNI_ABORT);
     }
@@ -162,23 +180,34 @@ JNIEXPORT jlong JNICALL Java_com_sun_glass_ui_monocle_EGL_eglCreateContext
     EGLint contextAttrs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
     EGLContext context = eglCreateContext(asPtr(eglDisplay), asPtr(config),
                                           NULL, contextAttrs);
+#ifdef ANDROID_NDK
+GLASS_LOG("eglCreateContext display = %p, context = %p\n", asPtr(eglDisplay), asPtr(context));
+#endif
     return asJLong(context);
 }
 
 JNIEXPORT jboolean JNICALL Java_com_sun_glass_ui_monocle_EGL_eglMakeCurrent
    (JNIEnv *UNUSED(env), jclass UNUSED(clazz), jlong eglDisplay, jlong drawSurface,
     jlong readSurface, jlong eglContext) {
-
+#ifdef ANDROID_NDK
+GLASS_LOG("eglMakeCurrent display = %p surface = %p, readSurface = %p, context = %p\n", asPtr(eglDisplay), asPtr(drawSurface), asPtr(readSurface), asPtr(eglContext));
+#endif
     if (eglMakeCurrent(asPtr(eglDisplay), asPtr(drawSurface), asPtr(readSurface),
                    asPtr(eglContext))) {
         return JNI_TRUE;
     } else {
+#ifdef ANDROID_NDK
+GLASS_LOG("eglMakeCurrent returns false!!");
+#endif
         return JNI_FALSE;
     }
 }
 
 JNIEXPORT jboolean JNICALL Java_com_sun_glass_ui_monocle_EGL_eglSwapBuffers
     (JNIEnv *UNUSED(env), jclass UNUSED(clazz), jlong eglDisplay, jlong eglSurface) {
+#ifdef ANDROID_NDK
+GLASS_LOG("eglSwapBuffers display = %p surface = %p\n", asPtr(eglDisplay), asPtr(eglSurface));
+#endif
     if (eglSwapBuffers(asPtr(eglDisplay), asPtr(eglSurface))) {
         return JNI_TRUE;
     } else {

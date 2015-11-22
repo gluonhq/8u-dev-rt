@@ -99,6 +99,7 @@ public abstract class PresentableState {
      * May be called on any thread.
      */
     public int getWidth() {
+        System.out.println("[JVDBG] getViewWidth, return "+viewWidth);
         return viewWidth;
     }
 
@@ -211,6 +212,7 @@ public abstract class PresentableState {
      * May be called on any thread.
      */
     public boolean isWindowVisible() {
+        System.out.println("[JVDBG] PresentableState, isWindowVisible returns "+isWindowVisible);
         return isWindowVisible;
     }
 
@@ -333,9 +335,15 @@ public abstract class PresentableState {
      * May only be called from the event thread.
      */
     public void update() {
+        System.out.println("[JVDBG] update called on PresentableState!");
+        Thread.dumpStack();
         // should only be called on the event thread
         if (view != null) {
             viewWidth = view.getWidth();
+            if (viewWidth == 0) {
+                System.out.println("[JVDBG] SET VIEWWIDTH TO 0");
+                Thread.dumpStack();
+            }
             viewHeight = view.getHeight();
             window = view.getWindow();
         } else {

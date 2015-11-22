@@ -2379,6 +2379,7 @@ public class Scene implements EventTarget {
 
         @Override
         public void pulse() {
+            System.out.println("[JVDBG] ScenePulseListener, pulse1");
             if (Scene.this.tracker != null) {
                 Scene.this.tracker.pulse();
             }
@@ -2394,6 +2395,7 @@ public class Scene implements EventTarget {
                 PulseLogger.newPhase("CSS Pass");
             }
             Scene.this.doCSSPass();
+            System.out.println("[JVDBG] ScenePulseListener, pulse1");
 
             if (PULSE_LOGGING_ENABLED) {
                 PulseLogger.newPhase("Layout Pass");
@@ -2401,6 +2403,9 @@ public class Scene implements EventTarget {
             Scene.this.doLayoutPass();
 
             boolean dirty = dirtyNodes == null || dirtyNodesSize != 0 || !isDirtyEmpty();
+            
+            System.out.println("[JVDBG] ScenePulseListener, pulse2, dirty = "+dirty+", impl_peer = "+impl_peer);
+
             if (dirty) {
                 if (PULSE_LOGGING_ENABLED) {
                     PulseLogger.newPhase("Update bounds");
@@ -2411,8 +2416,12 @@ public class Scene implements EventTarget {
                         if (PULSE_LOGGING_ENABLED) {
                             PulseLogger.newPhase("Waiting for previous rendering");
                         }
+                        System.out.println("[JVDBG] ScenePulseListener, waitForRenderingToComplete");
                         impl_peer.waitForRenderingToComplete();
+                        System.out.println("[JVDBG] ScenePulseListener, waitForRenderingToComplete done, now waitForSynchronization");
                         impl_peer.waitForSynchronization();
+                        System.out.println("[JVDBG] ScenePulseListener, waitForSynchronization done");
+
                         // synchronize scene properties
                         if (PULSE_LOGGING_ENABLED) {
                             PulseLogger.newPhase("Copy state to render graph");
