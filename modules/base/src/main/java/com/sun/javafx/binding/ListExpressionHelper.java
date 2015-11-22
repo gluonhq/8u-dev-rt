@@ -35,7 +35,6 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 
 import java.util.Arrays;
-import java.util.List;
 
 import static javafx.collections.ListChangeListener.Change;
 

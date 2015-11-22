@@ -148,7 +148,7 @@ public class ToolBar extends Control {
     private ObjectProperty<Orientation> orientation;
     public final void setOrientation(Orientation value) {
         orientationProperty().set(value);
-    };
+    }
     public final Orientation getOrientation() {
         return orientation == null ? Orientation.HORIZONTAL : orientation.get();
     }

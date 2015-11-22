@@ -26,7 +26,6 @@
 package javafx.beans.property;
 
 import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.WeakInvalidationListener;
 import javafx.beans.binding.LongExpression;
 
@@ -164,6 +163,6 @@ public abstract class ReadOnlyLongProperty extends LongExpression implements
                 return ReadOnlyLongProperty.this.getValue();
             }
         };
-    };
+    }
 
 }

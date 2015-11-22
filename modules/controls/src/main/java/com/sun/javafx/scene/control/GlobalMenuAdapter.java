@@ -25,14 +25,10 @@
 
 package com.sun.javafx.scene.control;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.Menu;
@@ -159,7 +155,7 @@ public class GlobalMenuAdapter extends Menu implements MenuBase {
         if (menu.getOnMenuValidation() != null) {
             Event.fireEvent(menu, new Event(GlobalMenuAdapter.MENU_VALIDATION_EVENT));
         }
-        Menu target = (Menu)menu.getParentMenu();
+        Menu target = menu.getParentMenu();
         if(target != null && target.getOnMenuValidation() != null) {
             Event.fireEvent(target, new Event(MenuItem.MENU_VALIDATION_EVENT));
         }
@@ -182,7 +178,7 @@ public class GlobalMenuAdapter extends Menu implements MenuBase {
             if (menuItem.getOnMenuValidation() != null) {
                 Event.fireEvent(menuItem, new Event(MenuItem.MENU_VALIDATION_EVENT));
             }
-            Menu target = (Menu)menuItem.getParentMenu();
+            Menu target = menuItem.getParentMenu();
             if(target.getOnMenuValidation() != null) {
                 Event.fireEvent(target, new Event(MenuItem.MENU_VALIDATION_EVENT));
             }
@@ -206,7 +202,7 @@ public class GlobalMenuAdapter extends Menu implements MenuBase {
             if (getOnMenuValidation() != null) {
                 Event.fireEvent(menuItem, new Event(CheckMenuItemAdapter.MENU_VALIDATION_EVENT));
             }
-            Menu target = (Menu)menuItem.getParentMenu();
+            Menu target = menuItem.getParentMenu();
             if(target.getOnMenuValidation() != null) {
                 Event.fireEvent(target, new Event(MenuItem.MENU_VALIDATION_EVENT));
             }
@@ -231,7 +227,7 @@ public class GlobalMenuAdapter extends Menu implements MenuBase {
             if (getOnMenuValidation() != null) {
                 Event.fireEvent(menuItem, new Event(RadioMenuItemAdapter.MENU_VALIDATION_EVENT));
             }
-            Menu target = (Menu)menuItem.getParentMenu();
+            Menu target = menuItem.getParentMenu();
             if(target.getOnMenuValidation() != null) {
                 Event.fireEvent(target, new Event(MenuItem.MENU_VALIDATION_EVENT));
             }
@@ -252,7 +248,7 @@ public class GlobalMenuAdapter extends Menu implements MenuBase {
             if (getOnMenuValidation() != null) {
                 Event.fireEvent(menuItem, new Event(SeparatorMenuItemAdapter.MENU_VALIDATION_EVENT));
             }
-            Menu target = (Menu)menuItem.getParentMenu();
+            Menu target = menuItem.getParentMenu();
             if(target.getOnMenuValidation() != null) {
                 Event.fireEvent(target, new Event(MenuItem.MENU_VALIDATION_EVENT));
             }
@@ -273,7 +269,7 @@ public class GlobalMenuAdapter extends Menu implements MenuBase {
             if (getOnMenuValidation() != null) {
                 Event.fireEvent(menuItem, new Event(CustomMenuItemAdapter.MENU_VALIDATION_EVENT));
             }
-            Menu target = (Menu)menuItem.getParentMenu();
+            Menu target = menuItem.getParentMenu();
             if(target.getOnMenuValidation() != null) {
                 Event.fireEvent(target, new Event(MenuItem.MENU_VALIDATION_EVENT));
             }

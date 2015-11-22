@@ -202,7 +202,7 @@ public class ClipboardContent extends HashMap<DataFormat, Object> {
      */
     public final boolean hasImage() {
         return containsKey(DataFormat.IMAGE);
-    };
+    }
 
     /**
      * Puts an Image into the {@code ClipboardContent}. This is

@@ -94,7 +94,7 @@ public class ColorAdjust extends Effect {
     @Override
     com.sun.scenario.effect.ColorAdjust impl_createImpl() {
         return new com.sun.scenario.effect.ColorAdjust();
-    };
+    }
     /**
      * The input for this {@code Effect}.
      * If set to {@code null}, or left unspecified, a graphical image of

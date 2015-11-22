@@ -207,7 +207,7 @@ public final class Printer {
          */
         EQUAL_OPPOSITES,
 
-    };
+    }
 
     private PageLayout defPageLayout;
     /**

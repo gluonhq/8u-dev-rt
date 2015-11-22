@@ -152,7 +152,7 @@ public class ObservableIntegerArrayImpl extends ObservableArrayBase<ObservableIn
     }
 
     @Override
-    public void setAll(int[] src) {
+    public void setAll(int... src) {
         setAllInternal(src, 0, src.length);
     }
 

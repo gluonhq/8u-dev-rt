@@ -1084,7 +1084,7 @@ public class TextAreaSkin extends TextInputControlSkin<TextArea, TextAreaBehavio
             textNode.setImpl_caretPosition(oldPos);
         }
         return hit;
-    };
+    }
 
     /**
      * Remembers horizontal position when traversing up / down.

@@ -478,9 +478,9 @@ public abstract class TextInputControlSkin<T extends TextInputControl, B extends
     protected void invalidateMetrics() {
     }
 
-    protected void updateTextFill() {};
-    protected void updateHighlightFill() {};
-    protected void updateHighlightTextFill() {};
+    protected void updateTextFill() {}
+    protected void updateHighlightFill() {}
+    protected void updateHighlightTextFill() {}
 
     // Start/Length of the text under input method composition
     private int imstart;
@@ -609,7 +609,7 @@ public abstract class TextInputControlSkin<T extends TextInputControl, B extends
 
     protected boolean isRTL() {
         return (getSkinnable().getEffectiveNodeOrientation() == NodeOrientation.RIGHT_TO_LEFT);
-    };
+    }
 
     public void setCaretAnimating(boolean value) {
         if (value) {

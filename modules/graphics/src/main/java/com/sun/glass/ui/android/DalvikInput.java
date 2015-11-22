@@ -48,7 +48,7 @@ public class DalvikInput {
                 onKeyEventNative(action, keycode, characters);
             }
         });
-    };
+    }
 
     private static Node activeNode;
 

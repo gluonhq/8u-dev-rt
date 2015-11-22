@@ -258,7 +258,7 @@ public class SplitPane extends Control {
      */
     public final void setOrientation(Orientation value) {
         orientationProperty().set(value);
-    };
+    }
 
     /**
      * The orientation for the SplitPane.

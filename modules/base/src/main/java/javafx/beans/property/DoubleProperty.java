@@ -26,16 +26,10 @@
 package javafx.beans.property;
 
 import com.sun.javafx.binding.BidirectionalBinding;
-import com.sun.javafx.binding.ExpressionHelper;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WritableDoubleValue;
 import com.sun.javafx.binding.Logging;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
-import javafx.beans.WeakInvalidationListener;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableDoubleValue;
 
 /**
  * This class defines a {@link Property} wrapping a {@code double} value.

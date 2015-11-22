@@ -65,7 +65,7 @@ public abstract class BaseMesh extends BaseGraphicsResource implements Mesh {
     //    int  smGroup;
     public static enum FaceMembers {
         POINT0, TEXCOORD0, POINT1, TEXCOORD1, POINT2, TEXCOORD2, SMOOTHING_GROUP
-    };
+    }
     public static final int FACE_MEMBERS_SIZE = 7;
 
     protected BaseMesh(Disposer.Record disposerRecord) {

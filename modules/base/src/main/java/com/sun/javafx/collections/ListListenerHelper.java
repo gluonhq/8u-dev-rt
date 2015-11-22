@@ -28,7 +28,6 @@ package com.sun.javafx.collections;
 import com.sun.javafx.binding.ExpressionHelperBase;
 import javafx.beans.InvalidationListener;
 import javafx.collections.ListChangeListener;
-import sun.util.logging.PlatformLogger;
 
 import java.util.Arrays;
 

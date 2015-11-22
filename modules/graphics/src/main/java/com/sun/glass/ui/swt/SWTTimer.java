@@ -40,7 +40,7 @@ final class SWTTimer extends Timer implements Runnable {
 
     @Override protected long _start(Runnable runnable) {
         return 1;
-    };
+    }
     
     @Override
     protected long _start(final Runnable runnable, final int period) {
@@ -57,7 +57,7 @@ final class SWTTimer extends Timer implements Runnable {
             public void run() {
                 runnable.run();
                 display.timerExec(period, this);
-            };
+            }
         };
         display.asyncExec(() -> {
             display.timerExec(period, timerRunnable);
