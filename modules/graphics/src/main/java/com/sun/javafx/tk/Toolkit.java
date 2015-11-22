@@ -894,6 +894,25 @@ public abstract class Toolkit {
         } catch (InterruptedException e) { }
     }
 
+    /**
+     * Pauses the rendering. When this method returns, there are no new render jobs
+     * being submitted to the renderer thread. 
+     * Also, it is guaranteed that no render jobs are still running. After calling
+     * this method, the caller can safely assume that no low-level calls to the
+     * graphical pipeline are made. 
+     * This method should be called when the underlying graphical pipeline is 
+     * about to be (temporarily) unavailable, as it prohibits calls to unavailable
+     * resources will be made.
+     */
+    public abstract void pauseRenderer();
+    
+    /**
+     * Resumes the rendering. In case the renderer thread was previously paused 
+     * due to a call to {@link #pauseRenderer()}, calling this method will
+     * resume the submission of new render jobs.
+     */
+    public abstract void resumeRenderer();
+    
     private Set<HighlightRegion> highlightRegions;
 
     /**

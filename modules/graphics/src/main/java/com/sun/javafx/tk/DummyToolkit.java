@@ -410,4 +410,14 @@ final public class DummyToolkit extends Toolkit {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
+    public void pauseRenderer() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void resumeRenderer() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
     }

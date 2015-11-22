@@ -213,6 +213,8 @@ public final class QuantumToolkit extends Toolkit {
     private HashMap<Object,EventLoop> eventLoopMap = null;
 
     private final PerformanceTracker perfTracker = new PerformanceTrackerImpl();
+    
+    private boolean pause;
 
     @Override public boolean init() {
         /*
@@ -486,6 +488,17 @@ public final class QuantumToolkit extends Toolkit {
         }
     }
 
+    @Override
+    public void pauseRenderer(){
+        Application.invokeAndWait(() -> this.pause = true);
+        PaintCollector.getInstance().waitForRenderingToComplete();
+    };
+    
+    @Override
+    public void resumeRenderer(){
+        Application.invokeAndWait(() -> this.pause = false);
+    };
+
     protected void pulse() {
         pulse(true);
     }
@@ -496,7 +509,9 @@ public final class QuantumToolkit extends Toolkit {
             if (PULSE_LOGGING_ENABLED) {
                 PulseLogger.pulseStart();
             }
-
+            if (pause) {
+                return;
+            }
             if (!toolkitRunning.get()) {
                 return;
             }
