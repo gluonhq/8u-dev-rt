@@ -185,5 +185,5 @@ public class ReadOnlyLongWrapper extends SimpleLongProperty {
         public String getName() {
             return ReadOnlyLongWrapper.this.getName();
         }
-    };
+    }
 }

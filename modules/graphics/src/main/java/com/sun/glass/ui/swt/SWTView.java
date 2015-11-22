@@ -202,13 +202,13 @@ final class SWTView extends View {
             return true;
         }
         return false;
-    };
+    }
     @Override protected void _exitFullscreen(long ptr, boolean animate) {
         canvas.getShell().setFullScreen(false);
         if (!canvas.getShell().getFullScreen()) {
             notifyView(ViewEvent.FULLSCREEN_EXIT);
         }
-    };
+    }
 
     @Override  protected void _setParent(long ptr, long parentPtr) {
         //TODO - implement set parent (is this necessary?)

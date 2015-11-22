@@ -37,8 +37,6 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 
-import java.util.Collections;
-
 /**
  * A read-only and unbacked ObservableList - the data is retrieved on demand by
  * subclasses via the get method. A combination of ObservableList, ObservableListWrapper

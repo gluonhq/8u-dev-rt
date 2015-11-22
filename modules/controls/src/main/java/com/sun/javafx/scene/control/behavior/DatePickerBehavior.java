@@ -30,10 +30,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import com.sun.javafx.scene.control.skin.DatePickerSkin;
-import static javafx.scene.input.KeyCode.DOWN;
-import static javafx.scene.input.KeyCode.F4;
-import static javafx.scene.input.KeyCode.UP;
-import static javafx.scene.input.KeyEvent.KEY_RELEASED;
 
 
 public class DatePickerBehavior extends ComboBoxBaseBehavior<LocalDate> {

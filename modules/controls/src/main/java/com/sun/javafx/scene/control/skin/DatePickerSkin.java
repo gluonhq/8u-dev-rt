@@ -28,7 +28,6 @@ package com.sun.javafx.scene.control.skin;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.chrono.HijrahChronology;
-import java.time.format.DateTimeParseException;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;

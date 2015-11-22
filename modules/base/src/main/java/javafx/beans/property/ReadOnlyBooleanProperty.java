@@ -26,7 +26,6 @@
 package javafx.beans.property;
 
 import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.WeakInvalidationListener;
 import javafx.beans.binding.BooleanExpression;
 
@@ -165,6 +164,6 @@ public abstract class ReadOnlyBooleanProperty extends BooleanExpression
                 return ReadOnlyBooleanProperty.this.getValue();
             }
         };
-    };
+    }
 
 }

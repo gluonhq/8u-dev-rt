@@ -52,7 +52,7 @@ import javafx.beans.value.ObservableNumberValue;
 public abstract class FloatPropertyBase extends FloatProperty {
 
     private float value;
-    private ObservableFloatValue observable = null;;
+    private ObservableFloatValue observable = null;
     private InvalidationListener listener = null;
     private boolean valid = true;
     private ExpressionHelper<Number> helper = null;

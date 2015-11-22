@@ -36,7 +36,6 @@ import static javafx.scene.input.KeyEvent.KEY_PRESSED;
 import java.util.ArrayList;
 import java.util.List;
 
-import javafx.geometry.NodeOrientation;
 import javafx.geometry.Side;
 import javafx.scene.control.MenuButton;
 import javafx.scene.input.MouseButton;

@@ -206,7 +206,7 @@ public class MenuItem implements EventTarget, Styleable {
     }
 
     public final Menu getParentMenu() {
-        return parentMenu == null ? null : parentMenu.get();
+        return (parentMenu == null) ? null : parentMenu.get();
     }
 
     public final ReadOnlyObjectProperty<Menu> parentMenuProperty() {
@@ -232,7 +232,7 @@ public class MenuItem implements EventTarget, Styleable {
     }
 
     public final ContextMenu getParentPopup() {
-        return parentPopup == null ? null : parentPopup.get();
+        return (parentPopup == null) ? null : parentPopup.get();
     }
 
     public final ReadOnlyObjectProperty<ContextMenu> parentPopupProperty() {

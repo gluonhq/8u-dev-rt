@@ -259,7 +259,7 @@ public class VirtualFlow<T extends IndexedCell> extends Region {
 
     public void setPosition(double newPosition) {
         boolean needsUpdate = this.position != newPosition;
-        this.position = com.sun.javafx.util.Utils.clamp(0, newPosition, 1);;
+        this.position = com.sun.javafx.util.Utils.clamp(0, newPosition, 1);
         if (needsUpdate) {
             requestLayout();
         }

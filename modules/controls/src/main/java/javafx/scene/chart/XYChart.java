@@ -1340,7 +1340,7 @@ public abstract class XYChart<X,Y> extends Chart {
                         }
                     });
                 }
-            };
+            }
         };
         public final Node getNode() { return node.get(); }
         public final void setNode(Node value) { node.set(value); }

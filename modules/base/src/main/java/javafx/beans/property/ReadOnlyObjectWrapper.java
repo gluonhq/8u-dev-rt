@@ -185,5 +185,5 @@ public class ReadOnlyObjectWrapper<T> extends SimpleObjectProperty<T> {
         public String getName() {
             return ReadOnlyObjectWrapper.this.getName();
         }
-    };
+    }
 }

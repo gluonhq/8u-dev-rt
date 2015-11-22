@@ -26,7 +26,6 @@
 package javafx.beans.property;
 
 import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.WeakInvalidationListener;
 import javafx.beans.binding.IntegerExpression;
 
@@ -166,6 +165,6 @@ public abstract class ReadOnlyIntegerProperty extends IntegerExpression
                 return ReadOnlyIntegerProperty.this.getValue();
             }
         };
-    };
+    }
 
 }

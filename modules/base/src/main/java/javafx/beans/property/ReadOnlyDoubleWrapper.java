@@ -186,5 +186,5 @@ public class ReadOnlyDoubleWrapper extends SimpleDoubleProperty {
         public String getName() {
             return ReadOnlyDoubleWrapper.this.getName();
         }
-    };
+    }
 }

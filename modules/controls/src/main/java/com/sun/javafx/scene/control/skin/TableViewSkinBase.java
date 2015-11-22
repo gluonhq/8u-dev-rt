@@ -30,14 +30,12 @@ import com.sun.javafx.scene.control.behavior.BehaviorBase;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.geometry.Insets;
-import javafx.scene.AccessibleAction;
 import javafx.scene.AccessibleAttribute;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -54,13 +52,11 @@ import java.util.List;
 import javafx.beans.WeakInvalidationListener;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.value.WeakChangeListener;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.Map;
 
 /**
  *

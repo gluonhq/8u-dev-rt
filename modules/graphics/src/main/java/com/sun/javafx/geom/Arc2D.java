@@ -385,7 +385,7 @@ public class Arc2D extends RectangularShape {
         double x = getCenterX();
         double y = getCenterY();
         double w = this.width;
-        double h = this.height;;
+        double h = this.height;
         // Note: reversing the Y equations negates the angle to adjust
         // for the upside down coordinate system.
         // Also we should bias atans by the height and width of the oval.
