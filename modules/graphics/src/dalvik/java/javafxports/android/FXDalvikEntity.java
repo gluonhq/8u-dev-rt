@@ -171,6 +171,8 @@ public class FXDalvikEntity implements SurfaceTextureListener {
         if (glassHasStarted) {
             try {
                 onSurfaceChangedNativeMethod2.invoke(null, surfaceDetails.format, surfaceDetails.width, surfaceDetails.height);
+                Thread.sleep(500); // we need to generate 2 pulses for the textureview to pick up
+                onSurfaceChangedNativeMethod2.invoke(null, surfaceDetails.format, surfaceDetails.width, surfaceDetails.height);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onSurfaceChangedNative2 method by reflection", e);
             }
