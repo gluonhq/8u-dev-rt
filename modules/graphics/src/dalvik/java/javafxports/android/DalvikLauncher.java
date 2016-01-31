@@ -219,7 +219,6 @@ public class DalvikLauncher implements Launcher {
         fxDalvikEntity.setInitializeMonocleMethod(registerDevice);
         Class<?> dalvikInputClass = getApplicationClassLoader().loadClass("com.sun.glass.ui.android.DalvikInput");
         fxDalvikEntity.setOnMultiTouchEventMethod(dalvikInputClass.getMethod("onMultiTouchEvent", int.class, int[].class, int[].class, int[].class, int[].class));
-        fxDalvikEntity.setOnKeyEventMethod(dalvikInputClass.getMethod("onKeyEvent", int.class, int.class, String.class));
         fxDalvikEntity.setOnGlobalLayoutChangedMethod(dalvikInputClass.getMethod("onGlobalLayoutChanged"));
         fxDalvikEntity.setOnSurfaceChangedNativeMethod1(dalvikInputClass.getMethod("onSurfaceChangedNative"));
         fxDalvikEntity.setOnSurfaceChangedNativeMethod2(dalvikInputClass.getMethod("onSurfaceChangedNative", int.class, int.class, int.class));

@@ -36,16 +36,12 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.Surface;
-import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 
 import java.io.BufferedInputStream;
@@ -60,11 +56,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.Properties;
-import java.util.concurrent.CountDownLatch;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-
 
 public class FXActivity extends Activity  {
 
@@ -99,7 +92,6 @@ public class FXActivity extends Activity  {
     // Cache method handles
     // Can not access com.sun.glass.ui.android.DalvikInput directly, because the javafx classes are loaded with a different classloader 
  //   private Method onMultiTouchEventMethod;
-    private Method onKeyEventMethod;
     private Method onSurfaceChangedNativeMethod1;
     private Method onSurfaceChangedNativeMethod2;
     private Method onSurfaceRedrawNeededNativeMethod;

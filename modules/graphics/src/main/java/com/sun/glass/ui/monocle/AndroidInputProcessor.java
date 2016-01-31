@@ -54,4 +54,20 @@ class AndroidInputProcessor {
         keyInput.setState(keyState);
     }
 
+    synchronized void dispatchKeyEvent(int type, int key, char[] chars, int modifiers) {
+        MonocleWindow window = (MonocleWindow) MonocleWindowManager.getInstance().getFocusedWindow();
+        if (window == null) {
+            return;
+        }
+        MonocleView view = (MonocleView) window.getView();
+        if (view == null) {
+            return;
+        }
+        RunnableProcessor.runLater(new Runnable() {
+            @Override
+            public void run() {
+                view.notifyKey(type, key, chars, modifiers);
+            }
+        });
+    }
 }
