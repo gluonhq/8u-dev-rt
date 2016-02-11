@@ -583,7 +583,7 @@ public abstract class LabeledSkinBase<C extends Labeled, B extends BehaviorBase<
             }
 
             // RT-37420
-            graphic.impl_processCSS(false);
+            // graphic.impl_processCSS(false);
 
         }
 

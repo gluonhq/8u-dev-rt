@@ -142,6 +142,9 @@ public class ComboBoxListViewSkin<T> extends ComboBoxPopupControl<T> {
         registerChangeListener(comboBox.buttonCellProperty(), "BUTTON_CELL");
         registerChangeListener(comboBox.valueProperty(), "VALUE");
         registerChangeListener(comboBox.editableProperty(), "EDITABLE");
+        if (comboBox.isShowing()) {
+            show();
+        }
     }
 
 
