@@ -51,29 +51,7 @@ int to_jfx_touch_action(int state) {
     }
 }
 
-int to_jfx_key_action(int action) {
-    switch (action) {
-        case KEY_ACTION_DOWN:
-            return com_sun_glass_events_KeyEvent_PRESS;
-        case KEY_ACTION_UP:
-            return com_sun_glass_events_KeyEvent_RELEASE;
-        case KEY_ACTION_MULTIPLE:
-            return com_sun_glass_events_KeyEvent_TYPED;
-    }
-}
-
-int to_linux_keycode(int androidKeyCode) {
-    int keySize = sizeof(keyMap)/sizeof(keyMap[0]);
-    for (int i = 0; i < keySize; ++i) {
-        if (keyMap[i].androidKC == androidKeyCode) {
-            return keyMap[i].linuxKC;
-        }
-    }
-    return KEY_RESERVED;
-}
-
-
-char *describe_surface_format(int f) {    
+char *describe_surface_format(int f) {
     switch (f) {
         case RGBA_8888:
             return "RGBA_8888";
@@ -108,17 +86,6 @@ char *describe_touch_action(int state) {
             return "TOUCH_ACTION_STILL";
         default:
             return "TOUCH_ACTION_UNKNOWN";
-    }
-}
-
-char *describe_key_action(int action) {
-    switch(action) {
-        case KEY_ACTION_DOWN:
-            return "KEY_ACTION_DOWN";
-        case KEY_ACTION_UP:
-            return "KEY_ACTION_UP";
-        case KEY_ACTION_MULTIPLE:
-            return "KEY_ACTION_MULTIPLE";
     }
 }
 

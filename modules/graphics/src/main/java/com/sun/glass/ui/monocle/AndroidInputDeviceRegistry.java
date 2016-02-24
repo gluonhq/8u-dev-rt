@@ -34,7 +34,6 @@ public class AndroidInputDeviceRegistry extends InputDeviceRegistry {
     private static AndroidInputDeviceRegistry instance = new AndroidInputDeviceRegistry();
     private AndroidInputDevice androidDevice;
     private AndroidInputProcessor processor;
-    private final KeyState keyState = new KeyState();
 
     static AndroidInputDeviceRegistry getInstance() {
         return instance;
@@ -75,28 +74,9 @@ public class AndroidInputDeviceRegistry extends InputDeviceRegistry {
         }
         processor.pushEvent(touchState);
     }
-    
-    
-    public static void gotKeyEventFromNative(int action, int linuxKey) {
-        instance.gotKeyEvent (action, linuxKey);
-    }
-    
-    private void gotKeyEvent(int action, int lk) {
-        int vk = LinuxKeyProcessor.getVirtualKeyCode(lk);
-        if (action == 0) {
-            keyState.pressKey(vk);
-        }
-        else if (action ==1) {
-            keyState.releaseKey(vk);
-        }
-        else {
-            System.out.println("[JVDBG] ERROR, what action is this? "+action);
-        }
-        instance.gotKeyEvent(keyState);
-    }
-    
-    private void gotKeyEvent(KeyState keyState) {
-        processor.pushKeyEvent(keyState);
+
+    public static void dispatchKeyEvent(int type, int key, char[] chars, int modifiers) {
+        instance.processor.dispatchKeyEvent(type, key, chars, modifiers);
     }
     
     private AndroidInputDeviceRegistry() {

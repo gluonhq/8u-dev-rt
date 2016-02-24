@@ -42,14 +42,6 @@ public class DalvikInput {
     private static native void onMultiTouchEventNative(int count, int[] actions,
             int[] ids, int[] touchXs, int[] touchYs);
 
-    public static void onKeyEvent(final int action, final int keycode, final String characters){
-        Platform.runLater(new Runnable() {
-            public void run() {
-                onKeyEventNative(action, keycode, characters);
-            }
-        });
-    }
-
     private static Node activeNode;
 
     public static void onGlobalLayoutChanged() {
@@ -61,8 +53,6 @@ public class DalvikInput {
     public static void setActiveNode (Node n) {
         activeNode = n;
     }
-
-    private static native void onKeyEventNative(int action, int keycode, String characters);
 
     public static native void onSurfaceChangedNative();
 

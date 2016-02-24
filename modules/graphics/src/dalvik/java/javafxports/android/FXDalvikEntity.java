@@ -67,7 +67,6 @@ public class FXDalvikEntity implements SurfaceTextureListener {
     
     private static boolean glassHasStarted = false;
     private Method onMultiTouchEventMethod;
-    private Method onKeyEventMethod;
     private static Method onGlobalLayoutChangedMethod;
     private static Method onSurfaceCreatedMethod;
     private static Method onSurfaceChangedNativeMethod1;
@@ -233,10 +232,6 @@ public class FXDalvikEntity implements SurfaceTextureListener {
         this.onMultiTouchEventMethod = onMultiTouchEventMethod;
     }
 
-    protected void setOnKeyEventMethod(Method onKeyEventMethod) {
-        this.onKeyEventMethod = onKeyEventMethod;
-    }
-
     protected void setOnGlobalLayoutChangedMethod(Method method) {
         onGlobalLayoutChangedMethod = method;
     }
@@ -397,11 +392,7 @@ private static long softInput = 0L;
             if (!glassHasStarted) {
                 return false;
             }
-            try {
-                onKeyEventMethod.invoke(null, event.getAction(), event.getKeyCode(), event.getCharacters());
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onKeyEventMethod method by reflection", e);
-            }
+            KeyEventProcessor.getInstance().process(event);
             return true;
         }
     }

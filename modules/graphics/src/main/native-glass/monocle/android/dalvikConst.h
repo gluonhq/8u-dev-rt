@@ -44,10 +44,6 @@ extern "C" {
 #define TOUCH_ACTION_POINTER_DOWN	5
 #define TOUCH_ACTION_POINTER_UP     6
 
-#define KEY_ACTION_DOWN     0
-#define KEY_ACTION_UP       1
-#define KEY_ACTION_MULTIPLE 2   
-    
 #ifdef	__cplusplus
 }
 #endif
