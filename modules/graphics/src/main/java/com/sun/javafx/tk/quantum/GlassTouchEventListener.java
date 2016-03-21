@@ -31,7 +31,7 @@ interface GlassTouchEventListener {
             int touchEventCount);
 
     public void notifyNextTouchEvent(long time, int type, long touchId, 
-                                     int x, int y, int xAbs, int yAbs);
+                                     double x, double y, double xAbs, double yAbs);
 
     public void notifyEndTouchEvent(long time);
 }

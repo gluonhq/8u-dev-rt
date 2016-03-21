@@ -66,7 +66,7 @@ class GestureRecognizers implements GestureRecognizer {
     }
 
     public void notifyNextTouchEvent(long time, int type, long touchId,
-                                     int x, int y, int xAbs, int yAbs)
+                                     double x, double y, double xAbs, double yAbs)
     {
         final GestureRecognizer[] wl = synchWorkList();
         for (int idx = 0; idx != wl.length; ++idx) {

@@ -178,14 +178,14 @@ final class MonocleView extends View {
     protected void notifyMenu(int x, int y, int xAbs, int yAbs, boolean isKeyboardTrigger) {
         super.notifyMenu(x, y, xAbs, yAbs, isKeyboardTrigger);
     }
-    public void notifyNextTouchEvent(int type, long touchId, int x, int y,
-                                     int xAbs, int yAbs) {
-       int newX = (int)(x/scale);
-       int newY = (int)(y/scale);
-       int newXAbs = (int)(xAbs/scale);
-       int newYAbs = (int)(yAbs/scale);
-       super.notifyNextTouchEvent(type, touchId, newX, newY, newXAbs, newYAbs);
-    }
+//    public void notifyNextTouchEvent(int type, long touchId, int x, int y,
+//                                     int xAbs, int yAbs) {
+//       int newX = (int)(x/scale);
+//       int newY = (int)(y/scale);
+//       int newXAbs = (int)(xAbs/scale);
+//       int newYAbs = (int)(yAbs/scale);
+//       super.notifyNextTouchEvent(type, touchId, newX, newY, newXAbs, newYAbs);
+//    }
 
 
     @Override

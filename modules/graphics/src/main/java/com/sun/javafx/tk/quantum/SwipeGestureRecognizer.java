@@ -65,7 +65,7 @@ class SwipeGestureRecognizer implements GestureRecognizer {
 
     @Override
     public void notifyNextTouchEvent(long time, int type, long touchId,
-                                     int x, int y, int xAbs, int yAbs) {
+                                     double x, double y, double xAbs, double yAbs) {
         switch(type) {
             case TouchEvent.TOUCH_PRESSED:
                 tracker.pressed(touchId, time, x, y, xAbs, yAbs);
@@ -228,7 +228,7 @@ class SwipeGestureRecognizer implements GestureRecognizer {
             this.direct = direct;
         }
 
-        public void pressed(long id, long nanos, int x, int y, int xAbs, int yAbs) {
+        public void pressed(long id, long nanos, double x, double y, double xAbs, double yAbs) {
             currentTouchCount++;
             switch (state) {
                 case IDLE:
@@ -249,7 +249,7 @@ class SwipeGestureRecognizer implements GestureRecognizer {
             }
         }
 
-        public void released(long id, long nanos, int x, int y, int xAbs, int yAbs) {
+        public void released(long id, long nanos, double x, double y, double xAbs, double yAbs) {
             if (state != SwipeRecognitionState.FAILURE) {
                 TouchPointTracker tracker = trackers.get(id);
 
@@ -303,7 +303,7 @@ class SwipeGestureRecognizer implements GestureRecognizer {
             }
         }
 
-        public void progress(long id, long nanos, int x, int y) {
+        public void progress(long id, long nanos, double x, double y) {
 
             if (state == SwipeRecognitionState.FAILURE) {
                 return;

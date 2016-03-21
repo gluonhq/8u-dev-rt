@@ -133,7 +133,6 @@ public class TouchInputSupport
                 System.err.println("Unknown touch state: " + state);
                 return;
         }
-        
         if (filterTouchCoordinates) {
             state = filterTouchInputState(state, id, x, y, xAbs, yAbs);
         }

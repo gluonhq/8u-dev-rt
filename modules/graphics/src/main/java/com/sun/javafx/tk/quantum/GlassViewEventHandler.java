@@ -1159,8 +1159,9 @@ class GlassViewEventHandler extends View.EventHandler {
                 PulseLogger.newInput(null);
             }
         }
-
-        gestures.notifyNextTouchEvent(time, type, touchId, x, y, xAbs, yAbs);
+        Window w = view.getWindow();
+        double pScale = (w == null) ? 1.0 : w.getPlatformScale();
+        gestures.notifyNextTouchEvent(time, type, touchId, x/pScale, y/pScale, xAbs/pScale, yAbs/pScale);
     }
 
     @Override public void handleEndTouchEvent(View view, long time) {

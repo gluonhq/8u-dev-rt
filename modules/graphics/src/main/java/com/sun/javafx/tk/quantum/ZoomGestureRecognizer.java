@@ -119,7 +119,7 @@ class ZoomGestureRecognizer implements GestureRecognizer {
 
     @Override
     public void notifyNextTouchEvent(long time, int type, long touchId,
-                                     int x, int y, int xAbs, int yAbs) {
+                                     double x, double y, double xAbs, double yAbs) {
         switch(type) {
             case TouchEvent.TOUCH_PRESSED:
                 touchPointsSetChanged = true;
@@ -348,14 +348,14 @@ class ZoomGestureRecognizer implements GestureRecognizer {
         this.direct = direct;
     }
 
-    public void touchPressed(long id, long nanos, int x, int y, int xAbs, int yAbs) {
+    public void touchPressed(long id, long nanos, double x, double y, double xAbs, double yAbs) {
         currentTouchCount++;
         TouchPointTracker tracker = new TouchPointTracker();
         tracker.update(nanos, x, y, xAbs, yAbs);
         trackers.put(id, tracker);
     }
 
-    public void touchReleased(long id, long nanos, int x, int y, int xAbs, int yAbs) {
+    public void touchReleased(long id, long nanos, double x, double y, double xAbs, double yAbs) {
         if (state != ZoomRecognitionState.FAILURE) {
             TouchPointTracker tracker = trackers.get(id);
             if (tracker == null) {
@@ -369,7 +369,7 @@ class ZoomGestureRecognizer implements GestureRecognizer {
         currentTouchCount--;
     }
 
-    public void touchMoved(long id, long nanos, int x, int y, int xAbs, int yAbs) {
+    public void touchMoved(long id, long nanos, double x, double y, double xAbs, double yAbs) {
         if (state == ZoomRecognitionState.FAILURE) {
             return;
         }
