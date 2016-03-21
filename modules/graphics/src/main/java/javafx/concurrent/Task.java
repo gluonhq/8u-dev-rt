@@ -1008,8 +1008,8 @@ public abstract class Task<V> extends FutureTask<V> implements Worker<V>, EventT
         // Assert the modifyThread permission
         boolean flag = AccessController.doPrivileged(
             (PrivilegedAction<Boolean>) () -> super.cancel(mayInterruptIfRunning),
-            null,
-            modifyThreadPerm);
+            null);
+            // modifyThreadPerm);
 
         // If cancel succeeded (according to the semantics of the Future cancel method),
         // then we need to make sure the State flag is set appropriately
