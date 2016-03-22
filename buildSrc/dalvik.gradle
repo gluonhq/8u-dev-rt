@@ -500,6 +500,7 @@ android.javax.xml.stream.XMLInputFactory=com.sun.xml.stream.ZephyrParserFactory
 android.javax.xml.stream.XMLOutputFactory=com.sun.xml.stream.ZephyrWriterFactory
 android.javax.xml.stream.XMLEventFactory=com.sun.xml.stream.events.ZephyrEventFactory
 android.glass.platform=Monocle
+android.monocle.platform=Android
 android.glass.lens=eglfb
 android.log.lens=FINEST
 android.prism.verbose=true
