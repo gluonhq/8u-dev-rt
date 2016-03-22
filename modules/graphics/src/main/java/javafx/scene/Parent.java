@@ -266,7 +266,7 @@ public abstract class Parent extends Node {
                             relayout = true;
                         }
                         node.setParent(Parent.this);
-                        node.setScenes(getScene(), getSubScene());
+                        node.setScenes(getScene(), getSubScene(), true);
                         // assert !node.boundsChanged;
                         if (node.isVisible()) {
                             geomChanged = true;
@@ -495,7 +495,7 @@ public abstract class Parent extends Node {
                     }
                     if (old.getParent() == Parent.this) {
                         old.setParent(null);
-                        old.setScenes(null, null);
+                        old.setScenes(null, null, false);
                     }
                     if (!removedChildrenOptimizationDisabled) {
                         removed.add(old);
@@ -656,7 +656,7 @@ public abstract class Parent extends Node {
         }
 
         for (int i=0; i<children.size(); i++) {
-            children.get(i).setScenes(newScene, newSubScene);
+            children.get(i).setScenes(newScene, newSubScene, false);
         }
 
         final boolean awaitingLayout = layoutFlag != LayoutFlags.CLEAN;

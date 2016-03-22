@@ -832,13 +832,13 @@ public abstract class Node implements EventTarget, Styleable {
         }
     }
 
-    private void invalidatedScenes(Scene oldScene, SubScene oldSubScene) {
+    private void invalidatedScenes(Scene oldScene, SubScene oldSubScene, boolean reapplyCSS) {
         Scene newScene = sceneProperty().get();
         boolean sceneChanged = oldScene != newScene;
         SubScene newSubScene = subScene;
 
         if (getClip() != null) {
-            getClip().setScenes(newScene, newSubScene);
+            getClip().setScenes(newScene, newSubScene, reapplyCSS);
         }
         if (sceneChanged) {
             updateCanReceiveFocus();
@@ -910,16 +910,16 @@ public abstract class Node implements EventTarget, Styleable {
         }
     }
 
-    final void setScenes(Scene newScene, SubScene newSubScene) {
+    final void setScenes(Scene newScene, SubScene newSubScene, boolean reapplyCSS) {
         Scene oldScene = sceneProperty().get();
         if (newScene != oldScene || newSubScene != subScene) {
             scene.set(newScene);
             SubScene oldSubScene = subScene;
             subScene = newSubScene;
-            invalidatedScenes(oldScene, oldSubScene);
+            invalidatedScenes(oldScene, oldSubScene, reapplyCSS);
             if (this instanceof SubScene) { // TODO: find better solution
                 SubScene thisSubScene = (SubScene)this;
-                thisSubScene.getRoot().setScenes(newScene, thisSubScene);
+                thisSubScene.getRoot().setScenes(newScene, thisSubScene, reapplyCSS);
             }
         }
     }
@@ -6605,13 +6605,13 @@ public abstract class Node implements EventTarget, Styleable {
                         } else {
                             if (oldClip != null) {
                                 oldClip.clipParent = null;
-                                oldClip.setScenes(null, null);
+                                oldClip.setScenes(null, null, false);
                                 oldClip.updateTreeVisible(false);
                             }
 
                             if (newClip != null) {
                                 newClip.clipParent = Node.this;
-                                newClip.setScenes(getScene(), getSubScene());
+                                newClip.setScenes(getScene(), getSubScene(), false);
                                 newClip.updateTreeVisible(true);
                             }
 
