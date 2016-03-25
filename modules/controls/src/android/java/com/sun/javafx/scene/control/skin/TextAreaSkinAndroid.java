@@ -46,5 +46,8 @@ public class TextAreaSkinAndroid extends TextAreaSkin {
                 }
             }
         });
+        if (textArea.isFocused() && textArea.isEditable()) {
+            com.sun.glass.ui.android.SoftwareKeyboard.show();
+        }
     }
 }
