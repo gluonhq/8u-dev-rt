@@ -31,6 +31,7 @@ DEFINES += \
 mac*|linux* {
     QMAKE_CXXFLAGS -= -std=c++11
     QMAKE_CXXFLAGS += -std=c++11
+    QMAKE_CXXFLAGS += -D_GLIBCXX_USE_SCHED_YIELD
 }
 
 mac*|linux*|solaris* {

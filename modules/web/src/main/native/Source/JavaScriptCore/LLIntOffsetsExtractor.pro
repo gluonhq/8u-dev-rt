@@ -18,6 +18,7 @@ CONFIG(release, debug|release) {
 
 mac*|linux* {
     QMAKE_CXXFLAGS += -std=c++11
+    QMAKE_CXXFLAGS += -D_GLIBCXX_USE_SCHED_YIELD
 
     CONFIG -= app_bundle
 }

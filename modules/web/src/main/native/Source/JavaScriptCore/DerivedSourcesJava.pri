@@ -191,7 +191,7 @@ GENERATORS += inspectorCreateDir
 inspectorCopy.input = INSPECTOR_JS_H_FILES
 inspectorCopy.output = $${INSPECTOR_JS_DIR}/${QMAKE_FILE_BASE}.h
 inspectorCopy.output_no_prepend = true
-inspectorCopy.commands = $(COPY_FILE) ${QMAKE_FILE_NAME} $$shell_path($$INSPECTOR_JS_DIR)
+inspectorCopy.commands = $(COPY_FILE) ${QMAKE_FILE_NAME} $$INSPECTOR_JS_DIR
 inspectorCopy.depends = $$INSPECTOR_JS_DIR
 GENERATORS += inspectorCopy
 
