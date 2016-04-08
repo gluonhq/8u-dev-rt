@@ -66,7 +66,7 @@ public class FXDalvikEntity implements SurfaceTextureListener {
     private final Activity activity;
     
     private static boolean glassHasStarted = false;
-    private Method onMultiTouchEventMethod;
+    private static Method onMultiTouchEventMethod;
     private static Method onGlobalLayoutChangedMethod;
     private static Method onSurfaceCreatedMethod;
     private static Method onSurfaceChangedNativeMethod1;
