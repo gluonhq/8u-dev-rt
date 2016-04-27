@@ -135,13 +135,13 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
 //                w -= insets.getLeft() + insets.getRight();
 //                h -= insets.getTop() + insets.getBottom();
                 String text = textField.getText();
-
+                System.out.println("[JVDBG] request to focus on textfield, mxt = "+trans.getMxt()+", myt = "+trans.getMyt()+", w = "+w+", h = "+h+", mxx = "+trans.getMxx());
                 // we need to display native text input component on the place where JFX component is drawn
                 // all parameters needed to do that are passed to native impl. here
                 textField.getScene().getWindow().impl_getPeer().requestInput(text, type.ordinal(), w, h, 
                         trans.getMxx(), trans.getMxy(), trans.getMxz(), trans.getMxt(),// + insets.getLeft(),
                         trans.getMyx(), trans.getMyy(), trans.getMyz(), trans.getMyt(),// + insets.getTop(),
-                        trans.getMzx(), trans.getMzy(), trans.getMzz(), trans.getMzt());
+                        trans.getMzx(), trans.getMzy(), trans.getMzz(), trans.getMzt(), textField.getFont().getSize());
             }
             if (!focusGainedByMouseClick) {
                 setCaretAnimating(true);

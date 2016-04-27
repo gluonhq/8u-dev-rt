@@ -881,11 +881,11 @@ class WindowStage extends GlassStage {
     public void requestInput(String text, int type, double width, double height, 
                         double Mxx, double Mxy, double Mxz, double Mxt,
                         double Myx, double Myy, double Myz, double Myt, 
-                        double Mzx, double Mzy, double Mzz, double Mzt) {
+                        double Mzx, double Mzy, double Mzz, double Mzt, double fontSize) {
         platformWindow.requestInput(text, type, width, height, 
                                     Mxx, Mxy, Mxz, Mxt, 
                                     Myx, Myy, Myz, Myt, 
-                                    Mzx, Mzy, Mzz, Mzt);
+                                    Mzx, Mzy, Mzz, Mzt, fontSize);
     }
 
     @Override

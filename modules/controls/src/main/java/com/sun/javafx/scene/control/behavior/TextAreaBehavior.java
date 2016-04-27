@@ -167,7 +167,7 @@ public class TextAreaBehavior extends TextInputControlBehavior<TextArea> {
                         textArea.getScene().getWindow().impl_getPeer().requestInput(text, TextFieldBehavior.TextInputTypes.TEXT_AREA.ordinal(), w, h,
                                 trans.getMxx(), trans.getMxy(), trans.getMxz(), trans.getMxt(),
                                 trans.getMyx(), trans.getMyy(), trans.getMyz(), trans.getMyt(),
-                                trans.getMzx(), trans.getMzy(), trans.getMzz(), trans.getMzt());
+                                trans.getMzx(), trans.getMzy(), trans.getMzz(), trans.getMzt(), textArea.getFont().getSize());
                     }
                     if (!focusGainedByMouseClick) {
                         setCaretAnimating(true);

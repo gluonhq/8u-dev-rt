@@ -220,7 +220,8 @@ class GtkWindow extends Window {
     protected void _requestInput(long ptr, String text, int type, double width, double height, 
                                     double Mxx, double Mxy, double Mxz, double Mxt,
                                     double Myx, double Myy, double Myz, double Myt, 
-                                    double Mzx, double Mzy, double Mzz, double Mzt) {
+                                    double Mzx, double Mzy, double Mzz, double Mzt,
+                                    double fontSize) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
         

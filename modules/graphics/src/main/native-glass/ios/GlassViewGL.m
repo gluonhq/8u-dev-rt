@@ -375,12 +375,12 @@ static EAGLContext * ctx = nil;
 - (void)requestInput:(NSString *)text type:(int)type width:(double)width height:(double)height 
                  mxx:(double)mxx mxy:(double)mxy mxz:(double)mxz mxt:(double)mxt 
                  myx:(double)myx myy:(double)myy myz:(double)myz myt:(double)myt
-                 mzx:(double)mzx mzy:(double)mzy mzz:(double)mzz mzt:(double)mzt
+                 mzx:(double)mzx mzy:(double)mzy mzz:(double)mzz mzt:(double)mzt fontSize:(double)fontSize
 {
-
+    double nativeFontSize = fontSize * mxx;
     if (type == 0 || type == 1) { // TextField or PasswordField
         
-        UITextField* textField = [[UITextField alloc] initWithFrame:CGRectMake(mxt + 1, myt + 1, width - 2, height - 2)];
+        UITextField* textField = [[UITextField alloc] initWithFrame:CGRectMake(mxt + 1, myt + 1, mxx * (width - 2), myy * (height - 2))];
         
         textField.text = text;
         
@@ -392,7 +392,7 @@ static EAGLContext * ctx = nil;
         
         [self setUpLayerForText:(id)textField];
         
-        textField.font = [UIFont systemFontOfSize:15];
+        textField.font = [UIFont systemFontOfSize:nativeFontSize];
         textField.inputAccessoryView = inputAccessoryView;
         textField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
         textField.borderStyle = UITextBorderStyleNone;
@@ -405,7 +405,7 @@ static EAGLContext * ctx = nil;
         
     } else if (type == 3) { // TextArea
         
-        UITextView* textView = [[UITextView alloc] initWithFrame:CGRectMake(mxt + 1, myt + 1, width - 2, height - 2)];
+        UITextView* textView = [[UITextView alloc] initWithFrame:CGRectMake(mxt + 1, myt + 1, mxx * (width - 2), myy * (height - 2))];
         
         textView.text = text;
         
@@ -413,7 +413,7 @@ static EAGLContext * ctx = nil;
                 
         [self setUpLayerForText:(id)textView];
         
-        textView.font = [UIFont systemFontOfSize:15];
+        textView.font = [UIFont systemFontOfSize:nativeFontSize];
         textView.inputAccessoryView = inputAccessoryView;
         
         nativeView = textView;
