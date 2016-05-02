@@ -16,6 +16,10 @@ CONFIG(release, debug|release) {
     DEFINES *= NDEBUG
 }
 
+*-cross-* {
+    QMAKE_CXXFLAGS += -D_GLIBCXX_USE_SCHED_YIELD
+}
+
 mac*|linux* {
     QMAKE_CXXFLAGS += -std=c++11
 
