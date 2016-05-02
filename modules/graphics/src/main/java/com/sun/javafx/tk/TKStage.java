@@ -200,7 +200,7 @@ public interface TKStage {
     void requestInput(String text, int type, double width, double height,
                         double Mxx, double Mxy, double Mxz, double Mxt,
                         double Myx, double Myy, double Myz, double Myt,
-                        double Mzx, double Mzy, double Mzz, double Mzt);
+                        double Mzx, double Mzy, double Mzz, double Mzt, double fontSize);
 
     /**
      * Native keyboard for text input is no longer necessary.

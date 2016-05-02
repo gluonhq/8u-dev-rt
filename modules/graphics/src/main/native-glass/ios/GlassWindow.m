@@ -731,13 +731,13 @@ static inline void setWindowFrame(GlassWindow *window, CGFloat x, CGFloat y, CGF
 - (void) requestInput:(NSString *)text type:(int)type width:(double)width height:(double)height 
                   mxx:(double)mxx mxy:(double)mxy mxz:(double)mxz mxt:(double)mxt 
                   myx:(double)myx myy:(double)myy myz:(double)myz myt:(double)myt
-                  mzx:(double)mzx mzy:(double)mzy mzz:(double)mzz mzt:(double)mzt
+                  mzx:(double)mzx mzy:(double)mzy mzz:(double)mzz mzt:(double)mzt fontSize:(double)fontSize
 
 {
     [view requestInput:text type:type width:width height:height 
                    mxx:mxx mxy:mxy mxz:mxz mxt:mxt 
                    myx:myx myy:myy myz:myz myt:myt
-                   mzx:mzx mzy:mzy mzz:mzz mzt:mzt];
+                   mzx:mzx mzy:mzy mzz:mzz mzt:mzt fontSize:fontSize];
 }
 
 
@@ -1629,7 +1629,8 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_ios_IosWindow__1requestInput
 (JNIEnv *env, jobject jwin, jlong ptr, jstring text, jint type, jdouble width, jdouble height, 
     jdouble mxx, jdouble mxy, jdouble mxz, jdouble mxt, 
     jdouble myx, jdouble myy, jdouble myz, jdouble myt, 
-    jdouble mzx, jdouble mzy, jdouble mzz, jdouble mzt)
+    jdouble mzx, jdouble mzy, jdouble mzz, jdouble mzt,
+    jdouble fontSize)
 {
     GLASS_ASSERT_MAIN_JAVA_THREAD(env);
     GLASS_POOL_ENTER;
@@ -1647,7 +1648,8 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_ios_IosWindow__1requestInput
     [window requestInput:nsstr type:(int)type width:(double)width height:(double)height 
                      mxx:(double)mxx mxy:(double)mxy mxz:(double)mxz mxt:(double)mxt
                      myx:(double)myx myy:(double)myy myz:(double)myz myt:(double)myt 
-                     mzx:(double)mzx mzy:(double)mzy mzz:(double)mzz mzt:(double)mzt];
+                     mzx:(double)mzx mzy:(double)mzy mzz:(double)mzz mzt:(double)mzt
+                     fontSize:(double)fontSize];
     GLASS_POOL_EXIT;
     GLASS_CHECK_EXCEPTION(env);
 }
