@@ -48,7 +48,7 @@ class TouchInput {
      */
     private final int touchRadius = AccessController.doPrivileged(
             (PrivilegedAction<Integer>) () -> Integer.getInteger(
-                    "monocle.input.touchRadius", 20)
+                    "monocle.input.touchRadius", 2)
     );
 
     private static TouchInput instance = new TouchInput();
