@@ -121,6 +121,7 @@ ios.javax.xml.stream.XMLOutputFactory=com.sun.xml.stream.ZephyrWriterFactory
 ios.javax.xml.stream.XMLEventFactory=com.sun.xml.stream.events.ZephyrEventFactory
 ios.jfxmedia.platforms=IOSPlatform
 ios.glass.platform=ios
+ios.com.sun.javafx.isEmbedded=true
 ios.prism.allowhidpi=true
 ios.prism.mintexturesize=16
 ios.prism.verbose=true
