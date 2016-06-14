@@ -93,7 +93,7 @@ jboolean flushBuffer(void *context) {
 }
 
 void setSwapInterval(void *context, int interval) {
-    fprintf(stderr, "IOSWindowSystemInterface : setSwapInterval unimp\n");
+    // fprintf(stderr, "IOSWindowSystemInterface : setSwapInterval unimp\n");
 }
 
 

@@ -697,6 +697,23 @@ static BOOL isTouchEnded(int phase)
     return NO;
 }
 
+// UITextViewDelegate
+-(BOOL)textView:(UITextView *)textView
+        shouldChangeTextInRange:(NSRange)range
+        replacementText:(NSString *)text {
+    char c = (char)13;
+    if (range.length == 0) {
+        const char *cl = [text cStringUsingEncoding:NSUTF8StringEncoding];
+        c = cl[0];
+    }
+    [self sendJavaKeyEventWithType:com_sun_glass_events_KeyEvent_TYPED
+                                          keyCode:com_sun_glass_events_KeyEvent_VK_ENTER
+                                            chars:c
+                                        modifiers:0];
+    return YES;
+}
+
+
 #pragma mark --- UITextFieldDelegate
 
 -(BOOL)textFieldShouldReturn:(UITextField *)textField{
@@ -707,6 +724,10 @@ static BOOL isTouchEnded(int phase)
     
     [[GlassWindow getMasterWindow] resignFocusOwner];
     
+    return YES;
+}
+
+- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField{
     return YES;
 }
 

@@ -377,6 +377,7 @@ static EAGLContext * ctx = nil;
                  myx:(double)myx myy:(double)myy myz:(double)myz myt:(double)myt
                  mzx:(double)mzx mzy:(double)mzy mzz:(double)mzz mzt:(double)mzt fontSize:(double)fontSize
 {
+NSLog(@"[JVDBG] REQUESTINPUT will create a native component, type = %d", type);
     double nativeFontSize = fontSize * mxx;
     if (type == 0 || type == 1) { // TextField or PasswordField
         
@@ -416,6 +417,8 @@ static EAGLContext * ctx = nil;
         textView.font = [UIFont systemFontOfSize:nativeFontSize];
         textView.inputAccessoryView = inputAccessoryView;
         
+        textView.delegate = self->delegate;
+
         nativeView = textView;
         
     }
