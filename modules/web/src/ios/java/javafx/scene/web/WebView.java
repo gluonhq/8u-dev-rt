@@ -84,6 +84,7 @@ final public class WebView extends Parent {
     private final WebEngine engine;
     // pointer to native WebViewImpl
     private final long handle;
+    private boolean nativeVisible = true;
 
     /**
      * The stage pulse listener registered with the toolkit.
@@ -302,7 +303,7 @@ final public class WebView extends Parent {
 
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                _setVisible(handle, newValue);
+                setNativeVisible(handle, newValue);
             }
         });
     }
@@ -994,8 +995,9 @@ final public class WebView extends Parent {
                 //getPGWebView().update(); // creates new render queues
                 Scene.impl_setAllowPGAccess(false);
             }
+            setNativeVisible(handle, true);
         } else {
-            _setVisible(handle, false);
+            setNativeVisible(handle, false);
         }
     }
 
@@ -1090,6 +1092,13 @@ final public class WebView extends Parent {
     }
     private void notifyJavaCall(String arg) {
         engine.notifyJavaCall(arg);
+    }
+
+    private void setNativeVisible(long handle, boolean v) {
+        if (nativeVisible != v) {
+            nativeVisible = v;
+            _setVisible(handle, v);
+        }
     }
     
     
