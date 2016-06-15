@@ -219,11 +219,12 @@ public class DalvikLauncher implements Launcher {
         fxDalvikEntity.setInitializeMonocleMethod(registerDevice);
         Class<?> dalvikInputClass = getApplicationClassLoader().loadClass("com.sun.glass.ui.android.DalvikInput");
         fxDalvikEntity.setOnMultiTouchEventMethod(dalvikInputClass.getMethod("onMultiTouchEvent", int.class, int[].class, int[].class, int[].class, int[].class));
-        fxDalvikEntity.setOnGlobalLayoutChangedMethod(dalvikInputClass.getMethod("onGlobalLayoutChanged"));
+        // fxDalvikEntity.setOnGlobalLayoutChangedMethod(dalvikInputClass.getMethod("onGlobalLayoutChanged"));
         fxDalvikEntity.setOnSurfaceChangedNativeMethod1(dalvikInputClass.getMethod("onSurfaceChangedNative"));
         fxDalvikEntity.setOnSurfaceChangedNativeMethod2(dalvikInputClass.getMethod("onSurfaceChangedNative", int.class, int.class, int.class));
         fxDalvikEntity.setOnSurfaceRedrawNeededNativeMethod(dalvikInputClass.getMethod("onSurfaceRedrawNeededNative"));
         fxDalvikEntity.setOnConfigurationChangedNativeMethod(dalvikInputClass.getMethod("onConfigurationChangedNative", int.class));
+        fxDalvikEntity.setKeyboardSizeMethod(dalvikInputClass.getMethod("keyboardSize", double.class));
         Class<?> androidAcceleratedScreen = getApplicationClassLoader().loadClass("com.sun.glass.ui.monocle.AndroidAcceleratedScreen");
         fxDalvikEntity.setOnSurfaceCreatedMethod(androidAcceleratedScreen.getMethod("createEglSurface"));
         boolean hasAccessToFXClasses = false;

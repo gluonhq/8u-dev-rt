@@ -28,6 +28,7 @@ package javafxports.android;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.util.Log;
@@ -39,11 +40,12 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.TextureView.SurfaceTextureListener;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.inputmethod.InputMethodManager;
 import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
 
-public class FXDalvikEntity implements SurfaceTextureListener {
+public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutListener {
     private static final String ACTIVITY_LIB = "activity";
     private static final String META_DATA_LAUNCHER_CLASS = "launcher.class";
     private static final String DEFAULT_LAUNCHER_CLASS = "javafxports.android.DalvikLauncher";
@@ -67,17 +69,21 @@ public class FXDalvikEntity implements SurfaceTextureListener {
     
     private static boolean glassHasStarted = false;
     private static Method onMultiTouchEventMethod;
-    private static Method onGlobalLayoutChangedMethod;
+    // private static Method onGlobalLayoutChangedMethod;
     private static Method onSurfaceCreatedMethod;
     private static Method onSurfaceChangedNativeMethod1;
     private static Method onSurfaceChangedNativeMethod2;
     private static Method onSurfaceRedrawNeededNativeMethod;
     private static Method onConfigurationChangedNativeMethod;
     private static Method initializeMonocleMethod;
+    private static Method keyboardSizeMethod;
     
     private static InputMethodManager imm;
     private static TextureView myView;
     private static CountDownLatch cdlEvLoopFinished;
+
+    private static float originalHeight;
+    public static float keyboardHeight = 0;
 
     private float density;
     private SurfaceTexture surfaceTexture;
@@ -130,6 +136,7 @@ public class FXDalvikEntity implements SurfaceTextureListener {
         myView = new InternalTextureView(activity);
         myView.setSurfaceTextureListener(this);
         //myView.getHolder().addCallback(this);
+        myView.getViewTreeObserver().addOnGlobalLayoutListener(this);
         return myView;
     }
     
@@ -145,6 +152,9 @@ public class FXDalvikEntity implements SurfaceTextureListener {
         _setSurface(surfaceDetails.surface);
         density = metrics.density;
         _setDensity(surfaceDetails.density);
+        Rect currentBounds = new Rect();
+        myView.getRootView().getWindowVisibleDisplayFrame(currentBounds);
+        originalHeight = currentBounds.height() / density;
         if (launcher == null) {
             //surface ready now is time to launch javafx
             getLauncherAndLaunchApplication();
@@ -224,17 +234,38 @@ public class FXDalvikEntity implements SurfaceTextureListener {
         }
 	*/
     }
+
+    @Override
+    public void onGlobalLayout() {
+        Rect currentBounds = new Rect();
+        myView.getRootView().getWindowVisibleDisplayFrame(currentBounds);
+        float newHeight = currentBounds.height()/density;
+        keyboardHeight = originalHeight - newHeight;
+        if (keyboardSizeMethod != null) {
+            try {
+                keyboardSizeMethod.invoke(null, keyboardHeight);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     protected void setInitializeMonocleMethod (Method v ) {
         initializeMonocleMethod  = v ;
+    }
+
+    protected void setKeyboardSizeMethod (Method v ) {
+        keyboardSizeMethod  = v ;
     }
         
     protected void setOnMultiTouchEventMethod(Method onMultiTouchEventMethod) {
         this.onMultiTouchEventMethod = onMultiTouchEventMethod;
     }
 
-    protected void setOnGlobalLayoutChangedMethod(Method method) {
-        onGlobalLayoutChangedMethod = method;
-    }
+    // protected void setOnGlobalLayoutChangedMethod(Method method) {
+        // onGlobalLayoutChangedMethod = method;
+    // }
 
     protected void setOnSurfaceCreatedMethod(Method method) {
         onSurfaceCreatedMethod = method;

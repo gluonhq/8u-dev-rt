@@ -28,26 +28,81 @@ package com.sun.javafx.scene.control.skin;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TextArea;
+import javafx.scene.Scene;
+import com.sun.glass.ui.android.DalvikInput;
+
 
 public class TextAreaSkinAndroid extends TextAreaSkin {
 
+    private final TextArea textArea;
+    boolean isShowingSoftwareKeyboard = false;
+
     public TextAreaSkinAndroid(final TextArea textArea) {
         super(textArea);
+        this.textArea = textArea;
 
-        textArea.focusedProperty().addListener(new ChangeListener<Boolean>() {
-            public void changed(ObservableValue<? extends Boolean> observable,
-                    Boolean wasFocused, Boolean isFocused) {
-                if (textArea.isEditable()) {
-                    if (isFocused) {
-                        com.sun.glass.ui.android.SoftwareKeyboard.show();
-                    } else {
-                        com.sun.glass.ui.android.SoftwareKeyboard.hide();
-                    }
-                }
-            }
-        });
-        if (textArea.isFocused() && textArea.isEditable()) {
+        if (textArea.isFocused() && textArea.isEditable() && (textArea.getScene() != null)) {
+            showSoftwareKeyboard();
+        }
+
+        textArea.sceneProperty().addListener( (o, a, b) -> evaluateVisibility());
+        textArea.focusedProperty().addListener( (o, a, b) -> evaluateVisibility());
+    }
+
+    private void showSoftwareKeyboard() {
+        if (! textArea.isEditable()) {
+            return;
+        }
+        // even if we think we are showing the keyboard, we need to evaluate this method as the 
+        // keyboard might be hidden by the user (height will be 0)
+        if (!isShowingSoftwareKeyboard) {
             com.sun.glass.ui.android.SoftwareKeyboard.show();
+            isShowingSoftwareKeyboard = true;
+            try {
+                com.sun.glass.ui.android.DalvikInput.setActiveNode(textArea);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        double kh = com.sun.glass.ui.android.DalvikInput.keyboardSize;
+        adjustSize(kh);
+        DalvikInput.setKeyboardHeightListener (e -> adjustSize(e));
+    }
+
+
+    private void evaluateVisibility() {
+        Scene scene = textArea.getScene();
+        boolean focused = textArea.isFocused();
+        if ((scene != null) && focused) {
+            showSoftwareKeyboard();
+        } else {
+            hideSoftwareKeyboard();
         }
     }
+
+    private void adjustSize(double kh) {
+        double tTot = textArea.getScene().getHeight();
+        double ty = textArea.getLocalToSceneTransform().getTy()+ textArea.getHeight();
+        if (ty > (tTot - kh) ) {
+            textArea.getScene().getRoot().setTranslateY(tTot - ty - kh);
+        } else if (kh < 1) {
+            textArea.getScene().getRoot().setTranslateY(0);
+        }
+    }
+
+    private void hideSoftwareKeyboard() {
+        if (! textArea.isEditable()) {
+            return;
+        }
+        if (! isShowingSoftwareKeyboard) {
+            return;
+        }
+        com.sun.glass.ui.android.SoftwareKeyboard.hide();
+        isShowingSoftwareKeyboard = false;
+        if(textArea.getScene() != null) {
+            textArea.getScene().getRoot().setTranslateY(0);
+        }
+    }
+
 }

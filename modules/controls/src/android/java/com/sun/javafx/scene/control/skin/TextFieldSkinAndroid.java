@@ -27,37 +27,47 @@ package com.sun.javafx.scene.control.skin;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.scene.control.PasswordField;
 
 import com.sun.javafx.scene.control.behavior.TextFieldBehavior;
+import com.sun.glass.ui.android.DalvikInput;
 
 public class TextFieldSkinAndroid extends TextFieldSkin {
 
     public static final char MOBILEBULLET = '\u2022';
+    private final TextField textField;
+    boolean isShowingSoftwareKeyboard = false;
+
 
     public TextFieldSkinAndroid(final TextField textField) {
         super(textField);
+        this.textField = textField;
 
-        textField.focusedProperty().addListener(new ChangeListener<Boolean>() {
-            public void changed(ObservableValue<? extends Boolean> observable,
-                    Boolean wasFocused, Boolean isFocused) {
-                if (textField.isEditable()) {
-                    if (isFocused) {
-                        com.sun.glass.ui.android.SoftwareKeyboard.show();
-                    } else {
-                        com.sun.glass.ui.android.SoftwareKeyboard.hide();
-                    }
-                }
-            }
-        });
-        if (textField.isFocused() && textField.isEditable()) {
-            com.sun.glass.ui.android.SoftwareKeyboard.show();
+        if (textField.isFocused() && textField.getScene() != null) {
+            showSoftwareKeyboard();
         }
+
+        textField.sceneProperty().addListener( (o, a, b) -> evaluateVisibility());
+
+        textField.focusedProperty().addListener( (o, a, b) -> evaluateVisibility());
     }
+
 
     public TextFieldSkinAndroid(final TextField textField, final TextFieldBehavior behavior) {
         super(textField, behavior);
+        this.textField = textField;
+    }
+
+    private void evaluateVisibility() {
+        Scene scene = textField.getScene();
+        boolean focused = textField.isFocused();
+        if ((scene != null) && focused) {
+            showSoftwareKeyboard();
+        } else {
+            hideSoftwareKeyboard();
+        }
     }
 
     @Override 
@@ -74,5 +84,53 @@ public class TextFieldSkinAndroid extends TextFieldSkin {
             return txt;
         }
     }
+
+
+    private void showSoftwareKeyboard() {
+        if (! textField.isEditable()) {
+            return;
+        }
+        // even if we think we are showing the keyboard, we need to evaluate this method as the 
+        // keyboard might be hidden by the user (height will be 0)
+        if (!isShowingSoftwareKeyboard) {
+            com.sun.glass.ui.android.SoftwareKeyboard.show();
+            isShowingSoftwareKeyboard = true;
+            try {
+                com.sun.glass.ui.android.DalvikInput.setActiveNode(textField);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        double kh = com.sun.glass.ui.android.DalvikInput.keyboardSize;
+        adjustSize(kh);
+        DalvikInput.setKeyboardHeightListener (e -> adjustSize(e));
+    }
+
+    private void adjustSize(double kh) {
+        double tTot = textField.getScene().getHeight();
+        double ty = textField.getLocalToSceneTransform().getTy()+ textField.getHeight();
+        if (ty > (tTot - kh) ) {
+            textField.getScene().getRoot().setTranslateY(tTot - ty - kh);
+        } else if (kh < 1) {
+            textField.getScene().getRoot().setTranslateY(0);
+        }
+    }
+
+
+    private void hideSoftwareKeyboard() {
+        if (! textField.isEditable()) {
+            return;
+        }
+        if (! isShowingSoftwareKeyboard) {
+            return;
+        }
+        com.sun.glass.ui.android.SoftwareKeyboard.hide();
+        isShowingSoftwareKeyboard = false;
+        if(textField.getScene() != null) {
+            textField.getScene().getRoot().setTranslateY(0);
+        }
+    }
+
 
 }

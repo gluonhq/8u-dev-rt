@@ -26,8 +26,12 @@ package com.sun.glass.ui.android;
 
 import javafx.application.Platform;
 import javafx.scene.Node;
+import java.util.function.Consumer;
 
 public class DalvikInput {
+
+    public static double keyboardSize = 0.;
+    private static Consumer listener;
 
     public static void onMultiTouchEvent(final int count, final int[] actions,
             final int[] ids, final int[] touchXs, final int[] touchYs) {
@@ -61,4 +65,15 @@ public class DalvikInput {
     public static native void onSurfaceRedrawNeededNative();
 
     public static native void onConfigurationChangedNative(int flag);
+
+    public static void keyboardSize(double v) {
+        keyboardSize = v;
+        if (listener != null) {
+            listener.accept(keyboardSize);
+        }
+    }
+
+    public static void setKeyboardHeightListener(Consumer<Double> f) {
+        listener = f;
+    }
 }
