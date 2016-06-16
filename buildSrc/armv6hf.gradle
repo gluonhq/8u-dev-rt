@@ -79,7 +79,7 @@ ARMV6HF.compileSwing = false;
 ARMV6HF.compileSWT = false;
 ARMV6HF.compileFXPackager = false;
 ARMV6HF.compileWebnodeNative = true;
-ARMV6HF.compileMediaNative = false;
+ARMV6HF.compileMediaNative = true;
 
 ARMV6HF.includeLens = false
 ARMV6HF.includeMonocle = true
@@ -110,6 +110,7 @@ def extraCFlags = [
         ccFlags,
         "-marm", "-mfloat-abi=hard", "-mfpu=vfp",
         "-I$sdk/usr/include",
+        "-I$sdk/usr/include/libxml2",
         "-I$sdk/opt/vc/include",
         "-I$sdk/opt/vc/include/interface/vcos/pthreads",
         "-I$sdk/opt/vc/include/interface/vmcs_host/linux",
@@ -546,7 +547,7 @@ ARMV6HF.webkit.strip    = file("$compilerHome/bin/${compilerPrefix}strip").getAb
 ARMV6HF.webkit.ccFlags  = extraCFlags.join(' ')
 ARMV6HF.webkit.linkFlags = extraLFlags.join(' ')
 
-ARMV6HF.disableMedia = true
+ARMV6HF.disableMedia = false
 ARMV6HF.media = [:]
 ARMV6HF.media.compiler = compiler
 ARMV6HF.media.linker = linker

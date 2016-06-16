@@ -2277,6 +2277,11 @@ project(":media") {
                                 args(IS_64 ? "ARCH=x64" : "ARCH=x32")
                             }
                         }
+                        if (t.name.startsWith("arm")) {
+                            args("EXTRA_CFLAGS=${mediaProperties.extra_cflags}", "EXTRA_LDFLAGS=${mediaProperties.extra_ldflags}")
+                        } else {
+                            args("HOST_COMPILE=1")
+                        }
                     }
                 }
             }
@@ -2315,6 +2320,11 @@ project(":media") {
                                 args(IS_64 ? "ARCH=x64" : "ARCH=x32")
                             }
                         }
+                        if (t.name.startsWith("arm")) {
+                            args("EXTRA_CFLAGS=${mediaProperties.extra_cflags}", "EXTRA_LDFLAGS=${mediaProperties.extra_ldflags}")
+                        } else {
+                            args("HOST_COMPILE=1")
+                        }
                     }
                 }
             }
@@ -2347,6 +2357,11 @@ project(":media") {
                                      "BASE_NAME=avplugin")
                                 args(IS_64 ? "ARCH=x64" : "ARCH=x32")
                             }
+                        if (t.name.startsWith("arm")) {
+                            args("EXTRA_CFLAGS=${mediaProperties.extra_cflags}", "EXTRA_LDFLAGS=${mediaProperties.extra_ldflags}")
+                        } else {
+                            args("HOST_COMPILE=1")
+                        }
                         }
                     }
                 }
