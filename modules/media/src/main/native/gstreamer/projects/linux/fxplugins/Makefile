@@ -16,7 +16,6 @@ TARGET = $(BUILD_DIR)/lib$(BASE_NAME).so
 
 CFLAGS = -fPIC                   \
          -Werror=implicit-function-declaration \
-         -msse2                  \
          -fbuiltin               \
          -DHAVE_STDINT_H         \
          -DLINUX                 \
@@ -33,6 +32,7 @@ else
     CFLAGS += -g -Wall
 endif
 
+CFLAGS += $(EXTRA_CFLAGS)
 
 INCLUDES = -I$(SRCBASE_DIR) \
 	   $(addprefix -I$(SRCBASE_DIR)/,$(DIRLIST)) \
@@ -43,6 +43,7 @@ PACKAGES_INCLUDES := $(shell pkg-config --cflags glib-2.0)
 PACKAGES_LIBS := $(shell pkg-config --libs glib-2.0 gobject-2.0)
 
 LDFLAGS = -L$(BUILD_DIR) -lgstreamer-lite $(PACKAGES_LIBS) 
+LDFLAGS = -L$(BUILD_DIR) $(EXTRA_LDFLAGS) -lgstreamer-lite $(PACKAGES_LIBS) 
 
 ifeq ($(ARCH), x32)
     CFLAGS += -m32

@@ -54,7 +54,7 @@ else
     CFLAGS += -g -Wall
 endif
 
-INCLUDES = -I$(BASE_DIR)/plugins                          \
+INCLUDES += -I$(BASE_DIR)/plugins                          \
 	   -I$(SRCBASE_DIR)/projects/build/linux/common   \
            -I$(SRCBASE_DIR)/gstreamer                     \
            -I$(SRCBASE_DIR)/gstreamer/libs                \
@@ -70,12 +70,13 @@ INCLUDES = -I$(BASE_DIR)/plugins                          \
 PACKAGES_INCLUDES := $(shell pkg-config --cflags alsa glib-2.0)
 PACKAGES_LIBS := $(shell pkg-config --libs alsa glib-2.0 gobject-2.0 gmodule-2.0 gthread-2.0)
 
-LDFLAGS = -L$(BUILD_DIR) -lm $(PACKAGES_LIBS) 
+LDFLAGS = -L$(BUILD_DIR) $(EXTRA_LDFLAGS) -lasound -lgobject-2.0 -lgmodule-2.0 -lgthread-2.0 -lglib-2.0
 
 ifeq ($(ARCH), x32)
     CFLAGS += -m32
     LDFLAGS += -m32
 endif
+CFLAGS += $(EXTRA_CFLAGS)
 
 SOURCES = \
      gstreamer/gst/gst.c                                             \
