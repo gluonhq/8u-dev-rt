@@ -45,7 +45,6 @@ public final class WebPage {
     static {
         AccessController.doPrivileged(new PrivilegedAction<Void>() {
             public Void run() {
-System.out.println ("[JVDBG] I will load the webview system library");
                 System.loadLibrary("webview");
                 return null;
             }
@@ -218,6 +217,7 @@ System.out.println ("[JVDBG] I will load the webview system library");
 
     public void moveAndResize(float minX, float minY, float width, float height) {
         Scene scene = getView().getScene();
+        if (scene == null) return;
         Window window = scene.getWindow();
         this.x = (int) (minX + scene.getX() + window.getX());
         this.y = (int) (minY + scene.getY() + window.getY());
