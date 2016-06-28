@@ -36,9 +36,7 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Surface;
-import android.view.SurfaceView;
-import android.view.TextureView;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
@@ -81,7 +79,6 @@ public class FXActivity extends Activity  {
     private static FXActivity instance;
     private static Launcher launcher;
     private static FrameLayout mViewGroup;
-    private static TextureView mView;
 
     private static String appDataDir;
 
@@ -132,10 +129,10 @@ public class FXActivity extends Activity  {
         getWindow().setFormat(PixelFormat.RGBA_8888);
 
 
-        mView = fxDalvikEntity.createView();
+        View myView = fxDalvikEntity.createView();
         
         mViewGroup = new FrameLayout(this);
-        mViewGroup.addView(mView);
+        mViewGroup.addView(myView);
         setContentView(mViewGroup);
         instance = this;
 

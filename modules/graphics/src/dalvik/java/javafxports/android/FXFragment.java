@@ -47,7 +47,6 @@ public class FXFragment extends Fragment {
         System.loadLibrary("activity");
     }
     private FXDalvikEntity fxDalvikEntity;
-    private TextureView mView;
 
     protected FXFragment() {
         activity = getActivity();
@@ -66,8 +65,8 @@ public class FXFragment extends Fragment {
         }
         metadata.putSerializable(FXDalvikEntity.META_DATA_MAIN_CLASS, fxAppClassName);
         fxDalvikEntity = new FXDalvikEntity(metadata, activity);
-        mView = fxDalvikEntity.createView();
-        return mView;
+        View answer = fxDalvikEntity.createView();
+        return answer;
     }
 
 }
