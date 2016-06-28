@@ -46,7 +46,7 @@ import android.view.View;
 import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
 
-public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutListener, SurfaceHolder.Callback {
+public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutListener, SurfaceHolder.Callback, SurfaceHolder.Callback2 {
     private static final String ACTIVITY_LIB = "activity";
     private static final String META_DATA_LAUNCHER_CLASS = "launcher.class";
     private static final String DEFAULT_LAUNCHER_CLASS = "javafxports.android.DalvikLauncher";
@@ -136,7 +136,7 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
 
 
     public View createView () {
-        return createTextureView();
+        return createSurfaceView();
     }
 
     public View createTextureView() {
@@ -302,6 +302,30 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
             }
         }
     }
+
+    @Override
+    public void surfaceRedrawNeeded(SurfaceHolder holder) {
+        Log.v(TAG, "Called Surface redraw needed");
+        if (holder.getSurface() != surfaceDetails.surface) {
+            surfaceDetails = new SurfaceDetails(holder.getSurface());
+            _setSurface(surfaceDetails.surface);
+        }
+        if (glassHasStarted) {
+            try {
+// this is dirty. We need to wait for at least 1 pulse.
+                 // Thread.currentThread().sleep(250);
+        Log.v(TAG, "Redraw...");
+                onSurfaceRedrawNeededNativeMethod.invoke(null);
+        Log.v(TAG, "Wait a while before doing this again...");
+                 Thread.currentThread().sleep(200);
+        Log.v(TAG, "Redraw again...");
+                onSurfaceRedrawNeededNativeMethod.invoke(null);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onSurfaceRedrawNeededNative method by reflection", e);
+            }
+        }
+    }
+
 
 
 
