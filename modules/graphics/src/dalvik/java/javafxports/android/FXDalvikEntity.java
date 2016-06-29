@@ -42,16 +42,18 @@ import android.view.TextureView;
 import android.view.TextureView.SurfaceTextureListener;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.inputmethod.InputMethodManager;
+import android.view.View;
 import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
 
-public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutListener {
+public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutListener, SurfaceHolder.Callback, SurfaceHolder.Callback2 {
     private static final String ACTIVITY_LIB = "activity";
     private static final String META_DATA_LAUNCHER_CLASS = "launcher.class";
     private static final String DEFAULT_LAUNCHER_CLASS = "javafxports.android.DalvikLauncher";
     public static final String META_DATA_MAIN_CLASS = "main.class";
     private static final String META_DATA_PRELOADER_CLASS = "preloader.class";
     private static final String META_DATA_DEBUG_PORT = "debug.port";
+    private static final String META_DATA_TEXTUREVIEW = "textureview";
 
     private static final String APPLICATION_DEX_NAME = "Application_dex.jar";
     private static final String APPLICATION_RESOURCES_NAME = "Application_resources.jar";
@@ -79,7 +81,7 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
     private static Method keyboardSizeMethod;
     
     private static InputMethodManager imm;
-    private static TextureView myView;
+    static View myView;
     private static CountDownLatch cdlEvLoopFinished;
 
     private static float originalHeight;
@@ -88,10 +90,14 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
     private float density;
     private SurfaceTexture surfaceTexture;
 
+    private static final int ACTION_POINTER_STILL = -1;
+    boolean useTextureView = false;
+
     public FXDalvikEntity (Bundle metadata, Activity activity) {
         this.metadata = metadata;
         this.activity = activity;
-        
+        useTextureView = metadata.containsKey(META_DATA_TEXTUREVIEW);
+        System.out.println ("usetextureview = "+useTextureView);
         imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         jfxEventsLoop();
     }
@@ -132,12 +138,25 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
     }
 
 
-    public TextureView createView () {
-        myView = new InternalTextureView(activity);
-        myView.setSurfaceTextureListener(this);
+    public View createView () {
+        return useTextureView ? createTextureView() : createSurfaceView();
+    }
+
+    public View createTextureView() {
+        TextureView answer = new InternalTextureView(activity);
+        answer.setSurfaceTextureListener(this);
         //myView.getHolder().addCallback(this);
-        myView.getViewTreeObserver().addOnGlobalLayoutListener(this);
-        return myView;
+        answer.getViewTreeObserver().addOnGlobalLayoutListener(this);
+        myView = answer;
+        return answer;
+    }
+
+    public View createSurfaceView() {
+        SurfaceView answer = new InternalSurfaceView(activity);
+        answer.getHolder().addCallback(this);
+        answer.getViewTreeObserver().addOnGlobalLayoutListener(this);
+        myView = answer;
+        return answer;
     }
     
     @Override
@@ -234,6 +253,94 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
         }
 	*/
     }
+
+    private void storeDensity() {
+        DisplayMetrics metrics = new DisplayMetrics();
+        activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        density = metrics.density;
+        _setDensity(density);
+    }
+
+    @Override
+    public void surfaceCreated(SurfaceHolder holder) {
+        Log.v(TAG, "Surface created.");
+        surfaceDetails = new SurfaceDetails(holder.getSurface());
+        _setSurface(surfaceDetails.surface);
+        storeDensity();
+        if (launcher == null) {
+            //surface ready now is time to launch javafx
+            getLauncherAndLaunchApplication();
+        } else {
+            try {
+                onSurfaceChangedNativeMethod1.invoke(null);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onSurfaceChangedNative1 method by reflection", e);
+            }
+        }
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int width,
+            int height) {
+        Log.v(TAG, String.format("Called Surface changed [%d, %d], format %d", width, height, format));
+        if (glassHasStarted) {
+//            if (configuration.isChanged()) {
+//                configuration.dispatch();
+//            }
+        }
+        surfaceDetails = new SurfaceDetails(holder.getSurface(), format, width, height);
+        _setSurface(surfaceDetails.surface);
+        storeDensity();
+        if (glassHasStarted) {
+            try {
+                onSurfaceChangedNativeMethod2.invoke(null, surfaceDetails.format, surfaceDetails.width, surfaceDetails.height);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onSurfaceChangedNative2 method by reflection", e);
+            }
+        }
+    }
+
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+        Log.v(TAG, "Called Surface destroyed");
+        surfaceDetails = new SurfaceDetails();
+        _setSurface(surfaceDetails.surface);
+        if (glassHasStarted) {
+            try {
+                onSurfaceChangedNativeMethod1.invoke(null);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onSurfaceChangedNative1 method by reflection", e);
+            }
+        }
+    }
+
+    @Override
+    public void surfaceRedrawNeeded(SurfaceHolder holder) {
+        Log.v(TAG, "Called Surface redraw needed");
+        if (holder.getSurface() != surfaceDetails.surface) {
+            surfaceDetails = new SurfaceDetails(holder.getSurface());
+            _setSurface(surfaceDetails.surface);
+            storeDensity();
+        }
+        if (glassHasStarted) {
+            try {
+// this is dirty. We need to wait for at least 1 pulse.
+                 // Thread.currentThread().sleep(250);
+        Log.v(TAG, "Redraw...");
+                onSurfaceRedrawNeededNativeMethod.invoke(null);
+        Log.v(TAG, "Wait a while before doing this again...");
+                 Thread.currentThread().sleep(200);
+        Log.v(TAG, "Redraw again...");
+                onSurfaceRedrawNeededNativeMethod.invoke(null);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onSurfaceRedrawNeededNative method by reflection", e);
+            }
+        }
+    }
+
+
+
 
     @Override
     public void onGlobalLayout() {
@@ -358,19 +465,7 @@ private static long softInput = 0L;
 
     private native void _setDensity(float density);
 
-
-    
-    class InternalTextureView extends TextureView {
-
-        public InternalTextureView(Context context) {
-            super(context);
-            setFocusableInTouchMode(true);
-        }
-
-        private static final int ACTION_POINTER_STILL = -1;
-
-        @Override
-        public boolean dispatchTouchEvent(MotionEvent event) {
+    private boolean internalDispatchTouchEvent(MotionEvent event) {
             if (!glassHasStarted) {
                 return false;
             }
@@ -416,6 +511,42 @@ private static long softInput = 0L;
                 throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onMultiTouchEvent method by reflection", e);
             }
             return true;
+    }
+
+    
+    class InternalTextureView extends TextureView {
+
+        public InternalTextureView(Context context) {
+            super(context);
+            setFocusableInTouchMode(true);
+        }
+
+
+        @Override
+        public boolean dispatchTouchEvent(MotionEvent event) {
+            return internalDispatchTouchEvent(event);
+        }
+
+        @Override
+        public boolean dispatchKeyEvent(final KeyEvent event) {
+            if (!glassHasStarted) {
+                return false;
+            }
+            KeyEventProcessor.getInstance().process(event);
+            return true;
+        }
+    }
+
+    class InternalSurfaceView extends SurfaceView {
+        public InternalSurfaceView(Context context) {
+            super(context);
+            setFocusableInTouchMode(true);
+        }
+
+
+        @Override
+        public boolean dispatchTouchEvent(MotionEvent event) {
+            return internalDispatchTouchEvent(event);
         }
 
         @Override
