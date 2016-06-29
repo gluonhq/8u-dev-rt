@@ -116,6 +116,27 @@ public class FXActivity extends Activity  {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        try {
+            ApplicationInfo appi = getPackageManager().getApplicationInfo(
+                    getPackageName(), PackageManager.GET_META_DATA);
+            if (appi != null && appi.metaData != null) {
+                metadata.putAll(appi.metaData);
+            }
+
+        } catch (NameNotFoundException e) {
+            Log.w(TAG, "Error getting Application info.");
+        }
+
+        try {            
+            ActivityInfo ai = FXActivity.this.getPackageManager().getActivityInfo(
+                    getIntent().getComponent(), PackageManager.GET_META_DATA);
+            if (ai != null && ai.metaData != null) {
+                metadata.putAll(ai.metaData);           
+            }
+
+        } catch (NameNotFoundException e) {
+            Log.w(TAG, "Error getting Activity info.");
+        }
         this.fxDalvikEntity = new FXDalvikEntity(metadata, this);
         Log.v(TAG, "onCreate called, using "+JFX_BUILD);
         if (launcher != null) {
@@ -139,27 +160,6 @@ public class FXActivity extends Activity  {
         appDataDir = getApplicationInfo().dataDir;
         instance = this;
         _setDataDir(appDataDir);
-        try {
-            ApplicationInfo appi = getPackageManager().getApplicationInfo(
-                    getPackageName(), PackageManager.GET_META_DATA);
-            if (appi != null && appi.metaData != null) {
-                metadata.putAll(appi.metaData);
-            }
-
-        } catch (NameNotFoundException e) {
-            Log.w(TAG, "Error getting Application info.");
-        }
-
-        try {            
-            ActivityInfo ai = FXActivity.this.getPackageManager().getActivityInfo(
-                    getIntent().getComponent(), PackageManager.GET_META_DATA);
-            if (ai != null && ai.metaData != null) {
-                metadata.putAll(ai.metaData);           
-            }
-
-        } catch (NameNotFoundException e) {
-            Log.w(TAG, "Error getting Activity info.");
-        }
         
         int dport = metadata.getInt(META_DATA_DEBUG_PORT);
         if (dport > 0) {
@@ -226,7 +226,7 @@ public class FXActivity extends Activity  {
     }
 
 
-    public static String getDataDir() {
+    public static String getMyDataDir() {
         return appDataDir;
     }
 

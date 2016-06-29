@@ -53,6 +53,7 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
     public static final String META_DATA_MAIN_CLASS = "main.class";
     private static final String META_DATA_PRELOADER_CLASS = "preloader.class";
     private static final String META_DATA_DEBUG_PORT = "debug.port";
+    private static final String META_DATA_TEXTUREVIEW = "textureview";
 
     private static final String APPLICATION_DEX_NAME = "Application_dex.jar";
     private static final String APPLICATION_RESOURCES_NAME = "Application_resources.jar";
@@ -90,11 +91,13 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
     private SurfaceTexture surfaceTexture;
 
     private static final int ACTION_POINTER_STILL = -1;
+    boolean useTextureView = false;
 
     public FXDalvikEntity (Bundle metadata, Activity activity) {
         this.metadata = metadata;
         this.activity = activity;
-        
+        useTextureView = metadata.containsKey(META_DATA_TEXTUREVIEW);
+        System.out.println ("usetextureview = "+useTextureView);
         imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         jfxEventsLoop();
     }
@@ -136,7 +139,7 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
 
 
     public View createView () {
-        return createSurfaceView();
+        return useTextureView ? createTextureView() : createSurfaceView();
     }
 
     public View createTextureView() {
@@ -251,11 +254,19 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
 	*/
     }
 
+    private void storeDensity() {
+        DisplayMetrics metrics = new DisplayMetrics();
+        activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        density = metrics.density;
+        _setDensity(density);
+    }
+
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         Log.v(TAG, "Surface created.");
         surfaceDetails = new SurfaceDetails(holder.getSurface());
         _setSurface(surfaceDetails.surface);
+        storeDensity();
         if (launcher == null) {
             //surface ready now is time to launch javafx
             getLauncherAndLaunchApplication();
@@ -279,6 +290,7 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
         }
         surfaceDetails = new SurfaceDetails(holder.getSurface(), format, width, height);
         _setSurface(surfaceDetails.surface);
+        storeDensity();
         if (glassHasStarted) {
             try {
                 onSurfaceChangedNativeMethod2.invoke(null, surfaceDetails.format, surfaceDetails.width, surfaceDetails.height);
@@ -309,6 +321,7 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
         if (holder.getSurface() != surfaceDetails.surface) {
             surfaceDetails = new SurfaceDetails(holder.getSurface());
             _setSurface(surfaceDetails.surface);
+            storeDensity();
         }
         if (glassHasStarted) {
             try {
