@@ -542,7 +542,6 @@ public class VirtualFlow<T extends IndexedCell> extends Region {
                 */ 
                 double virtualDelta = 0.0;
                 if (isVertical()) {
-                    System.out.println("[JVDBG] vertical scroll, units = "+event.getTextDeltaYUnits()+", dy = "+event.getDeltaY());
                     switch(event.getTextDeltaYUnits()) {
                         case PAGES:
                             virtualDelta = event.getTextDeltaY() * lastHeight;
@@ -590,7 +589,6 @@ public class VirtualFlow<T extends IndexedCell> extends Region {
                     ** only consume it if we use it
                     */
                     double result = adjustPixels(-virtualDelta);
-                    System.out.println("[JVDBG] adjusted pixels = "+result);
                     if (result != 0.0) {
                         event.consume();
                     }
@@ -2327,8 +2325,6 @@ public class VirtualFlow<T extends IndexedCell> extends Region {
                 (! isVertical && (tempVisibility ? !needLengthBar : !hbar.isVisible())))) return 0;
         
         double pos = getPosition();
-        System.out.println("[JVDBG] adjust pixels, pos = "+pos);
-
         if (pos == 0.0f && delta < 0) return 0;
         if (pos == 1.0f && delta > 0) return 0;
 
