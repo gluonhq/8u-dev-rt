@@ -36,9 +36,7 @@ import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Surface;
-import android.view.SurfaceView;
-import android.view.TextureView;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
@@ -81,7 +79,6 @@ public class FXActivity extends Activity  {
     private static FXActivity instance;
     private static Launcher launcher;
     private static FrameLayout mViewGroup;
-    private static TextureView mView;
 
     private static String appDataDir;
 
@@ -119,29 +116,6 @@ public class FXActivity extends Activity  {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.fxDalvikEntity = new FXDalvikEntity(metadata, this);
-        Log.v(TAG, "onCreate called, using "+JFX_BUILD);
-        if (launcher != null) {
-            Log.v(TAG, "JavaFX application is already running");
-            return;
-        }
-        getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setSoftInputMode(
-                WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED
-                | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_UNSPECIFIED);
-        getWindow().setFormat(PixelFormat.RGBA_8888);
-
-
-        mView = fxDalvikEntity.createView();
-        
-        mViewGroup = new FrameLayout(this);
-        mViewGroup.addView(mView);
-        setContentView(mViewGroup);
-        instance = this;
-
-        appDataDir = getApplicationInfo().dataDir;
-        instance = this;
-        _setDataDir(appDataDir);
         try {
             ApplicationInfo appi = getPackageManager().getApplicationInfo(
                     getPackageName(), PackageManager.GET_META_DATA);
@@ -163,6 +137,29 @@ public class FXActivity extends Activity  {
         } catch (NameNotFoundException e) {
             Log.w(TAG, "Error getting Activity info.");
         }
+        this.fxDalvikEntity = new FXDalvikEntity(metadata, this);
+        Log.v(TAG, "onCreate called, using "+JFX_BUILD);
+        if (launcher != null) {
+            Log.v(TAG, "JavaFX application is already running");
+            return;
+        }
+        getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED
+                | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_UNSPECIFIED);
+        getWindow().setFormat(PixelFormat.RGBA_8888);
+
+
+        View myView = fxDalvikEntity.createView();
+        
+        mViewGroup = new FrameLayout(this);
+        mViewGroup.addView(myView);
+        setContentView(mViewGroup);
+        instance = this;
+
+        appDataDir = getApplicationInfo().dataDir;
+        instance = this;
+        _setDataDir(appDataDir);
         
         int dport = metadata.getInt(META_DATA_DEBUG_PORT);
         if (dport > 0) {
@@ -229,7 +226,7 @@ public class FXActivity extends Activity  {
     }
 
 
-    public static String getDataDir() {
+    public static String getMyDataDir() {
         return appDataDir;
     }
 
