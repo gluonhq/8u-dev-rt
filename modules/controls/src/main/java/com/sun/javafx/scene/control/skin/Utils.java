@@ -751,17 +751,22 @@ public class Utils {
     private static BreakIterator charIterator = null;
     public static int getHitInsertionIndex(HitInfo hit, String text) {
         int charIndex = hit.getCharIndex();
-        if (text != null && !hit.isLeading()) {
-            if (charIterator == null) {
-                charIterator = BreakIterator.getCharacterInstance();
+        try {
+            if (text != null && !hit.isLeading()) {
+                if (charIterator == null) {
+                    charIterator = BreakIterator.getCharacterInstance();
+                }
+                charIterator.setText(text);
+                int next = charIterator.following(charIndex);
+                if (next == BreakIterator.DONE) {
+                    charIndex = hit.getInsertionIndex();
+                } else {
+                    charIndex = next;
+                }
             }
-            charIterator.setText(text);
-            int next = charIterator.following(charIndex);
-            if (next == BreakIterator.DONE) {
-                charIndex = hit.getInsertionIndex();
-            } else {
-                charIndex = next;
-            }
+        } catch (RuntimeException e) {
+            System.out.println ("[JVDBG] got a runtime exception, but we ignore this.");
+            e.printStackTrace();
         }
         return charIndex;
     }
