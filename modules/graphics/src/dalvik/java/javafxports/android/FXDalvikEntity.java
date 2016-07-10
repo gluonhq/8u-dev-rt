@@ -276,6 +276,9 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
         surfaceDetails = new SurfaceDetails(holder.getSurface());
         _setSurface(surfaceDetails.surface);
         storeDensity();
+        Rect currentBounds = new Rect();
+        myView.getRootView().getWindowVisibleDisplayFrame(currentBounds);
+        originalHeight = currentBounds.height() / density;
         if (launcher == null) {
             //surface ready now is time to launch javafx
             getLauncherAndLaunchApplication();
