@@ -61,6 +61,7 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
     private static final String META_DATA_DEBUG_PORT = "debug.port";
     private static final String META_DATA_TEXTUREVIEW = "textureview";
     private static final String META_DATA_SWIPEKEYBOARD = "swipekeyboard";
+    private static final String META_DATA_RESTOREKEYBOARD = "restorekeyboard";
 
     private static final String APPLICATION_DEX_NAME = "Application_dex.jar";
     private static final String APPLICATION_RESOURCES_NAME = "Application_resources.jar";
@@ -100,12 +101,15 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
     private static final int ACTION_POINTER_STILL = -1;
     boolean useTextureView = false;
     boolean useSwipeKeyboard = false;
+    boolean useRestoreKeyboard = false;
+    private static long softInput = 0L;
 
     public FXDalvikEntity (Bundle metadata, Activity activity) {
         this.metadata = metadata;
         this.activity = activity;
         useTextureView = metadata.containsKey(META_DATA_TEXTUREVIEW);
         useSwipeKeyboard = metadata.containsKey(META_DATA_SWIPEKEYBOARD);
+        useRestoreKeyboard = metadata.containsKey(META_DATA_RESTOREKEYBOARD);
         System.out.println ("usetextureview = "+useTextureView+", useswipekeyboard = "+useSwipeKeyboard);
         imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         jfxEventsLoop();
@@ -289,6 +293,9 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
                 throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onSurfaceChangedNative1 method by reflection", e);
             }
         }
+       if (useRestoreKeyboard && (softInput > 0)) {
+           com.sun.glass.ui.android.SoftwareKeyboard.delayShow();
+       }
     }
 
     @Override
@@ -439,7 +446,6 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
         }).start();
     }
 
-private static long softInput = 0L;
     private static void notify_showIME() {
         Log.v(TAG, "Called notify_showIME");
         // myView.requestFocus();
@@ -583,7 +589,7 @@ private static long softInput = 0L;
             outAttrs.actionLabel = null;
             outAttrs.label = "Placeholder";
             outAttrs.inputType = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_NORMAL;
-            outAttrs.imeOptions = EditorInfo.IME_ACTION_NONE;
+            // outAttrs.imeOptions = EditorInfo.IME_ACTION_NONE;
 
             // return new BaseInputConnection(this, true);
             FXInputConnection ic = new FXInputConnection(this, true);
