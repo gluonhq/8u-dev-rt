@@ -81,12 +81,28 @@ public class TextAreaSkinAndroid extends TextAreaSkin {
         }
     }
 
+/**
+ * in case a virtual keyboard is shown that would overlap the TextArea input,
+ * we shift the scene so that the TextArea is rendered immediately above the
+ * virtual keyboard.
+ * In case shifting would cause the beginning of the TextArea to appear outside
+ * the screen (which would happen in case the height of the TextArea plus the
+ * height of the virtual keyboard is larger than the screensize), we cap the
+ * shift to the translation of the TextArea (so that one appears at the top
+ * of the screen.
+ */
     private void adjustSize(double kh) {
         double tTot = textArea.getScene().getHeight();
-        double ty = textArea.getLocalToSceneTransform().getTy()+ textArea.getHeight();
-        if (ty > (tTot - kh) ) {
-            textArea.getScene().getRoot().setTranslateY(tTot - ty - kh);
-        } else if (kh < 1) {
+        double trans = textArea.getLocalToSceneTransform().getTy();
+        double th = textArea.getHeight();
+        double ty = trans + th;
+        if (ty > (tTot - kh) ) { // vk would overlap
+            if (tTot < kh + th) { // not enough space for both
+                textArea.getScene().getRoot().setTranslateY(-trans );
+            } else {
+                textArea.getScene().getRoot().setTranslateY(tTot - ty - kh);
+            }
+        } else if (kh < 1) { // vk disappeared.
             textArea.getScene().getRoot().setTranslateY(0);
         }
     }
