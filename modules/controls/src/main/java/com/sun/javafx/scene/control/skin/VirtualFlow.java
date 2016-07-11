@@ -1472,11 +1472,11 @@ public class VirtualFlow<T extends IndexedCell> extends Region {
 
     private void updateViewportDimensions() {
         final boolean isVertical = isVertical();
-        final double breadthBarLength = snapSize(isVertical ? hbar.prefHeight(-1) : vbar.prefWidth(-1));
-        final double lengthBarBreadth = snapSize(isVertical ? vbar.prefWidth(-1) : hbar.prefHeight(-1));
-
-        setViewportBreadth((isVertical ? getWidth() : getHeight()) - (needLengthBar ? lengthBarBreadth : 0));
-        setViewportLength((isVertical ? getHeight() : getWidth()) - (needBreadthBar ? breadthBarLength : 0));
+        final boolean isFloatingBars = BehaviorSkinBase.IS_TOUCH_SUPPORTED;
+        final double breadthBarLength = isVertical ? snapSize(hbar.prefHeight(-1)) : snapSize(vbar.prefWidth(-1));
+        final double lengthBarBreadth = isVertical ? snapSize(vbar.prefWidth(-1)) : snapSize(hbar.prefHeight(-1));
+        setViewportBreadth((isVertical ? getWidth() : getHeight()) - (needLengthBar && !isFloatingBars ? lengthBarBreadth : 0));
+        setViewportLength((isVertical ? getHeight() : getWidth()) - (needBreadthBar && !isFloatingBars ? breadthBarLength : 0));
     }
 
     private void initViewport() {
