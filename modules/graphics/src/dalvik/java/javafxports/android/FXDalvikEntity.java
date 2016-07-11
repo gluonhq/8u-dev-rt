@@ -31,6 +31,8 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.text.InputType;
 import android.util.Log;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
@@ -41,7 +43,11 @@ import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.TextureView.SurfaceTextureListener;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.view.inputmethod.BaseInputConnection;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+
 import android.view.View;
 import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
@@ -54,6 +60,7 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
     private static final String META_DATA_PRELOADER_CLASS = "preloader.class";
     private static final String META_DATA_DEBUG_PORT = "debug.port";
     private static final String META_DATA_TEXTUREVIEW = "textureview";
+    private static final String META_DATA_SWIPEKEYBOARD = "swipekeyboard";
 
     private static final String APPLICATION_DEX_NAME = "Application_dex.jar";
     private static final String APPLICATION_RESOURCES_NAME = "Application_resources.jar";
@@ -92,12 +99,14 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
 
     private static final int ACTION_POINTER_STILL = -1;
     boolean useTextureView = false;
+    boolean useSwipeKeyboard = false;
 
     public FXDalvikEntity (Bundle metadata, Activity activity) {
         this.metadata = metadata;
         this.activity = activity;
         useTextureView = metadata.containsKey(META_DATA_TEXTUREVIEW);
-        System.out.println ("usetextureview = "+useTextureView);
+        useSwipeKeyboard = metadata.containsKey(META_DATA_SWIPEKEYBOARD);
+        System.out.println ("usetextureview = "+useTextureView+", useswipekeyboard = "+useSwipeKeyboard);
         imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         jfxEventsLoop();
     }
@@ -267,6 +276,9 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
         surfaceDetails = new SurfaceDetails(holder.getSurface());
         _setSurface(surfaceDetails.surface);
         storeDensity();
+        Rect currentBounds = new Rect();
+        myView.getRootView().getWindowVisibleDisplayFrame(currentBounds);
+        originalHeight = currentBounds.height() / density;
         if (launcher == null) {
             //surface ready now is time to launch javafx
             getLauncherAndLaunchApplication();
@@ -557,6 +569,41 @@ private static long softInput = 0L;
             KeyEventProcessor.getInstance().process(event);
             return true;
         }
+
+        @Override
+        public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
+            if (!useSwipeKeyboard) {
+                return super.onCreateInputConnection(outAttrs);
+            }
+//            if (!glassHasStarted) {
+//                return null;
+//            }
+            Log.w(TAG, "onCreateInputConnection called...!!");
+
+            outAttrs.actionLabel = null;
+            outAttrs.label = "Placeholder";
+            outAttrs.inputType = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_NORMAL;
+            outAttrs.imeOptions = EditorInfo.IME_ACTION_NONE;
+
+            // return new BaseInputConnection(this, true);
+            FXInputConnection ic = new FXInputConnection(this, true);
+            return ic;
+        }
+
+        public void backSpace() {
+            KeyEvent k1 = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL);
+            KeyEventProcessor.getInstance().process(k1);
+            KeyEvent k2 = new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DEL);
+            KeyEventProcessor.getInstance().process(k2);
+        }
+
+        public void setText(CharSequence text, int newCursorPosition) {
+            KeyEvent keyEvent = new KeyEvent(SystemClock.elapsedRealtimeNanos(), text.toString(), 0, KeyEvent.FLAG_SOFT_KEYBOARD);
+            Log.e(TAG, "TEXT setText will call with text: '" + text + "' cursor: " + newCursorPosition);
+            KeyEventProcessor.getInstance().process(keyEvent);
+            Log.e(TAG, "TEXT setText called with text: '" + text + "' cursor: " + newCursorPosition);
+        }
+
     }
 
     private void setSurface(Surface surface) {

@@ -48,6 +48,7 @@ import java.util.List;
 
 import static com.sun.javafx.PlatformUtil.isMac;
 import static com.sun.javafx.PlatformUtil.isWindows;
+import com.sun.javafx.tk.TKStage;
 import static javafx.scene.input.KeyCode.*;
 import static javafx.scene.input.KeyEvent.KEY_PRESSED;
 
@@ -129,6 +130,7 @@ public class TextAreaBehavior extends TextInputControlBehavior<TextArea> {
     private TextAreaSkin skin;
     private ContextMenu contextMenu;
     private TwoLevelFocusBehavior tlFocus;
+    private TKStage tkStage;
 
     /**************************************************************************
      * Constructors                                                           *
@@ -168,15 +170,16 @@ public class TextAreaBehavior extends TextInputControlBehavior<TextArea> {
                                 trans.getMxx(), trans.getMxy(), trans.getMxz(), trans.getMxt(),
                                 trans.getMyx(), trans.getMyy(), trans.getMyz(), trans.getMyt(),
                                 trans.getMzx(), trans.getMzy(), trans.getMzz(), trans.getMzt(), textArea.getFont().getSize());
+                        tkStage = textArea.getScene().getWindow().impl_getPeer();
                     }
                     if (!focusGainedByMouseClick) {
                         setCaretAnimating(true);
                     }
                 } else {
 //                    skin.hideCaret();
-                    if (PlatformUtil.isIOS() && textArea.getScene() != null) {
+                    if (PlatformUtil.isIOS() && tkStage != null) {
                         // releasing the focus => we need to hide the native component and also native keyboard
-                        textArea.getScene().getWindow().impl_getPeer().releaseInput();
+                        tkStage.releaseInput();
                     }
                     focusGainedByMouseClick = false;
                     setCaretAnimating(false);

@@ -42,12 +42,13 @@ public class KeyEventProcessor {
 
     public void process(KeyEvent event) {
 
-//        System.out.println("KeyEvent: " + event);
+       System.out.println("KeyEvent: " + event+" with action = "+event.getAction());
 
         int jfxModifiers = mapAndroidModifierToJfx(event.getMetaState());
         switch (event.getAction()) {
             case KeyEvent.ACTION_DOWN:
                 KeyCode jfxKeyCode = mapAndroidKeyCodeToJfx(event.getKeyCode());
+System.out.println ("[JVDBG] eventkeycode = "+event.getKeyCode()+" and jfxkc = "+jfxKeyCode+" with code "+ jfxKeyCode.impl_getCode());
                 Platform.runLater(new Runnable() {
                     public void run() {
                         AndroidInputDeviceRegistry.dispatchKeyEvent(com.sun.glass.events.KeyEvent.PRESS, jfxKeyCode.impl_getCode(), jfxKeyCode.impl_getChar().toCharArray(), jfxModifiers);
