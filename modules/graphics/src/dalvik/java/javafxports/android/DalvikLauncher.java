@@ -68,7 +68,7 @@ public class DalvikLauncher implements Launcher {
     private FXDalvikEntity fxDalvikEntity;
 
     @Override
-    public void launchApp(FXDalvikEntity fxDalvikEntity, String mainClassName, String preloaderClassName) {
+    public void launchApp(FXDalvikEntity fxDalvikEntity, String mainClassName, String preloaderClassName, String[] args) {
         this.fxDalvikEntity = fxDalvikEntity;
         this.activity = fxDalvikEntity.getActivity();
         this.preloaderClassName = preloaderClassName;
@@ -186,13 +186,11 @@ public class DalvikLauncher implements Launcher {
                     try {
                         if (javafxApplicationClass.isAssignableFrom(applicationClass)) {
                             launchMethod.invoke(null, new Object[]{
-                                applicationClass, preloaderClass,
-                                new String[]{}});
+                                applicationClass, preloaderClass, args});
                         } else {
                             Method mainMethod = applicationClass.getMethod(
                                     MAIN_METHOD, MAIN_METHOD_ARGS);
-                            mainMethod.invoke(null,
-                                    new Object[]{new String[]{}});
+                            mainMethod.invoke(null, args);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();

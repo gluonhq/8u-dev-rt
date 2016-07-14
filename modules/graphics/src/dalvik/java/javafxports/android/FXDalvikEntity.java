@@ -62,6 +62,7 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
     private static final String META_DATA_TEXTUREVIEW = "textureview";
     private static final String META_DATA_SWIPEKEYBOARD = "swipekeyboard";
     private static final String META_DATA_RESTOREKEYBOARD = "restorekeyboard";
+    private static final String META_DATA_JAVA_ARGS = "java.args";
 
     private static final String APPLICATION_DEX_NAME = "Application_dex.jar";
     private static final String APPLICATION_RESOURCES_NAME = "Application_resources.jar";
@@ -103,16 +104,31 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
     boolean useSwipeKeyboard = false;
     boolean useRestoreKeyboard = false;
     private static long softInput = 0L;
+    private String[] javaArgs = new String[0];
 
     public FXDalvikEntity (Bundle metadata, Activity activity) {
         this.metadata = metadata;
         this.activity = activity;
+        createJavaArgs();
         useTextureView = metadata.containsKey(META_DATA_TEXTUREVIEW);
         useSwipeKeyboard = metadata.containsKey(META_DATA_SWIPEKEYBOARD);
         useRestoreKeyboard = metadata.containsKey(META_DATA_RESTOREKEYBOARD);
         System.out.println ("usetextureview = "+useTextureView+", useswipekeyboard = "+useSwipeKeyboard);
         imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         jfxEventsLoop();
+    }
+
+    private void createJavaArgs() {
+        String extraKey = metadata.getString(META_DATA_JAVA_ARGS);
+        if ((extraKey != null) &&(!extraKey.isEmpty())) {
+            Bundle b = this.activity.getIntent().getExtras();
+            if (b != null) {
+                String extraVal = b.getString(extraKey);
+                if ((extraVal != null) && (extraVal.isEmpty())) {
+                    this.javaArgs = new String[]{"--"+extraKey+"="+extraVal};
+                }
+            }
+        }
     }
     
     public Activity getActivity() {
@@ -143,7 +159,7 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
         try {
             Class<Launcher> clazz = (Class<Launcher>) Thread.currentThread().getContextClassLoader().loadClass(launcherClassName);
             launcher = clazz.newInstance();
-            launcher.launchApp(this, mainClassName, preloaderClassName);
+            launcher.launchApp(this, mainClassName, preloaderClassName, javaArgs);
 
         } catch (Exception ex) {
             throw new RuntimeException("Did not create correct launcher.", ex);
