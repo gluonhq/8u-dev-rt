@@ -34,13 +34,22 @@ public class FXInputConnection extends BaseInputConnection {
     @Override
     public boolean setComposingText(CharSequence text, int newCursorPosition) {
 System.out.println("[JVDBG] TEXT setComposingText-Before: text = '" + text + "', workText = '" + workText + "', editable = '" + editable + "'");
-        if (!text.toString().equals(workText)) {
-            for (int i = 0; i < workText.length(); i++) {
-                surfaceView.backSpace();
+        if (!text.toString().equals(workText.toString())) {
+            if (text.length() == 0) {
+                for (int i = 0; i < workText.length(); i++) {
+                    surfaceView.backSpace();
+                }
+            } else {
+                if (editable.toString().startsWith(text.toString())) {
+                    for (int i = editable.length() - text.length(); i > 0; i--) {
+                        surfaceView.backSpace();
+                    }
+                } else {
+                    surfaceView.setText(text);
+                }
             }
 
             workText = text.toString();
-            surfaceView.setText(text, newCursorPosition);
         }
 
 System.out.println("[JVDBG] TEXT setComposingText-BeforeSuper: text = '" + text + "', workText = '" + workText + "', editable = '" + editable + "'");
@@ -53,7 +62,6 @@ System.out.println("[JVDBG] TEXT setComposingText-After: text = '" + text + "', 
     public boolean finishComposingText() {
 System.out.println ("[JVDBG] TEXT finishComposingText-Before: workText = '" + workText + "', editable = '" + editable + "'");
         workText = "";
-//        editable.clear();
 System.out.println ("[JVDBG] TEXT finishComposingText-BeforeSuper: workText = '" + workText + "', editable = '" + editable + "'");
         boolean result = super.finishComposingText();
 System.out.println ("[JVDBG] TEXT finishComposingText-After: workText = '" + workText + "', editable = '" + editable + "'");
@@ -63,17 +71,15 @@ System.out.println ("[JVDBG] TEXT finishComposingText-After: workText = '" + wor
     @Override
     public boolean commitText(CharSequence text, int newCursorPosition) {
 System.out.println ("[JVDBG] TEXT commitText-Before: '" + text + "', workText: '" + workText + "', editable = '" + editable + "'");
-//        editable.clear();
-        if (workText.length() > 0) {
-//            editable.replace(editable.length() - workText.length(), editable.length(), text);
-            for (int i = 0; i < workText.length(); i++) {
+        if (!text.toString().equals(workText)) {
+            int commonSize = commonSize(text, workText);
+            for (int i = workText.length() - commonSize; i > 0; i--) {
                 surfaceView.backSpace();
             }
+            surfaceView.setText(text.subSequence(commonSize, text.length()));
         }
-        editable.append(text);
-        surfaceView.setText(text, newCursorPosition);
-        editable.clear();
         workText = "";
+        editable.clear();
 System.out.println ("[JVDBG] TEXT commitText-BeforeSuper: '" + text + "', workText: '" + workText + "', editable = '" + editable + "'");
         boolean result = super.commitText(text, newCursorPosition);
 System.out.println ("[JVDBG] TEXT commitText-After: '" + text + "', workText: '" + workText + "', editable = '" + editable + "'");

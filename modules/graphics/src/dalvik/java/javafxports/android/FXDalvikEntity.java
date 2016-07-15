@@ -619,11 +619,11 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
             KeyEventProcessor.getInstance().process(k2);
         }
 
-        public void setText(CharSequence text, int newCursorPosition) {
+        public void setText(CharSequence text) {
             KeyEvent keyEvent = new KeyEvent(SystemClock.elapsedRealtimeNanos(), text.toString(), 0, KeyEvent.FLAG_SOFT_KEYBOARD);
-            Log.e(TAG, "TEXT setText will call with text: '" + text + "' cursor: " + newCursorPosition);
+            Log.e(TAG, "TEXT setText will call with text: '" + text + "'");
             KeyEventProcessor.getInstance().process(keyEvent);
-            Log.e(TAG, "TEXT setText called with text: '" + text + "' cursor: " + newCursorPosition);
+            Log.e(TAG, "TEXT setText called with text: '" + text + "'");
         }
 
     }
