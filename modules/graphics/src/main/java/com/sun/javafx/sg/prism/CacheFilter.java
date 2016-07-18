@@ -584,6 +584,7 @@ public class CacheFilter {
             cachedY = cachedBounds.y;
 
         } else {
+            PulseLogger.incrementCounter("Nodes cached");
             if (scrollCacheState == ScrollCacheState.ENABLED &&
                     (lastXDelta != 0 || lastYDelta != 0) ) {
                 impl_moveCacheBy(cachedImageData, lastXDelta, lastYDelta);
