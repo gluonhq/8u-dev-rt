@@ -851,7 +851,7 @@ public abstract class Node implements EventTarget, Styleable {
             focusSetDirty(newScene);
         }
         scenesChanged(newScene, newSubScene, oldScene, oldSubScene);
-        if (sceneChanged) impl_reapplyCSS();
+        if (sceneChanged && reapplyCSS) impl_reapplyCSS();
 
         if (sceneChanged && !impl_isDirtyEmpty()) {
             //Note: no need to remove from scene's dirty list
