@@ -472,6 +472,8 @@ public class VirtualFlow<T extends IndexedCell> extends Region {
     private double lastX;
     private double lastY;
     private boolean isPanning = false;
+    
+    private double toAdjust = 0.;
 
     public VirtualFlow() {
         getStyleClass().add("virtual-flow");
@@ -586,12 +588,11 @@ public class VirtualFlow<T extends IndexedCell> extends Region {
 
                 if (virtualDelta != 0.0) { 
                     /*
-                    ** only consume it if we use it
+                    ** don't recalculate cells now, leave that (batched) to layout phase
                     */
-                    double result = adjustPixels(-virtualDelta);
-                    if (result != 0.0) {
-                        event.consume();
-                    }
+                    toAdjust += virtualDelta;
+                    VirtualFlow.this.requestLayout();
+                    event.consume();
                 }
 
                 ScrollBar nonVirtualBar = isVertical() ? hbar : vbar;
@@ -920,6 +921,10 @@ public class VirtualFlow<T extends IndexedCell> extends Region {
     }
     
     @Override protected void layoutChildren() {
+        if (toAdjust != 0.) {
+            adjustPixels(-toAdjust);
+            toAdjust = 0.;
+        }
         if (needsRecreateCells) {
             lastWidth = -1;
             lastHeight = -1;
