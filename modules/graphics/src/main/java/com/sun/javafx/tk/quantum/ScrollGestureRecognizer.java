@@ -94,6 +94,7 @@ class ScrollGestureRecognizer implements GestureRecognizer {
     private double centerX, centerY;
     private double centerAbsX, centerAbsY;
     private double lastCenterAbsX, lastCenterAbsY;
+    private double initialX, initialY;
 
     private double deltaX, deltaY;
     private double totalDeltaX, totalDeltaY;
@@ -114,7 +115,8 @@ class ScrollGestureRecognizer implements GestureRecognizer {
             totalDeltaY += deltaY;
 
             //send inertia scroll event
-            sendScrollEvent(true, centerAbsX, centerAbsY, currentTouchCount);
+            sendScrollEvent(true, initialX, initialY, currentTouchCount);
+
         });
     }
 
@@ -124,6 +126,11 @@ class ScrollGestureRecognizer implements GestureRecognizer {
         params(modifiers, isDirect);
         touchPointsSetChanged = false;
         touchPointsPressed = false;
+        if (state == ScrollRecognitionState.TRACKING) {
+            // we keep track of original coordinates, as those are the ones we sent with inertia events
+            initialX = centerAbsX;
+            initialY = centerAbsY;
+        }
     }
 
     @Override
@@ -259,7 +266,6 @@ class ScrollGestureRecognizer implements GestureRecognizer {
                         factorX = deltaX / scrollMagnitude;
                         factorY = deltaY / scrollMagnitude;
                         initialInertiaScrollVelocity = scrollMagnitude / timePassed;
-                        
                         scrollStartTime = time;
                     }
 
