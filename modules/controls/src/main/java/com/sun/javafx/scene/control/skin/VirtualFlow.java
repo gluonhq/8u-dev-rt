@@ -2879,7 +2879,7 @@ public class VirtualFlow<T extends IndexedCell> extends Region {
             });
 
             sbTouchKF2 = new KeyFrame(Duration.millis(1000), event -> {
-                if (touchDetected == false && mouseDown == false) {
+                if (touchDetected == false || mouseDown == false) {
                     tempVisibility = false;
                     requestLayout();
                 }
