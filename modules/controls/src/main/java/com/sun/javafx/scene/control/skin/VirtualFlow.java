@@ -535,9 +535,9 @@ public class VirtualFlow<T extends IndexedCell> extends Region {
         setOnScroll(new EventHandler<javafx.scene.input.ScrollEvent>() {
             @Override public void handle(ScrollEvent event) {
                 if (BehaviorSkinBase.IS_TOUCH_SUPPORTED) {
-                    if (touchDetected == false &&  mouseDown == false ) {
+                    if (event.isInertia() && (touchDetected == false || mouseDown == false)) {
                         startSBReleasedAnimation();
-                    }
+                    } 
                 }
                 /*
                 ** calculate the delta in the direction of the flow.
