@@ -304,6 +304,7 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
             getLauncherAndLaunchApplication();
         } else {
             try {
+                onSurfaceCreatedMethod.invoke(null);
                 onSurfaceChangedNativeMethod1.invoke(null);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onSurfaceChangedNative1 method by reflection", e);
