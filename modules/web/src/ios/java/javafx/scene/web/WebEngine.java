@@ -49,9 +49,16 @@ import org.xml.sax.InputSource;
 import com.sun.javafx.tk.TKPulseListener;
 import com.sun.javafx.tk.Toolkit;
 import java.io.StringReader;
+import java.net.MalformedURLException;
+import java.net.NetPermission;
+import java.net.URL;
+import java.net.URLStreamHandler;
 import java.security.AccessControlContext;
 import java.security.AccessController;
+import java.security.Permission;
 import java.security.PrivilegedAction;
+import java.util.HashMap;
+import java.util.Map;
 import javafx.beans.property.*;
 import javafx.geometry.Rectangle2D;
 
@@ -518,6 +525,7 @@ final public class WebEngine {
      * Creates a new engine and loads a Web page into it.
      */
     public WebEngine(String url) {
+        System.out.println ("[JVDBG] WEBENGINE in ios created");
         accessControlContext = AccessController.getContext();
         js2javaBridge = new JS2JavaBridge(this);
         load(url);
@@ -915,6 +923,7 @@ final public class WebEngine {
     }
 
     void notifyLoadFailed() {
+        System.out.println ("[JVDBG] WebEngine, notifyLoadFailed");
         synchronized (loadedLock) {
             loaded = false;
             updateProgress(0.0);
@@ -929,6 +938,27 @@ final public class WebEngine {
         if (pageListener != null) {
             pageListener.onJavaCall(arg);
         }
+    }
+
+/**
+ * check if there is a handler registered for dealing with this protocol.
+ * 
+ */
+    boolean hasAppProtocolHandler(String url) {
+        boolean answer = false;
+        try {
+            URL u = newURL(null, url);
+            System.out.println ("[WebEngine] I can handle this protocol for "+url);
+            u.openConnection();
+            // location.set(url);
+            answer = true;
+        }
+        // catch (MalformedURLException e) {
+        catch (Exception e) {
+            System.out.println ("[WebEngine] I can't handle this protocol for "+url);
+            // no handler known for this protocol
+        }
+        return answer;
     }
 
     void onAlertNotify(String text) {
@@ -982,4 +1012,41 @@ final public class WebEngine {
             this.callback = callback;
         }
     };
+    private static final Map<String, URLStreamHandler> handlerMap = new HashMap<>();
+    private static final Permission streamHandlerPermission = new NetPermission ("specifyStreamHandler");
+
+    public static URL newURL(final URL context, final String spec) throws MalformedURLException {
+        try {
+            // Try the standard protocol handler selection procedure
+            return new URL(context, spec);
+        } catch (MalformedURLException ex) {
+
+            // Try WebPane-specific protocol handler, if any
+            int colonPosition = spec.indexOf(':');
+            final URLStreamHandler handler = (colonPosition != -1) ?
+                handlerMap.get(spec.substring(0, colonPosition).toLowerCase()) :
+                null;
+
+            if (handler == null) throw ex;
+
+            try {
+                // We should be able to specify one of our stream handlers for the URL
+                // when running as an applet or a web start app.
+                return AccessController.doPrivileged((PrivilegedAction<URL>) () -> {
+                    try {
+                        return new URL(context, spec, handler);
+                    } catch (MalformedURLException muex) {
+                        throw new RuntimeException(muex);
+                    }
+                }, null, streamHandlerPermission);
+
+            } catch (RuntimeException re) {
+                if (re.getCause() instanceof MalformedURLException) {
+                    throw (MalformedURLException)re.getCause();
+                }
+                throw re;
+            }
+        }
+    }
+
 }

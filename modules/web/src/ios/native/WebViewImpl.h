@@ -52,6 +52,7 @@
     jmethodID jmidLoadFinished;
     jmethodID jmidLoadFailed;
     jmethodID jmidJavaCall;
+    jmethodID jmidHasAppProtocolHandler;
 }
 
 @property (readwrite, retain) UIWindow *window;

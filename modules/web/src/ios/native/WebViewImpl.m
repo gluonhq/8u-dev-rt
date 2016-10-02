@@ -24,6 +24,7 @@
  */
 
 #import "WebViewImpl.h"
+#include <execinfo.h>
 
 #include "javafx_scene_web_WebView.h"
 #include "javafx_scene_web_WebEngine.h"
@@ -35,6 +36,7 @@
 #define JAVA_CALL_PREFIX        @"javacall:"
 
 #define PATH_DELIMITER          '/'
+#define NSLog(FORMAT, ...) printf("NSLOG - %s\n", [[NSString stringWithFormat:FORMAT, ##__VA_ARGS__] UTF8String]);
 
 jint JNI_OnLoad_ios_webnode(JavaVM* vm, void * reserved) {
 #ifdef JNI_VERSION_1_8
@@ -47,6 +49,10 @@ jint JNI_OnLoad_ios_webnode(JavaVM* vm, void * reserved) {
 #else
     return JNI_VERSION_1_4;
 #endif
+}
+
+void printTrace() {
+void* callstack[128]; int i, frames = backtrace(callstack, 128); char** strs = backtrace_symbols(callstack, frames); for (i = 0; i < frames; ++i) { printf("%s\n", strs[i]); } free(strs); 
 }
 
 jstring createJString(JNIEnv *env, NSString *nsStr) {
@@ -114,9 +120,10 @@ jstring createJString(JNIEnv *env, NSString *nsStr) {
     jmidLoadFinished = (*env)->GetMethodID(env, cls, "notifyLoadFinished", "(Ljava/lang/String;Ljava/lang/String;)V");
     jmidLoadFailed = (*env)->GetMethodID(env, cls, "notifyLoadFailed", "()V");
     jmidJavaCall = (*env)->GetMethodID(env, cls, "notifyJavaCall", "(Ljava/lang/String;)V");
-    if (jmidLoadStarted == 0 || jmidLoadFinished == 0 || jmidLoadFailed == 0 || jmidJavaCall == 0) {
-        NSLog(@"ERROR: could not get jmethodIDs: %d, %d, %d, %d",
-                jmidLoadStarted, jmidLoadFinished, jmidLoadFailed, jmidJavaCall);
+    jmidHasAppProtocolHandler = (*env)->GetMethodID(env, cls, "hasAppProtocolHandler", "(Ljava/lang/String;)Z");
+    if (jmidLoadStarted == 0 || jmidLoadFinished == 0 || jmidLoadFailed == 0 || jmidJavaCall == 0 || jmidHasAppProtocolHandler == 0) {
+        NSLog(@"ERROR: could not get jmethodIDs: %d, %d, %d, %d, %d",
+                jmidLoadStarted, jmidLoadFinished, jmidLoadFailed, jmidJavaCall, jmidHasAppProtocolHandler);
     }
     return self;
 }
@@ -188,8 +195,14 @@ jstring createJString(JNIEnv *env, NSString *nsStr) {
 - (BOOL)webView:(UIWebView *)wv shouldStartLoadWithRequest:(NSURLRequest *)request
         navigationType:(UIWebViewNavigationType)navigationType {
     NSString *url = [[request URL] absoluteString];
+    JNIEnv *env = [self getJNIEnv];
+    if (env != NULL) {
+        jstring jUrl = createJString(env, url);
+        (*env)->CallVoidMethod(env, jObject, jmidHasAppProtocolHandler, jUrl);
+        (*env)->DeleteLocalRef(env, jUrl);
+        [self releaseJNIEnv:env];
+    }
     if ([url hasPrefix:JAVA_CALL_PREFIX]) {
-        JNIEnv *env = [self getJNIEnv];
         if (env != NULL) {
             jstring jUrl = createJString(env, url);
             (*env)->CallVoidMethod(env, jObject, jmidJavaCall, jUrl);
@@ -236,8 +249,11 @@ jstring createJString(JNIEnv *env, NSString *nsStr) {
 }
 
 - (void)webView:(UIWebView *)wv didFailLoadWithError:(NSError *)error {
+// printTrace();
     NSLog(@"WebViewImpl ERROR: didFailLoadWithError");
     NSLog(@" this error => %@ ", [error userInfo] );
+    printf(" this errorinfo => %d \n", [error code]  );
+    printf(" this errorinfo => %s \n", [[error localizedDescription] UTF8String] );
     JNIEnv *env = [self getJNIEnv];
     if (env != NULL) {
         (*env)->CallVoidMethod(env, jObject, jmidLoadFailed);

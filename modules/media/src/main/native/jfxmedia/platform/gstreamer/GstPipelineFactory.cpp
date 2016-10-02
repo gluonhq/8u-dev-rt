@@ -971,7 +971,7 @@ uint32_t CGstPipelineFactory::CreateVideoBin(const char* strDecoderName, GstElem
 GstElement* CGstPipelineFactory::CreateElement(const char* strFactoryName)
 {
     GstElement* el = gst_element_factory_make (strFactoryName, NULL);
-    if (el == null) {
+    if (el == NULL) {
         fprintf(stderr, "Error in GstPipelineFactory: can't find element for factory named %s\n", strFactoryName);
     }
     return el;

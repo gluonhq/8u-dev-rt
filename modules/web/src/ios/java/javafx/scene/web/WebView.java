@@ -1088,10 +1088,15 @@ final public class WebView extends Parent {
         engine.notifyLoadFinished(loc, content);
     }
     private void notifyLoadFailed() {
+System.out.println ("[JVDBG] webview, notifiyloadfailed call will now propagate to engine");
         engine.notifyLoadFailed();
     }
     private void notifyJavaCall(String arg) {
         engine.notifyJavaCall(arg);
+    }
+
+    private boolean hasAppProtocolHandler(String arg) {
+        return engine.hasAppProtocolHandler(arg);
     }
 
     private void setNativeVisible(long handle, boolean v) {
