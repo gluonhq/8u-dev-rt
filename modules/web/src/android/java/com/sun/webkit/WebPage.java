@@ -63,13 +63,13 @@ public final class WebPage {
     private final List<LoadListenerClient> loadListenerClients =
             new LinkedList<LoadListenerClient>();
     WebEngine engine;
-    NativeWebView nativeWebView;
+    final NativeWebView nativeWebView;
     private String url;
     private boolean visible = false;
 
     public WebPage(WebEngine engine) {
         this.engine = engine;
-        createNativePeer();
+        nativeWebView = new NativeWebView(this);
     }
 
     static void unlockPage() {
@@ -125,12 +125,12 @@ public final class WebPage {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public void setUserAgent(String get) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void setUserAgent(String agent) {
+        getNativePeer().setUserAgent(agent);
     }
 
     public String getUserAgent() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return getNativePeer().getUserAgent();
     }
 
     public void dispose() {
@@ -228,10 +228,6 @@ public final class WebPage {
 
     private WebView getView() {
         return engine.getView();
-    }
-
-    private void createNativePeer() {
-        nativeWebView = new NativeWebView(this);
     }
 
     private NativeWebView getNativePeer() {

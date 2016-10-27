@@ -69,6 +69,7 @@ public class InternalWebView {
     private String contentType = "text/html";
     private String encoding = null;
     private String htmlContent;
+    private String userAgent;
     private boolean visible;
     private boolean pageFinished = false;
 
@@ -127,6 +128,9 @@ public class InternalWebView {
         WebSettings settings = nativeWebView.getSettings();
         settings.setSupportZoom(true);
         settings.setJavaScriptEnabled(true);
+        if (userAgent != null) {
+            settings.setUserAgentString(userAgent);
+        }
         nativeWebView.addJavascriptInterface(new MyJavaScriptInterface(), "HTMLOUT");
         initialized = true;        
     }
@@ -201,6 +205,32 @@ public class InternalWebView {
                 }
             });
         }
+    }
+
+    public String getUserAgent() {
+        return this.userAgent;
+    }
+
+    public void setUserAgent(String agent) {
+        this.userAgent = agent;
+    }
+
+    public static String getUserAgent(int id) {
+        final InternalWebView iwv = InternalWebView.getViewByID(id);
+        if (iwv.initialized) {
+            return iwv.nativeWebView.getSettings().getUserAgentString();
+        } else {
+            return iwv.getUserAgent();
+        }
+        
+    }
+
+    public static void setUserAgent(int id, String agent) {
+        final InternalWebView iwv = InternalWebView.getViewByID(id);
+        if (iwv.initialized) {
+            iwv.nativeWebView.getSettings().setUserAgentString(agent);
+        }
+        iwv.setUserAgent(agent);
     }
 
     static void setEncoding(int id, String encoding) {

@@ -72,6 +72,14 @@ public class NativeWebView {
         views.remove(this);
     }
 
+    void setUserAgent(String agent) {
+        _setUserAgent(this.id, agent);
+    }
+
+    String getUserAgent() {
+        return _getUserAgent(this.id);
+    }
+
     String getHtmlContent() {
         return InternalWebView.getHtmlContent(this.id);
     }
@@ -143,6 +151,14 @@ public class NativeWebView {
     // private native void _loadContent(int id, String content, String contentType);
     private void _loadContent(int id, String content, String contentType) {
         InternalWebView.loadContent(id, content, contentType);
+    }
+
+    private void _setUserAgent(int id, String agent) {
+        InternalWebView.setUserAgent(id, agent);
+    }
+
+    private String _getUserAgent(int id) {
+        return InternalWebView.getUserAgent(id);
     }
 
     private native void _setEncoding(int id, String encoding);
