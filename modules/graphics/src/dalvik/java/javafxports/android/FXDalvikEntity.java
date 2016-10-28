@@ -120,12 +120,13 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
 
     private void createJavaArgs() {
         String extraKey = metadata.getString(META_DATA_JAVA_ARGS);
-        if ((extraKey != null) &&(!extraKey.isEmpty())) {
+        if (extraKey != null && !extraKey.isEmpty()) {
             Bundle b = this.activity.getIntent().getExtras();
             if (b != null) {
                 String extraVal = b.getString(extraKey);
-                if ((extraVal != null) && (!extraVal.isEmpty())) {
-                    this.javaArgs = new String[]{"--"+extraKey+"="+extraVal};
+                if (extraVal != null && !extraVal.isEmpty()) {
+                    this.javaArgs = new String[]{"--" + extraKey + "=" + extraVal};
+                    System.setProperty(extraKey, extraVal);
                 }
             }
         }
