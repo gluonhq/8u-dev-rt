@@ -59,6 +59,8 @@ import com.sun.javafx.scene.control.behavior.TextBinding;
 import com.sun.javafx.scene.text.HitInfo;
 import com.sun.javafx.scene.text.TextLayout;
 import com.sun.javafx.tk.Toolkit;
+import java.util.HashMap;
+import java.util.Objects;
 
 /**
  * BE REALLY CAREFUL WITH RESTORING OR RESETTING STATE OF helper NODE AS LEFTOVER
@@ -122,17 +124,96 @@ public class Utils {
         return computeTextHeight(font, text, wrappingWidth, 0, boundsType);
     }
 
+    static class TextKey {
+        Font font;
+        String text;
+        double wrappingWidth;
+        double lineSpacing;
+        TextBoundsType boundsType;
+        
+        TextKey(Font font, String text, double wrappingWidth, double lineSpacing, TextBoundsType boundsType) {
+            this.font = font;
+            this.text = text;
+            this.wrappingWidth = wrappingWidth;
+            this.lineSpacing = lineSpacing;
+            this.boundsType = boundsType;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 3;
+            hash = 79 * hash + Objects.hashCode(this.font);
+            hash = 79 * hash + Objects.hashCode(this.text);
+            hash = 79 * hash + (int) (Double.doubleToLongBits(this.wrappingWidth) ^ (Double.doubleToLongBits(this.wrappingWidth) >>> 32));
+            hash = 79 * hash + (int) (Double.doubleToLongBits(this.lineSpacing) ^ (Double.doubleToLongBits(this.lineSpacing) >>> 32));
+            hash = 79 * hash + Objects.hashCode(this.boundsType);
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final TextKey 
+                    
+                    
+                    
+                    
+                    other = (TextKey) obj;
+            if (Double.doubleToLongBits(this.wrappingWidth) != Double.doubleToLongBits(other.wrappingWidth)) {
+                return false;
+            }
+            if (Double.doubleToLongBits(this.lineSpacing) != Double.doubleToLongBits(other.lineSpacing)) {
+                return false;
+            }
+            if (!Objects.equals(this.text, other.text)) {
+                return false;
+            }
+            if (!Objects.equals(this.font, other.font)) {
+                return false;
+            }
+            if (this.boundsType != other.boundsType) {
+                return false;
+            }
+            return true;
+        }
+        
+        
+    }
+// TODO: eviction
+    static HashMap<TextKey, Double> textHeightCache = new HashMap<>();
+    private static boolean useCache = System.getProperty("javafxports.textHeightCache", "false").equals("true");
+
     @SuppressWarnings("deprecation")
     static double computeTextHeight(Font font, String text, double wrappingWidth, double lineSpacing, TextBoundsType boundsType) {
+        TextKey key = null;
+        if (useCache) {
+            key = new TextKey(font, text, wrappingWidth, lineSpacing, boundsType);
+            Double cached = textHeightCache.get(key);
+            if (cached != null) {
+                return cached;
+            }
+        }
         layout.setContent(text != null ? text : "", font.impl_getNativeFont());
-        layout.setWrapWidth((float)wrappingWidth);
-        layout.setLineSpacing((float)lineSpacing);
+        layout.setWrapWidth((float) wrappingWidth);
+        layout.setLineSpacing((float) lineSpacing);
         if (boundsType == TextBoundsType.LOGICAL_VERTICAL_CENTER) {
             layout.setBoundsType(TextLayout.BOUNDS_CENTER);
         } else {
             layout.setBoundsType(0);
         }
-        return layout.getBounds().getHeight();
+        double answer = layout.getBounds().getHeight();
+        if (useCache) {
+            textHeightCache.put(key, answer);
+        }
+        return answer;
     }
 
     static int computeTruncationIndex(Font font, String text, double width) {
