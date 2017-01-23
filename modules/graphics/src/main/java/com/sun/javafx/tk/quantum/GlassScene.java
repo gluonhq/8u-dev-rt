@@ -53,9 +53,6 @@ import sun.misc.SharedSecrets;
 
 abstract class GlassScene implements TKScene {
 
-    private static final JavaSecurityAccess javaSecurityAccess =
-            SharedSecrets.getJavaSecurityAccess();
-
     private GlassStage stage;
 
     protected TKSceneListener sceneListener;
@@ -119,7 +116,7 @@ abstract class GlassScene implements TKScene {
         AccessControlContext acc = AccessController.getContext();
         // JDK doesn't provide public APIs to get ACC intersection,
         // so using this ugly workaround
-        accessCtrlCtx = javaSecurityAccess.doIntersectionPrivilege(
+        accessCtrlCtx = GlassStage.doIntersectionPrivilege(
                 () -> AccessController.getContext(), acc, ctx);
     }
 

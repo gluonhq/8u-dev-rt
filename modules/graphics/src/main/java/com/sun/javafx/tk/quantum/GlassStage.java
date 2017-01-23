@@ -25,6 +25,8 @@
 
 package com.sun.javafx.tk.quantum;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -45,8 +47,44 @@ import sun.misc.SharedSecrets;
 
 abstract class GlassStage implements TKStage {
 
-    private static final JavaSecurityAccess javaSecurityAccess =
-            SharedSecrets.getJavaSecurityAccess();
+    private static Object javaSecurityAccess = null;
+    private static Method m_doIntersectionPrivilege = null;
+
+    static {
+        AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+            Class cls_SharedSecrets;
+            Class cls_JavaSecurityAccess;
+
+            try {
+                try {
+                    // First look for these classes in their new location
+                    cls_SharedSecrets = Class.forName("jdk.internal.misc.SharedSecrets");
+                    cls_JavaSecurityAccess = Class.forName("jdk.internal.misc.JavaSecurityAccess");
+                } catch (ClassNotFoundException ex) {
+                    // As a fallback, look for these classes in their old location
+                    cls_SharedSecrets = Class.forName("sun.misc.SharedSecrets");
+                    cls_JavaSecurityAccess = Class.forName("sun.misc.JavaSecurityAccess");
+                }
+
+                // JavaSecurityAccess jsa = SharedSecrets.getJavaSecurityAccess();
+                Method m_getJavaSecurityAccess = cls_SharedSecrets.getMethod("getJavaSecurityAccess",
+                        new Class[0]);
+                javaSecurityAccess = m_getJavaSecurityAccess.invoke(null);
+                m_doIntersectionPrivilege = cls_JavaSecurityAccess.getMethod("doIntersectionPrivilege",
+                        PrivilegedAction.class, AccessControlContext.class, AccessControlContext.class);
+
+            } catch (ClassNotFoundException
+                    | NoSuchMethodException
+                    | IllegalAccessException
+                    | InvocationTargetException ex)
+            {
+                throw new SecurityException(ex);
+            }
+            return null;
+        });
+    }
+
+
 
     // A list of all GlassStage objects regardless of visibility.
     private static final List<GlassStage> windows = new ArrayList<>();
@@ -109,6 +147,18 @@ abstract class GlassStage implements TKStage {
         return accessCtrlCtx;
     }
 
+    static AccessControlContext doIntersectionPrivilege(PrivilegedAction<AccessControlContext> action,
+                                                       AccessControlContext stack,
+                                                       AccessControlContext context) {
+        try {
+            return (AccessControlContext) m_doIntersectionPrivilege.invoke(
+                    javaSecurityAccess, action, stack, context);
+        } catch (IllegalAccessException | InvocationTargetException ex) {
+            throw new SecurityException(ex);
+        }
+    }
+
+
     public final void setSecurityContext(AccessControlContext ctx) {
         if (accessCtrlCtx != null) {
             throw new RuntimeException("Stage security context has been already set!");
@@ -116,7 +166,7 @@ abstract class GlassStage implements TKStage {
         AccessControlContext acc = AccessController.getContext();
         // JDK doesn't provide public APIs to get ACC intersection,
         // so using this ugly workaround
-        accessCtrlCtx = javaSecurityAccess.doIntersectionPrivilege(
+        accessCtrlCtx = doIntersectionPrivilege(
                 () -> AccessController.getContext(), acc, ctx);
     }
 

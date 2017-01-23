@@ -153,7 +153,7 @@ public final class QuantumToolkit extends Toolkit {
                 return result;
             });
 
-    private static boolean debug =
+    private static boolean debug = 
             AccessController.doPrivileged((PrivilegedAction<Boolean>) () -> Boolean.getBoolean("quantum.debug"));
 
     private static Integer pulseHZ =
