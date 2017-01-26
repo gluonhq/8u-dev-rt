@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2009, 2016, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -35,11 +35,22 @@ public class ShapeUtil {
 
     private static final ShapeRasterizer shapeRasterizer;
     static {
-        if (PrismSettings.doNativePisces) {
+        System.out.println("[JVDBG] ShapeUtil, rasteriser");
+        // Enable Marlin-FX by setting -Dprism.marlin=true
+        if (com.sun.marlin.MarlinProperties.isMarlinEnabled()) {
+            if (com.sun.marlin.MarlinProperties.isDoublePrecisionEnabled()) {
+                System.out.println("Marlin-FX[" + com.sun.marlin.Version.getVersion() + "] (double) enabled.");
+                shapeRasterizer = new DMarlinRasterizer();
+            } else {
+                System.out.println("Marlin-FX[" + com.sun.marlin.Version.getVersion() + "] (float)  enabled.");
+                shapeRasterizer = new MarlinRasterizer();
+            }
+        } else if (PrismSettings.doNativePisces) {
             shapeRasterizer = new NativePiscesRasterizer();
         } else {
             shapeRasterizer = new OpenPiscesRasterizer();
         }
+        System.out.println("[JVDBG] marlin pisces, rasterizer = "+shapeRasterizer);
     }
 
     public static MaskData rasterizeShape(Shape shape,
@@ -48,6 +59,7 @@ public class ShapeUtil {
                                           BaseTransform xform,
                                           boolean close, boolean antialiasedShape)
     {
+        System.out.println("[JVDBG] rasterizeShape!");
         return shapeRasterizer.getMaskData(shape, stroke, xformBounds, xform, close, antialiasedShape);
     }
 

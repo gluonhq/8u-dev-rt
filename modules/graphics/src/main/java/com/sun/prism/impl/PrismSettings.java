@@ -261,7 +261,7 @@ public final class PrismSettings {
             }
             System.out.println("");
             String piscestype = (doNativePisces ? "native" : "java");
-            System.out.println("Using " + piscestype + "-based Pisces rasterizer");
+            System.out.println("[JVDBG] Using " + piscestype + "-based Pisces rasterizer");
             printBooleanOption(dirtyOptsEnabled, "Using dirty region optimizations");
             if (primTextureSize == 0) {
                 System.out.println("Not using texture mask for primitives");

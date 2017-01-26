@@ -863,6 +863,7 @@ public class LauncherImpl {
                         theApp.start(primaryStage);
                     } catch (Throwable t) {
                         System.err.println("Exception in Application start method");
+t.printStackTrace();
                         startError = t;
                         error = true;
                     }
