@@ -87,7 +87,7 @@ ARMV6HF.includeNull3d = true
 ARMV6HF.includeEGL = true
 ARMV6HF.includeSwing = false
 ARMV6HF.includeSWT = false
-ARMV6HF.includeGTK = true
+ARMV6HF.includeGTK = false
 
 ARMV6HF.javafxPlatformDefault="monocle"
 
@@ -111,9 +111,6 @@ def extraCFlags = [
         "-marm", "-mfloat-abi=hard", "-mfpu=vfp",
         "-I$sdk/usr/include",
         "-I$sdk/usr/include/libxml2",
-        "-I$sdk/opt/vc/include",
-        "-I$sdk/opt/vc/include/interface/vcos/pthreads",
-        "-I$sdk/opt/vc/include/interface/vmcs_host/linux",
         "-DOMAP3", "-DUSE_DISPMAN"].flatten();
 
 //See if we should build for imx6
@@ -126,8 +123,7 @@ def extraLFlags = [
         linkFlags,
         "-L$sdk/lib/arm-linux-gnueabihf",
         "-L$sdk/usr/lib",
-        "-L$sdk/usr/lib/arm-linux-gnueabihf",
-        "-L$sdk/opt/vc/lib"].flatten()
+        "-L$sdk/usr/lib/arm-linux-gnueabihf"].flatten()
 
 def lensLFlags = [extraLFlags, "-lpthread", "-ludev", "-ldl", "-lm"].flatten()
 def monocleCFlags = [
@@ -303,7 +299,7 @@ if (ARMV6HF.includeMonocle) {
     ARMV6HF.glass.variants.addAll("monocle", "monocle_x11");
     ARMV6HF.glass.javahInclude.addAll(
         "com/sun/glass/ui/monocle/*",
-        "com/sun/glass/ui/monocle/dispman/*",
+        // "com/sun/glass/ui/monocle/dispman/*",
         "com/sun/glass/ui/monocle/mx6/*",
         "com/sun/glass/ui/monocle/linux/*",
         "com/sun/glass/ui/monocle/util/*",
@@ -331,14 +327,14 @@ ARMV6HF.glass.lensport.lib = "lens_porting"
 ARMV6HF.glass.monocle = [:]
 ARMV6HF.glass.monocle.nativeSource = [
         file("modules/graphics/src/main/native-glass/monocle"),
-        file("modules/graphics/src/main/native-glass/monocle/dispman"),
+        // file("modules/graphics/src/main/native-glass/monocle/dispman"),
         file("modules/graphics/src/main/native-glass/monocle/mx6"),
         file("modules/graphics/src/main/native-glass/monocle/linux"),
         file("modules/graphics/src/main/native-glass/monocle/util") ]
 ARMV6HF.glass.monocle.compiler = compiler
 ARMV6HF.glass.monocle.ccFlags = monocleCFlags
 ARMV6HF.glass.monocle.linker = linker
-ARMV6HF.glass.monocle.linkFlags = monocleLFlags
+ARMV6HF.glass.monocle.linkFlags =  [ monocleLFlags, "-lX11", "-lEGL" ].flatten()
 ARMV6HF.glass.monocle.lib = "glass_monocle"
 
 ARMV6HF.glass.monocle_x11 = [:]
@@ -348,7 +344,7 @@ ARMV6HF.glass.monocle_x11.nativeSource = [
 ARMV6HF.glass.monocle_x11.compiler = compiler
 ARMV6HF.glass.monocle_x11.ccFlags = monocleCFlags
 ARMV6HF.glass.monocle_x11.linker = linker
-ARMV6HF.glass.monocle_x11.linkFlags = [ monocleLFlags, "-lX11" ].flatten()
+ARMV6HF.glass.monocle_x11.linkFlags = [ monocleLFlags, "-lX11", "-lEGL" ].flatten()
 ARMV6HF.glass.monocle_x11.lib = "glass_monocle_x11"
 
 ARMV6HF.glass.eglfb = [:]
@@ -481,7 +477,7 @@ ARMV6HF.prismES2.monocle.nativeSource = [
 ARMV6HF.prismES2.monocle.compiler = compiler
 ARMV6HF.prismES2.monocle.ccFlags = [ es2EglfbCFlags, "-I", ARMV6HF.glass.lensport.nativeSource ].flatten()
 ARMV6HF.prismES2.monocle.linker = linker
-ARMV6HF.prismES2.monocle.linkFlags =[  es2EglfbLFlags, "-ldl" ].flatten()
+ARMV6HF.prismES2.monocle.linkFlags =[es2X11LFlags,  es2EglfbLFlags, "-ldl" ].flatten()
 ARMV6HF.prismES2.monocle.lib = "prism_es2_monocle"
 
 ARMV6HF.prismES2.eglx11 = [:]
