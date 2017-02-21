@@ -37,6 +37,7 @@ import java.util.concurrent.CountDownLatch;
 class RunnableProcessor implements Runnable {
 
     private RunnableQueue queue = new RunnableQueue();
+    private boolean ignoreException = Boolean.valueOf(System.getProperty("javafx.ignoreExceptions", "false"));
 
     private static class RunLoopControl {
         boolean active; // thread should continue to process events.
@@ -91,7 +92,12 @@ class RunnableProcessor implements Runnable {
             try {
                 queue.getNextRunnable().run();
             } catch (Throwable e) {
-                Application.reportException(e);
+                if (ignoreException) {
+                    System.err.println("Exception in Monocle runLoop, see stacktrace below");
+                    e.printStackTrace();
+                } else {
+                    Application.reportException(e);
+                }
             }
         }
 
