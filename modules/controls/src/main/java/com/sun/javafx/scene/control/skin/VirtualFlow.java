@@ -922,7 +922,7 @@ public class VirtualFlow<T extends IndexedCell> extends Region {
     
     @Override protected void layoutChildren() {
         if (toAdjust != 0.) {
-            adjustPixels(-toAdjust);
+            simplyAdjustPixels(-toAdjust);
             toAdjust = 0.;
         }
         if (needsRecreateCells) {
@@ -2314,6 +2314,29 @@ public class VirtualFlow<T extends IndexedCell> extends Region {
     public void scrollToOffset(int offset) {
         adjustPixels(offset * getCellLength(0));
     }    
+    // only calculate position and shift cells, don't try to add trailing/leading cells.
+    private double simplyAdjustPixels(final double delta) {
+        if (delta == 0) {
+            return 0;
+        }
+        final boolean isVertical = isVertical();
+        if (((isVertical && (tempVisibility ? !needLengthBar : !vbar.isVisible()))
+            || (!isVertical && (tempVisibility ? !needLengthBar : !hbar.isVisible())))) {
+            return 0;
+        }
+
+        double pos = getPosition();
+        if (pos == 0.0f && delta < 0) {
+            return 0;
+        }
+        if (pos == 1.0f && delta > 0) {
+            return 0;
+        }
+
+        adjustByPixelAmount(delta);
+        double pos2 = getPosition();
+        return pos2 - pos;
+    }
     
     /**
      * Given a delta value representing a number of pixels, this method attempts
