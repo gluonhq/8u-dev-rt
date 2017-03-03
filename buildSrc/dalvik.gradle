@@ -23,6 +23,7 @@
  * questions.
  */
 
+import org.gradle.api.GradleException
 
 /**
  * Gets the most recent android platform installed, relative to the given path.
@@ -177,6 +178,10 @@ def compileNativeText = freetypeDir != null
 def compiler = file("$compilerHome/bin/${toolchainArchs[0]}-gcc").getAbsolutePath()
 def linker = file("$compilerHome/bin/${toolchainArchs[0]}-g++").getAbsolutePath()
 
+// Define the wearable version in the 'com.google.android.support:wearable' artifact
+// Required by the FXWearableActivity
+def wearableVersion = "2.0.0"
+
 // Log the settings we're building with
 logger.quiet("ANDROID_SDK: $sdk")
 logger.quiet("ANDROID_SDK_TARGET: $sdk_target")
@@ -273,7 +278,7 @@ project(":web") {
     }
 
     afterEvaluate {
-    sourceSets.main.java.srcDirs = ['src/android/java'];
+        sourceSets.main.java.srcDirs = ['src/android/java'];
         def compileWebJavaAndroid = task("compileWebJavaAndroid",
             type: JavaCompile, group: "Build") {
 
@@ -308,7 +313,7 @@ project(":web") {
             from "modules/web/build/classes/android"
         }
 
-  sdkDalvik  {
+        sdkDalvik  {
             dependsOn(jarWebJavaAndroid)
             doLast {
                 def props = project.ext["DALVIK"]
@@ -337,11 +342,69 @@ project(":graphics") {
     sourceSets.main.java {
         exclude "com/sun/glass/ui/swt/**"
     }
+    
+    File googleMavenRepository = project.file("$sdk/extras/google/m2repository")
+    if (googleMavenRepository.exists()) {
+        logger.info("Adding $googleMavenRepository.absolutePath to repositories.")
+        repositories {
+            maven {
+                url googleMavenRepository.toURI().toString()
+            }
+        }
+    } else {
+        throw new GradleException("Unable to find Google repository at: " + googleMavenRepository)
+    }
+    
+    configurations {
+        androidCompile
+    }
 
+    dependencies {
+        androidCompile ("com.google.android.support:wearable:$wearableVersion") { transitive = false }
+    }
+    
+    task explodeAarDependencies {
+        configurations.each { configuration ->
+            Set<File> files = configuration.copy().resolve()
+            files.findAll {
+                it.name.endsWith('.aar')
+            }.each { aarFile ->
+                def aarFileWithoutExtension = aarFile.name.take(aarFile.name.lastIndexOf('.'))
+                final File explodedDirectory = new File(aarFile.parent, "exploded")
+                if (!explodedDirectory.exists()) {
+                    logger.info("Explode aar file: $aarFile into $explodedDirectory")
+
+                    if (!explodedDirectory.mkdirs()) {
+                        throw new GradleException("Unable to create base directory to explode aar into: " + explodedDirectory)
+                    }
+
+                    copy {
+                        from zipTree(aarFile)
+                        into file(explodedDirectory)
+                        include 'classes.jar'
+                        include 'libs/*.jar'
+                        rename('classes.jar', "${aarFileWithoutExtension}.jar")
+                    }
+                }
+
+                if (file("$explodedDirectory.absolutePath/${aarFileWithoutExtension}.jar").exists()) {
+                    dependencies.add(configuration.name, project.files("$explodedDirectory.absolutePath/${aarFileWithoutExtension}.jar"))
+                }
+                if (file("$explodedDirectory.absolutePath/libs").exists()) {
+                    files(file("$explodedDirectory.absolutePath/libs").listFiles()).findAll {
+                        it.name.endsWith('.jar')
+                    }.each {
+                        dependencies.add(configuration.name, project.files(it))
+                    }
+                }
+            }
+        }
+    }
+    
     assemble.dependsOn("retroClass");
-    task compileDalvikLibs(type: JavaCompile, group: "Build") {
+    task compileDalvikLibs(type: JavaCompile, group: "Build", dependsOn: explodeAarDependencies) {
         description = "Task compiles dalvik vm based libraries."
-        options.bootClasspath = "$sdk/platforms/$sdk_target/android.jar"
+        options.bootClasspath = "$sdk/platforms/$sdk_target/android.jar" + File.pathSeparator + configurations.androidCompile.asPath
         classpath = files("build/classes/dalvik", "build/classes/main")
         destinationDir = file("build/classes/dalvik")
         dependencyCacheDir = file("build/dependency-cache")
@@ -539,7 +602,9 @@ def linkFlags = ["--sysroot=$sysroot",
 
 DALVIK.activity = [:]
 DALVIK.activity.javahSource = files("modules/graphics/build/classes/dalvik")
-DALVIK.activity.javahClasspath = files("modules/graphics/build/classes/dalvik", "$sdk/platforms/$sdk_target/android.jar")
+DALVIK.activity.javahClasspath = files("modules/graphics/build/classes/dalvik", \
+"$sdk/platforms/$sdk_target/android.jar", \
+"$sdk/extras/google/m2repository/com/google/android/support/wearable/$wearableVersion/exploded/wearable-${wearableVersion}.jar")
 DALVIK.activity.javahInclude = ["javafxports/android/**"]
 DALVIK.activity.nativeSource = file("modules/graphics/src/dalvik/native")
 DALVIK.activity.compiler = compiler
@@ -591,7 +656,8 @@ DALVIK.glass.javahSource = files("modules/graphics/build/classes/dalvik",
 DALVIK.glass.javahClasspath = files("modules/graphics/build/classes/main",
  "modules/graphics/build/classes/dalvik",
  "modules/base/build/classes/main",
- "$sdk/platforms/$sdk_target/android.jar")
+ "$sdk/platforms/$sdk_target/android.jar",
+ "$sdk/extras/google/m2repository/com/google/android/support/wearable/$wearableVersion/exploded/wearable-${wearableVersion}.jar")
 DALVIK.glass.javahInclude = [
     "javafxports/android/**",
     "com/sun/glass/ui/monocle/*",

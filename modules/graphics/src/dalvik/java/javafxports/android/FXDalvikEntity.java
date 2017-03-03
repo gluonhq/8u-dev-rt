@@ -43,7 +43,6 @@ import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.TextureView.SurfaceTextureListener;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
-import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
@@ -76,7 +75,7 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
     private SurfaceDetails surfaceDetails;
     private static Launcher launcher;
     private final Bundle metadata;
-    private final Activity activity;
+    private static Activity activity;
     
     private static boolean glassHasStarted = false;
     private static Method onMultiTouchEventMethod;
@@ -106,9 +105,9 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
     private static long softInput = 0L;
     private String[] javaArgs = new String[0];
 
-    public FXDalvikEntity (Bundle metadata, Activity activity) {
+    public FXDalvikEntity (Bundle metadata, Activity fxActivity) {
         this.metadata = metadata;
-        this.activity = activity;
+        activity = fxActivity;
         createJavaArgs();
         useTextureView = metadata.containsKey(META_DATA_TEXTUREVIEW);
         useSwipeKeyboard = metadata.containsKey(META_DATA_SWIPEKEYBOARD);
@@ -121,7 +120,7 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
     private void createJavaArgs() {
         String extraKey = metadata.getString(META_DATA_JAVA_ARGS);
         if (extraKey != null && !extraKey.isEmpty()) {
-            Bundle b = this.activity.getIntent().getExtras();
+            Bundle b = activity.getIntent().getExtras();
             if (b != null) {
                 String extraVal = b.getString(extraKey);
                 if (extraVal != null && !extraVal.isEmpty()) {
@@ -132,8 +131,8 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
         }
     }
     
-    public Activity getActivity() {
-        return this.activity;
+    public static Activity getActivity() {
+        return activity;
     }
     
     public void getLauncherAndLaunchApplication() {

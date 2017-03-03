@@ -144,6 +144,20 @@ JNIEXPORT void JNICALL Java_javafxports_android_FXActivity__1setDataDir
     LOGV(TAG, "appDataDir: %s", appDataDir);
 }
 
+/*
+ * Class:     javafxports_android_FXWearableActivity
+ * Method:    _setDataDir
+ * Signature: (Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_javafxports_android_FXWearableActivity__1setDataDir
+  (JNIEnv *env, jobject that, jstring jdir) {    
+    const char *cdir = (*env)->GetStringUTFChars(env, jdir, 0);
+    int len = strlen(cdir);
+    appDataDir = (char *)malloc(len + 1);
+    strcpy(appDataDir, cdir);            
+    LOGV(TAG, "appDataDir: %s", appDataDir);
+}
+
 ANativeWindow *android_getNativeWindow() {
     return window;
 }

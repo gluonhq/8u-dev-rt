@@ -1,31 +1,34 @@
 /*
- * Copyright (c) 2013, 2015, Oracle and/or its affiliates. All rights reserved.
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ * Copyright (c) 2017, Gluon
  *
- * This code is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * This code is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- * version 2 for more details (a copy is included in the LICENSE file that
- * accompanied this code).
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * You should have received a copy of the GNU General Public License version
- * 2 along with this work; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
- * or visit www.oracle.com if you need additional information or have any
- * questions.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL GLUON BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package javafxports.android;
 
-import android.app.Activity;
+import android.support.wearable.activity.WearableActivity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -41,9 +44,11 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
-public class FXActivity extends Activity {
+import javafx.application.Platform;
 
-    private static final String TAG = "FXActivity";
+public class FXWearableActivity extends WearableActivity {
+
+    private static final String TAG = "FXWearableActivity";
     private static final String JFX_BUILD = "8.60.7-SNAPSHOT";
     
     private static final String ACTIVITY_LIB = "activity";
@@ -51,13 +56,15 @@ public class FXActivity extends Activity {
 
     public static String dexClassPath = new String();
 
-    private static FXActivity instance;
+    private static FXWearableActivity instance;
     private static Launcher launcher;
     private static FrameLayout mViewGroup;
 
     private static String appDataDir;
 
     private static IntentHandler intentHandler;
+
+    private static AmbientHandler ambientHandler;
 
     private static final Bundle metadata = new Bundle();
     private FXDalvikEntity fxDalvikEntity;
@@ -82,7 +89,7 @@ public class FXActivity extends Activity {
         }
 
         try {            
-            ActivityInfo ai = FXActivity.this.getPackageManager().getActivityInfo(
+            ActivityInfo ai = FXWearableActivity.this.getPackageManager().getActivityInfo(
                     getIntent().getComponent(), PackageManager.GET_META_DATA);
             if (ai != null && ai.metaData != null) {
                 metadata.putAll(ai.metaData);           
@@ -171,7 +178,7 @@ public class FXActivity extends Activity {
         intentHandler = handler;
     }
 
-    public static FXActivity getInstance() {
+    public static FXWearableActivity getInstance() {
         return instance;
     }
 
@@ -179,11 +186,9 @@ public class FXActivity extends Activity {
         return mViewGroup;
     }
 
-
     public static String getMyDataDir() {
         return appDataDir;
     }
-
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -192,4 +197,87 @@ public class FXActivity extends Activity {
     }
 
     private native void _setDataDir(String dir);
+
+    /**
+     * The AmbientHandler, if set, will enable AmbientMode, otherwise it will be disabled.
+     * Once enabled, it can't be disabled
+     * When enabled, it will call its methods on the JavaFX thread when enter/update/exit Ambient are
+     * called
+     * @param handler 
+     */
+    public void setAmbientHandler(AmbientHandler handler) {
+        ambientHandler = handler;
+        if (ambientHandler != null) {
+            Log.v(TAG, "WearableActivity: enable Ambient");
+            // Sets that this activity should remain displayed when the system enters ambient mode.
+            setAmbientEnabled();
+        }
+    }
+    
+    
+    /**
+     * Called when an activity is entering ambient mode.
+     * @param ambientDetails 
+     */
+    @Override
+    public void onEnterAmbient(Bundle ambientDetails) {
+        super.onEnterAmbient(ambientDetails); 
+        Log.v(TAG, "onEnterAmbient with ambientDetails ");
+        if (ambientHandler != null) {
+            Platform.runLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    ambientHandler.enterAmbient(ambientDetails);
+                }
+
+            });
+        }
+    }
+    
+    /**
+     * Called when the system is updating the display for ambient mode.
+     */
+    @Override
+    public void onUpdateAmbient() {
+        super.onUpdateAmbient(); 
+        Log.v(TAG, "onUpdateAmbient");
+        if (ambientHandler != null) {
+            Platform.runLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    ambientHandler.updateAmbient();
+                }
+
+            });
+        }
+    }
+    
+    /**
+     * Called when an activity should exit ambient mode.
+     */
+    @Override
+    public void onExitAmbient() {
+        if (ambientHandler != null) {
+            Platform.runLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    ambientHandler.exitAmbient();
+                }
+
+            });
+        }
+        Log.v(TAG, "onExitAmbient");
+        super.onExitAmbient(); 
+    }
+    
+    /**
+     * True if activity is in ambient mode, false if it is in interaction mode
+     * @return 
+     */
+    public final boolean isAmbientMode() {
+        return isAmbient(); 
+    }
 }

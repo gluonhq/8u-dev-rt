@@ -153,12 +153,21 @@ final public class DummyToolkit extends Toolkit {
 
     @Override
     public void startup(Runnable runnable) {
-        throw new UnsupportedOperationException("Not supported yet.");
+//        throw new UnsupportedOperationException("Not supported yet.");
+        setFxUserThread(Thread.currentThread());
+        
+        System.out.println("STARTUP, runnable = " + runnable);
+        if (runnable != null) {
+            runnable.run();
+        }
     }
 
     @Override
     public void defer(Runnable runnable) {
-        throw new UnsupportedOperationException("Not supported yet.");
+//        throw new UnsupportedOperationException("Not supported yet.");
+        if (runnable != null) {
+            runnable.run();
+        }
     }
 
     @Override
@@ -183,7 +192,22 @@ final public class DummyToolkit extends Toolkit {
 
     @Override
     public PerformanceTracker getPerformanceTracker() {
-        throw new UnsupportedOperationException("Not supported yet.");
+//        throw new UnsupportedOperationException("Not supported yet.");
+        return new PerformanceTracker() {
+            @Override
+            protected long nanoTime() {
+                return 0L;
+            }
+
+            @Override
+            public void doOutputLog() {
+            }
+
+            @Override
+            public void doLogEvent(String s) {
+            }
+            
+        };
     }
 
     @Override public PerformanceTracker createPerformanceTracker() {
@@ -420,4 +444,8 @@ final public class DummyToolkit extends Toolkit {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
+    public boolean isFxUserThread() {
+        return true;
     }
+}
