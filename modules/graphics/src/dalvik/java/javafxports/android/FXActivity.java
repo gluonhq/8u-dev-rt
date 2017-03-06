@@ -44,7 +44,7 @@ import android.widget.FrameLayout;
 public class FXActivity extends Activity {
 
     private static final String TAG = "FXActivity";
-    private static final String JFX_BUILD = "8.60.7-SNAPSHOT";
+    private static final String JFX_BUILD = "8.60.9-SNAPSHOT";
     
     private static final String ACTIVITY_LIB = "activity";
     private static final String META_DATA_DEBUG_PORT = "debug.port";

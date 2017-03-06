@@ -49,7 +49,7 @@ import javafx.application.Platform;
 public class FXWearableActivity extends WearableActivity {
 
     private static final String TAG = "FXWearableActivity";
-    private static final String JFX_BUILD = "8.60.7-SNAPSHOT";
+    private static final String JFX_BUILD = "8.60.9-SNAPSHOT";
     
     private static final String ACTIVITY_LIB = "activity";
     private static final String META_DATA_DEBUG_PORT = "debug.port";
