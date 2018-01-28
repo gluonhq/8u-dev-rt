@@ -1559,6 +1559,15 @@ public abstract class Window {
     }
 
     /**
+     * While native text input component is visible, if any change is made in the
+     * text property of the JavaFX text component, update the native component.
+     * @param text
+     */
+    public void updateInput(String text) {
+        Application.checkEventThread();
+        _updateInput(this.ptr, text);
+    }
+    /**
      * Native keyboard for text input is no longer necessary.
      * Keyboard will be hidden and native text input component too.
      */
@@ -1572,6 +1581,8 @@ public abstract class Window {
                                             double Myx, double Myy, double Myz, double Myt,
                                             double Mzx, double Mzy, double Mzz, double Mzt,
                                             double fontSize);
+    
+    protected abstract void _updateInput(long ptr, String text);
 
     protected abstract void _releaseInput(long ptr);
 

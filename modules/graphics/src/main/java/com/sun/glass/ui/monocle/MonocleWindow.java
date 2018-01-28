@@ -464,6 +464,11 @@ final class MonocleWindow extends Window {
     }
 
     @Override
+    protected void _updateInput(long ptr, String text) {
+        throw new UnsupportedOperationException("Not supported yet."); 
+    }
+        
+    @Override
     protected void _releaseInput(long ptr) {
         throw new UnsupportedOperationException("Not supported yet.");
     }

@@ -740,6 +740,10 @@ static inline void setWindowFrame(GlassWindow *window, CGFloat x, CGFloat y, CGF
                    mzx:mzx mzy:mzy mzz:mzz mzt:mzt fontSize:fontSize];
 }
 
+- (void) updateInput:(NSString *)text 
+{
+    [view updateInput:text];
+}
 
 - (void) releaseInput
 {
@@ -1654,6 +1658,32 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_ios_IosWindow__1requestInput
     GLASS_CHECK_EXCEPTION(env);
 }
 
+/*
+ * Class:     com_sun_glass_ui_ios_IosWindow
+ * Method:    _updateInput
+ * Signature: (JLjava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_com_sun_glass_ui_ios_IosWindow__1updateInput
+(JNIEnv *env, jobject jwin, jlong ptr, jstring text)
+{
+    GLASS_ASSERT_MAIN_JAVA_THREAD(env);
+    GLASS_POOL_ENTER;
+
+    GlassWindow *window = getGlassWindow(env, ptr);
+    
+    const char *str;
+    str = (*env)->GetStringUTFChars(env, text, NULL);
+    if (str == nil) {
+        return;
+    }
+    NSString *nsstr = [NSString stringWithUTF8String:str];
+    (*env)->ReleaseStringUTFChars(env, text, str);
+
+    [window updateInput:nsstr];
+
+    GLASS_POOL_EXIT;
+    GLASS_CHECK_EXCEPTION(env);
+}
 
 /*
  * Class:     com_sun_glass_ui_ios_IosWindow                                                                                                                                                                                      
