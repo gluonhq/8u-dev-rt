@@ -424,20 +424,33 @@ NSLog(@"[JVDBG] REQUESTINPUT will create a native component, type = %d", type);
     }
     
     if (![[self.superview subviews] containsObject:nativeView]) {
-        
+
         [self.superview addSubview:nativeView];
         
-        [[NSNotificationCenter defaultCenter] addObserver:self 
-                                                 selector:@selector(textChanged:) 
-                                                     name:UITextViewTextDidChangeNotification
-                                                   object:nativeView];
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self 
-                                                 selector:@selector(textChanged:) 
-                                                     name:UITextFieldTextDidChangeNotification
-                                                   object:nativeView];
+        if ([nativeView isKindOfClass:[UITextView class]]) {
+            [[NSNotificationCenter defaultCenter] addObserver:self 
+                                                selector:@selector(textChanged:) 
+                                                name:UITextViewTextDidChangeNotification
+                                                object:nativeView];
+        } else if ([nativeView isKindOfClass:[UITextField class]]) {
+            [[NSNotificationCenter defaultCenter] addObserver:self 
+                                                selector:@selector(textChanged:) 
+                                                name:UITextFieldTextDidChangeNotification
+                                                object:nativeView];
+        }
         
         [nativeView becomeFirstResponder];
+    }
+}
+
+- (void)updateInput:(NSString *)text 
+{
+    if (nativeView) {
+        if ([nativeView isKindOfClass:[UITextField class]]) {
+            ((UITextField *) nativeView).text = text;
+        } else if ([nativeView isKindOfClass:[UITextView class]]) {
+            ((UITextView *) nativeView).text = text;
+        } 
     }
 }
 
@@ -466,8 +479,11 @@ NSLog(@"[JVDBG] REQUESTINPUT will create a native component, type = %d", type);
 - (void)releaseInput
 {
     if (nativeView) {
-        [[NSNotificationCenter defaultCenter] removeObserver:self name:UITextViewTextDidChangeNotification object:nativeView];
-        [[NSNotificationCenter defaultCenter] removeObserver:self name:UITextFieldTextDidChangeNotification object:nativeView];
+        if ([nativeView isKindOfClass:[UITextView class]]) {
+            [[NSNotificationCenter defaultCenter] removeObserver:self name:UITextViewTextDidChangeNotification object:nativeView];
+        } else if ([nativeView isKindOfClass:[UITextField class]]) {
+            [[NSNotificationCenter defaultCenter] removeObserver:self name:UITextFieldTextDidChangeNotification object:nativeView];
+        }
         [nativeView resignFirstResponder];
         [nativeView removeFromSuperview];
         

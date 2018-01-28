@@ -889,6 +889,11 @@ class WindowStage extends GlassStage {
     }
 
     @Override
+    public void updateInput(String text) {
+        platformWindow.updateInput(text);
+    }
+
+    @Override
     public void releaseInput() {
         platformWindow.releaseInput();
     }

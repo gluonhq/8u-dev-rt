@@ -89,6 +89,7 @@
                  myx:(double)myx myy:(double)myy myz:(double)myz myt:(double)myt
                  mzx:(double)mzx mzy:(double)mzy mzz:(double)mzz mzt:(double)mzt
                  fontSize:(double)fontSize;
+- (void)updateInput:(NSString *)text;
 - (void)releaseInput;
 
 - (void)becomeKeyWindow; // window become key window (receives keyboard and other non-touch events)

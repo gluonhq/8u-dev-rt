@@ -49,6 +49,7 @@ import java.util.List;
 import static com.sun.javafx.PlatformUtil.isMac;
 import static com.sun.javafx.PlatformUtil.isWindows;
 import com.sun.javafx.tk.TKStage;
+import javafx.beans.value.WeakChangeListener;
 import static javafx.scene.input.KeyCode.*;
 import static javafx.scene.input.KeyEvent.KEY_PRESSED;
 
@@ -131,6 +132,10 @@ public class TextAreaBehavior extends TextInputControlBehavior<TextArea> {
     private ContextMenu contextMenu;
     private TwoLevelFocusBehavior tlFocus;
     private TKStage tkStage;
+    
+    private final ChangeListener<Scene> sceneListener;
+    private final ChangeListener<String> textListener;
+
 
     /**************************************************************************
      * Constructors                                                           *
@@ -143,49 +148,35 @@ public class TextAreaBehavior extends TextInputControlBehavior<TextArea> {
         if (IS_TOUCH_SUPPORTED) {
             contextMenu.getStyleClass().add("text-input-context-menu");
         }
+        
+        handleFocusChange();
 
         // Register for change events
-        textArea.focusedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                // NOTE: The code in this method is *almost* and exact copy of what is in TextFieldBehavior.
-                // The only real difference is that TextFieldBehavior selects all the text when the control
-                // receives focus (when not gained by mouse click), whereas TextArea doesn't, and also the
-                // TextArea doesn't lose selection on focus lost, whereas the TextField does.
-                final TextArea textArea = getControl();
-                if (textArea.isFocused()) {
-                    if (PlatformUtil.isIOS()) {
-                        // Special handling of focus on iOS is required to allow to
-                        // control native keyboard, because native keyboard is popped-up only when native
-                        // text component gets focus. When we have JFX keyboard we can remove this code
-                        final Bounds bounds = textArea.getBoundsInParent();
-                        double w = bounds.getWidth();
-                        double h = bounds.getHeight();
-                        Affine3D trans = TextFieldBehavior.calculateNodeToSceneTransform(textArea);
-                        String text = textArea.textProperty().getValueSafe();
-
-                        // we need to display native text input component on the place where JFX component is drawn
-                        // all parameters needed to do that are passed to native impl. here
-                        textArea.getScene().getWindow().impl_getPeer().requestInput(text, TextFieldBehavior.TextInputTypes.TEXT_AREA.ordinal(), w, h,
-                                trans.getMxx(), trans.getMxy(), trans.getMxz(), trans.getMxt(),
-                                trans.getMyx(), trans.getMyy(), trans.getMyz(), trans.getMyt(),
-                                trans.getMzx(), trans.getMzy(), trans.getMzz(), trans.getMzt(), textArea.getFont().getSize());
-                        tkStage = textArea.getScene().getWindow().impl_getPeer();
-                    }
-                    if (!focusGainedByMouseClick) {
-                        setCaretAnimating(true);
-                    }
-                } else {
-//                    skin.hideCaret();
-                    if (PlatformUtil.isIOS() && tkStage != null) {
-                        // releasing the focus => we need to hide the native component and also native keyboard
-                        tkStage.releaseInput();
-                    }
-                    focusGainedByMouseClick = false;
-                    setCaretAnimating(false);
-                }
-            }
+        textArea.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            handleFocusChange();
         });
+
+        textListener = (observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                textArea.getScene().getWindow().impl_getPeer().updateInput(newValue);
+            }
+        };
+        final WeakChangeListener<String> textWeakChangeListener = 
+                new WeakChangeListener<>(textListener);
+        
+        sceneListener = (observable, oldValue, newValue) -> {
+            if (oldValue != null) {
+                textArea.textProperty().removeListener(textWeakChangeListener);
+            }
+            if (newValue != null) {
+                textArea.textProperty().addListener(textWeakChangeListener);
+            }
+        };
+        textArea.sceneProperty().addListener(new WeakChangeListener<>(sceneListener));
+
+        if (textArea.getScene() != null) {
+            textArea.textProperty().addListener(textWeakChangeListener);
+        }
 
         // Only add this if we're on an embedded platform that supports 5-button navigation
         if (com.sun.javafx.scene.control.skin.Utils.isTwoLevelFocus()) {
@@ -196,6 +187,45 @@ public class TextAreaBehavior extends TextInputControlBehavior<TextArea> {
     @Override public void dispose() {
         if (tlFocus != null) tlFocus.dispose();
         super.dispose();
+    }
+    
+    private void handleFocusChange() {
+        // NOTE: The code in this method is *almost* and exact copy of what is in TextFieldBehavior.
+        // The only real difference is that TextFieldBehavior selects all the text when the control
+        // receives focus (when not gained by mouse click), whereas TextArea doesn't, and also the
+        // TextArea doesn't lose selection on focus lost, whereas the TextField does.
+        final TextArea textArea = getControl();
+        if (textArea.isFocused()) {
+            if (PlatformUtil.isIOS()) {
+                // Special handling of focus on iOS is required to allow to
+                // control native keyboard, because native keyboard is popped-up only when native
+                // text component gets focus. When we have JFX keyboard we can remove this code
+                final Bounds bounds = textArea.getBoundsInParent();
+                double w = bounds.getWidth();
+                double h = bounds.getHeight();
+                Affine3D trans = TextFieldBehavior.calculateNodeToSceneTransform(textArea);
+                String text = textArea.textProperty().getValueSafe();
+
+                // we need to display native text input component on the place where JFX component is drawn
+                // all parameters needed to do that are passed to native impl. here
+                textArea.getScene().getWindow().impl_getPeer().requestInput(text, TextFieldBehavior.TextInputTypes.TEXT_AREA.ordinal(), w, h,
+                        trans.getMxx(), trans.getMxy(), trans.getMxz(), trans.getMxt(),
+                        trans.getMyx(), trans.getMyy(), trans.getMyz(), trans.getMyt(),
+                        trans.getMzx(), trans.getMzy(), trans.getMzz(), trans.getMzt(), textArea.getFont().getSize());
+                tkStage = textArea.getScene().getWindow().impl_getPeer();
+            }
+            if (!focusGainedByMouseClick) {
+                setCaretAnimating(true);
+            }
+        } else {
+//                    skin.hideCaret();
+            if (PlatformUtil.isIOS() && tkStage != null) {
+                // releasing the focus => we need to hide the native component and also native keyboard
+                tkStage.releaseInput();
+            }
+            focusGainedByMouseClick = false;
+            setCaretAnimating(false);
+        }
     }
 
     // An unholy back-reference!
@@ -478,7 +508,9 @@ public class TextAreaBehavior extends TextInputControlBehavior<TextArea> {
     }
 
     @Override protected void setCaretAnimating(boolean play) {
-        skin.setCaretAnimating(play);
+        if (skin != null) {
+            skin.setCaretAnimating(play);
+        }
     }
 
     protected void mouseDoubleClick(HitInfo hit) {

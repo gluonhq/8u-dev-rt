@@ -279,6 +279,11 @@ final class EmbeddedStage extends GlassStage implements EmbeddedStageInterface {
     }
 
     @Override
+    public void updateInput(String text) {
+        throw new UnsupportedOperationException("Not supported yet."); 
+    }
+
+    @Override
     public void releaseInput() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
