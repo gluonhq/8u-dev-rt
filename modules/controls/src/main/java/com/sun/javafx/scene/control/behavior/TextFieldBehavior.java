@@ -56,8 +56,9 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
     private ContextMenu contextMenu;
     private TwoLevelFocusBehavior tlFocus;
     private ChangeListener<Scene> sceneListener;
-    private final ChangeListener<String> textListener;
+    private ChangeListener<String> textListener = null;
     private ChangeListener<Node> focusOwnerListener;
+    private WeakChangeListener<String> textWeakChangeListener = null;
 
     public TextFieldBehavior(final TextField textField) {
         super(textField, TEXT_INPUT_BINDINGS);
@@ -86,30 +87,38 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
                 textField.selectRange(0, 0);
             }
         };
-        textListener = (observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                textField.getScene().getWindow().impl_getPeer().updateInput(newValue);
-            }
-        };
-        final WeakChangeListener<String> textWeakChangeListener = 
-                new WeakChangeListener<>(textListener);
+        
+        if (PlatformUtil.isIOS()) { 
+            textListener = (observable, oldValue, newValue) -> {
+                if (newValue != null) {
+                    textField.getScene().getWindow().impl_getPeer().updateInput(newValue);
+                }
+            };
+            textWeakChangeListener = new WeakChangeListener<>(textListener);
+        }
         
         final WeakChangeListener<Node> weakFocusOwnerListener =
                                 new WeakChangeListener<Node>(focusOwnerListener);
         sceneListener = (observable, oldValue, newValue) -> {
             if (oldValue != null) {
-                textField.textProperty().removeListener(textWeakChangeListener);
+                if (PlatformUtil.isIOS()) {
+                    textField.textProperty().removeListener(textWeakChangeListener);
+                }
                 oldValue.focusOwnerProperty().removeListener(weakFocusOwnerListener);
             }
             if (newValue != null) {
-                textField.textProperty().addListener(textWeakChangeListener);
+                if (PlatformUtil.isIOS()) {
+                    textField.textProperty().addListener(textWeakChangeListener);
+                }
                 newValue.focusOwnerProperty().addListener(weakFocusOwnerListener);
             }
         };
         textField.sceneProperty().addListener(new WeakChangeListener<Scene>(sceneListener));
 
         if (textField.getScene() != null) {
-            textField.textProperty().addListener(textWeakChangeListener);
+            if (PlatformUtil.isIOS()) {
+                textField.textProperty().addListener(textWeakChangeListener);
+            }
             textField.getScene().focusOwnerProperty().addListener(weakFocusOwnerListener);
         }
 

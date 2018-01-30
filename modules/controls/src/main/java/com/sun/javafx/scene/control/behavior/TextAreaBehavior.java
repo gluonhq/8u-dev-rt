@@ -133,10 +133,6 @@ public class TextAreaBehavior extends TextInputControlBehavior<TextArea> {
     private TwoLevelFocusBehavior tlFocus;
     private TKStage tkStage;
     
-    private final ChangeListener<Scene> sceneListener;
-    private final ChangeListener<String> textListener;
-
-
     /**************************************************************************
      * Constructors                                                           *
      *************************************************************************/
@@ -156,28 +152,30 @@ public class TextAreaBehavior extends TextInputControlBehavior<TextArea> {
             handleFocusChange();
         });
 
-        textListener = (observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                textArea.getScene().getWindow().impl_getPeer().updateInput(newValue);
-            }
-        };
-        final WeakChangeListener<String> textWeakChangeListener = 
-                new WeakChangeListener<>(textListener);
+        if (PlatformUtil.isIOS()) {
+            final ChangeListener<String> textListener = (observable, oldValue, newValue) -> {
+                if (newValue != null) {
+                    textArea.getScene().getWindow().impl_getPeer().updateInput(newValue);
+                }
+            };
+            final WeakChangeListener<String> textWeakChangeListener = new WeakChangeListener<>(textListener);
         
-        sceneListener = (observable, oldValue, newValue) -> {
-            if (oldValue != null) {
-                textArea.textProperty().removeListener(textWeakChangeListener);
-            }
-            if (newValue != null) {
+        
+            final ChangeListener<Scene> sceneListener = (observable, oldValue, newValue) -> {
+                if (oldValue != null) {
+                    textArea.textProperty().removeListener(textWeakChangeListener);
+                }
+                if (newValue != null) {
+                    textArea.textProperty().addListener(textWeakChangeListener);
+                }
+            };
+            textArea.sceneProperty().addListener(new WeakChangeListener<>(sceneListener));
+        
+        
+            if (textArea.getScene() != null) {
                 textArea.textProperty().addListener(textWeakChangeListener);
             }
-        };
-        textArea.sceneProperty().addListener(new WeakChangeListener<>(sceneListener));
-
-        if (textArea.getScene() != null) {
-            textArea.textProperty().addListener(textWeakChangeListener);
         }
-
         // Only add this if we're on an embedded platform that supports 5-button navigation
         if (com.sun.javafx.scene.control.skin.Utils.isTwoLevelFocus()) {
             tlFocus = new TwoLevelFocusBehavior(textArea); // needs to be last.
