@@ -583,10 +583,10 @@ com.sun.javafx.gestures.zoom=true
 com.sun.javafx.gestures.rotate=true
 com.sun.javafx.gestures.scroll=true
 """
-def sysroot = "$ndk/platforms/$ndk_target/arch-arm"
 
 def ccFlags = ["--sysroot=$ndk/sysroot","-std=c99", "-DANDROID", "-c", "-nostdlib", 
-               "-DANDROID_NDK", "-DDALVIK_VM", "-I$ndk/sysroot/usr/include/${toolchainArchs[0]}", "-I$JDK_HOME/include", "-I$JDK_HOME/include/linux"]
+               "-DANDROID_NDK", "-DDALVIK_VM",
+               "-I$ndk/sysroot/usr/include/${toolchainArchs[0]}"]
 
 def ccOptFlags = ["-fpic", "-ffunction-sections", "-funwind-tables","-fstack-protector",
                   "-Os", "-O2", "-fno-strict-aliasing", "-finline-limit=64", "-fomit-frame-pointer"]
@@ -601,7 +601,7 @@ if (DALVIK.armArch == 'armeabi') {
 def ccDebugFlags = [IS_DEBUG_NATIVE ? "-DDEBUG" : "-DNDEBUG"]
 def ccDefaultIncludeFlags = ["-I$ndk/platforms/$ndk_target/arch-arm/usr/include"]
 
-def linkFlags = ["--sysroot=$sysroot",
+def linkFlags = ["--sysroot=$ndk/platforms/$ndk_target/arch-arm",
                  "-Wl,--no-undefined", "-Wl,-z,noexecstack", "-lc", "-lm", "-shared",
                  "-L$ndk/platforms/$ndk_target/arch-arm/usr/lib"]
 def linkArchFlags = []
