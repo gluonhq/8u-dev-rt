@@ -96,7 +96,7 @@ boolean assertDir(String dir) {
 def closedDir = file("$projectDir/../rt-closed")
 
 def toolchainArchs = ["arm-linux-androideabi", "mipsel-linux-android", "x86"]
-def armArchs = ["armeabi", "armeabiv-7a"]
+def armArchs = ["armeabi", "armeabi-v7a"]
 
 ext.DALVIK = [:]
 DALVIK.compileSwing = false;
@@ -104,7 +104,7 @@ DALVIK.compileSWT = false;
 DALVIK.compileFXPackager = false;
 DALVIK.compileDesignTime = false;
 DALVIK.glassPlatform = "android"
-DALVIK.armArch = armArchs[0]
+DALVIK.armArch = armArchs[1]
 DALVIK.libDest = "lib/${DALVIK.armArch}"
 DALVIK.jfxdvklib = "jfxdvk.jar"
 DALVIK.library = { name -> return "lib${name}.so" as String }
@@ -583,22 +583,31 @@ com.sun.javafx.gestures.zoom=true
 com.sun.javafx.gestures.rotate=true
 com.sun.javafx.gestures.scroll=true
 """
-def sysroot = "$ndk/platforms/$ndk_target/arch-arm"
 
-def ccFlags = ["--sysroot=$sysroot","-std=c99", "-DANDROID", "-c", "-nostdlib", 
-               "-DANDROID_NDK", "-DDALVIK_VM"]
+def ccFlags = ["--sysroot=$ndk/sysroot","-std=c99", "-DANDROID", "-c", "-nostdlib", 
+               "-DANDROID_NDK", "-DDALVIK_VM",
+               "-I$ndk/sysroot/usr/include/${toolchainArchs[0]}"]
 
 def ccOptFlags = ["-fpic", "-ffunction-sections", "-funwind-tables","-fstack-protector",
                   "-Os", "-O2", "-fno-strict-aliasing", "-finline-limit=64", "-fomit-frame-pointer"]
 def ccWarnFlags = ["-Wa,--noexecstack", "-Wno-psabi"]
-def ccArchFlags = ["-mthumb", "-msoft-float", "-D__ARM_ARCH_5__", "-D__ARM_ARCH_5T__", "-D__ARM_ARCH_5E__",
+def ccArchFlags = []
+if (DALVIK.armArch == 'armeabi') {
+    ccArchFlags = ["-mthumb", "-msoft-float", "-D__ARM_ARCH_5__", "-D__ARM_ARCH_5T__", "-D__ARM_ARCH_5E__",
                    "-D__ARM_ARCH_5TE__", "-march=armv5te" , "-mtune=xscale"]
+} else if (DALVIK.armArch == 'armeabi-v7a') {
+    ccArchFlags = ["-mthumb", "-mfloat-abi=softfp", "-mfpu=vfpv3-d16", "-march=armv7-a"]
+}
 def ccDebugFlags = [IS_DEBUG_NATIVE ? "-DDEBUG" : "-DNDEBUG"]
 def ccDefaultIncludeFlags = ["-I$ndk/platforms/$ndk_target/arch-arm/usr/include"]
 
-def linkFlags = ["--sysroot=$sysroot",
+def linkFlags = ["--sysroot=$ndk/platforms/$ndk_target/arch-arm",
                  "-Wl,--no-undefined", "-Wl,-z,noexecstack", "-lc", "-lm", "-shared",
                  "-L$ndk/platforms/$ndk_target/arch-arm/usr/lib"]
+def linkArchFlags = []
+if (DALVIK.armArch == 'armeabi-v7a') {
+    linkArchFlags = ["-march=armv7-a", "-Wl,--fix-cortex-a8"]
+}
 
 DALVIK.activity = [:]
 DALVIK.activity.javahSource = files("modules/graphics/build/classes/dalvik")
@@ -612,7 +621,7 @@ DALVIK.activity.linker = linker
 DALVIK.activity.lib = "activity"
 DALVIK.activity.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags].flatten()
-DALVIK.activity.linkFlags = [linkFlags, "-landroid", "-llog"].flatten()
+DALVIK.activity.linkFlags = [linkFlags, linkArchFlags, "-landroid", "-llog"].flatten()
 
 DALVIK.webview = [:]
 DALVIK.webview.javahSource = files("modules/web/build/classes/android")
@@ -629,7 +638,7 @@ DALVIK.webview.linker = linker
 DALVIK.webview.lib = "webview"
 DALVIK.webview.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags].flatten()
-DALVIK.webview.linkFlags = [linkFlags, "-ldl", "-llog"].flatten()
+DALVIK.webview.linkFlags = [linkFlags, linkArchFlags, "-ldl", "-llog"].flatten()
 
 DALVIK.dvkwebview = [:]
 DALVIK.dvkwebview.javahSource = files("modules/web/build/classes/android")
@@ -645,7 +654,7 @@ DALVIK.dvkwebview.linker = linker
 DALVIK.dvkwebview.lib = "android_webview"
 DALVIK.dvkwebview.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags].flatten()
-DALVIK.dvkwebview.linkFlags = [linkFlags, "-ldl", "-llog"].flatten()
+DALVIK.dvkwebview.linkFlags = [linkFlags, linkArchFlags, "-ldl", "-llog"].flatten()
 
 DALVIK.glass = [:]
 // DALVIK.glass.variants = ["eglfb", "lensport"]
@@ -678,7 +687,7 @@ DALVIK.glass.lensport.lib = "lens_porting"
 DALVIK.glass.lensport.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags, "-DISEGLFB", "-DLENSPORT",
     "-I", file("modules/graphics/src/main/native-glass/lens")].flatten()
-DALVIK.glass.lensport.linkFlags = [linkFlags, "-ldl", "-llog"].flatten()
+DALVIK.glass.lensport.linkFlags = [linkFlags, linkArchFlags, "-ldl", "-llog"].flatten()
 
 def monocleCFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags, "-DISEGLFB",
@@ -694,7 +703,7 @@ DALVIK.glass.monocle.nativeSource = [
 DALVIK.glass.monocle.compiler = compiler
 DALVIK.glass.monocle.ccFlags = monocleCFlags
 DALVIK.glass.monocle.linker = linker
-DALVIK.glass.monocle.linkFlags =  [linkFlags, "-ldl", "-llog", "-landroid", "-lGLESv2", "-lEGL"].flatten()
+DALVIK.glass.monocle.linkFlags =  [linkFlags, linkArchFlags, "-ldl", "-llog", "-landroid", "-lGLESv2", "-lEGL"].flatten()
 
 DALVIK.glass.monocle.lib = "glass_monocle"
 
@@ -732,7 +741,7 @@ DALVIK.glass.eglfb.linker = linker
 DALVIK.glass.eglfb.lib = "glass_lens_eglfb"
 DALVIK.glass.eglfb.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags].flatten()
-DALVIK.glass.eglfb.linkFlags = [linkFlags, "-ldl", "-landroid", "-llog"].flatten()
+DALVIK.glass.eglfb.linkFlags = [linkFlags, linkArchFlags, "-ldl", "-landroid", "-llog"].flatten()
 
 DALVIK.prism = [:]
 DALVIK.prism.javahInclude = ["com/sun/prism/impl/**/*", "com/sun/prism/PresentableState*"]
@@ -741,7 +750,7 @@ DALVIK.prism.compiler = compiler
 DALVIK.prism.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags].flatten()
 DALVIK.prism.linker = linker
-DALVIK.prism.linkFlags = [linkFlags, "-ldl", "-landroid", "-llog"].flatten()
+DALVIK.prism.linkFlags = [linkFlags, linkArchFlags, "-ldl", "-landroid", "-llog"].flatten()
 DALVIK.prism.lib = "prism_common"
 
 DALVIK.prismSW = [:]
@@ -751,7 +760,7 @@ DALVIK.prismSW.compiler = compiler
 DALVIK.prismSW.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags].flatten()
 DALVIK.prismSW.linker = linker
-DALVIK.prismSW.linkFlags = [linkFlags].flatten()
+DALVIK.prismSW.linkFlags = [linkFlags, linkArchFlags].flatten()
 DALVIK.prismSW.lib = "prism_sw"
 
 DALVIK.decora = [:]
@@ -759,7 +768,7 @@ DALVIK.decora.compiler = compiler
 DALVIK.decora.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags].flatten()
 DALVIK.decora.linker = linker
-DALVIK.decora.linkFlags = [linkFlags].flatten()
+DALVIK.decora.linkFlags = [linkFlags, linkArchFlags].flatten()
 DALVIK.decora.lib = "decora_sse"
 
 DALVIK.iio = [:]
@@ -771,7 +780,7 @@ DALVIK.iio.compiler = compiler
 DALVIK.iio.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags].flatten()
 DALVIK.iio.linker = linker
-DALVIK.iio.linkFlags = [linkFlags].flatten()
+DALVIK.iio.linkFlags = [linkFlags, linkArchFlags].flatten()
 DALVIK.iio.lib = "javafx_iio"
 
 DALVIK.prismES2 = [:]
@@ -789,7 +798,7 @@ DALVIK.prismES2.monocle.compiler = compiler
 DALVIK.prismES2.monocle.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags, "-DIS_EGLFB"].flatten()
 DALVIK.prismES2.monocle.linker = linker
-DALVIK.prismES2.monocle.linkFlags = [linkFlags, "-ldl", "-llog", "-lGLESv2", "-lEGL"].flatten()
+DALVIK.prismES2.monocle.linkFlags = [linkFlags, linkArchFlags, "-ldl", "-llog", "-lGLESv2", "-lEGL"].flatten()
 DALVIK.prismES2.monocle.lib = "prism_es2_monocle"
 
 DALVIK.prismES2.eglfb = [:]
@@ -802,7 +811,7 @@ DALVIK.prismES2.eglfb.compiler = compiler
 DALVIK.prismES2.eglfb.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags, "-DIS_EGLFB"].flatten()
 DALVIK.prismES2.eglfb.linker = linker
-DALVIK.prismES2.eglfb.linkFlags = [linkFlags, "-ldl", "-llog", "-lGLESv2", "-lEGL"].flatten()
+DALVIK.prismES2.eglfb.linkFlags = [linkFlags, linkArchFlags, "-ldl", "-llog", "-lGLESv2", "-lEGL"].flatten()
 DALVIK.prismES2.eglfb.lib = "prism_es2_eglfb"
 
 DALVIK.font = [:]
@@ -814,7 +823,7 @@ DALVIK.font.compiler = compiler
 DALVIK.font.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags].flatten()
 DALVIK.font.linker = linker
-DALVIK.font.linkFlags = [linkFlags].flatten()
+DALVIK.font.linkFlags = [linkFlags, linkArchFlags].flatten()
 DALVIK.font.lib = "javafx_font"
 
 if (BUILD_CLOSED) {
@@ -828,7 +837,7 @@ if (BUILD_CLOSED) {
     DALVIK.fontT2K.ccFlags = [ccFlags, "-fno-exceptions", "-fno-rtti", ccWarnFlags,
         ccArchFlags, ccOptFlags, ccDebugFlags, ccDefaultIncludeFlags].flatten()
     DALVIK.fontT2K.linker = linker
-    DALVIK.fontT2K.linkFlags = [linkFlags, "-lstdc++"].flatten()
+    DALVIK.fontT2K.linkFlags = [linkFlags, linkArchFlags, "-lstdc++"].flatten()
     DALVIK.fontT2K.lib = "javafx_font_t2k"
 } 
 
@@ -852,7 +861,7 @@ if (compileNativeText) {
         "-I$freetypeDir/include", "-I$freetypeDir/include/freetype2"].flatten()  
         
     DALVIK.fontNativeFreetype.linkFlags = 
-        [linkFlags, "-llog", 
+        [linkFlags, linkArchFlags, "-llog", 
          "-L$freetypeDir/lib", "$freetypeDir/lib/libfreetype.a"].flatten()
 }
 
