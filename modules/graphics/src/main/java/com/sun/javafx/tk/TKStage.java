@@ -203,6 +203,13 @@ public interface TKStage {
                         double Mzx, double Mzy, double Mzz, double Mzt, double fontSize);
 
     /**
+     * While native text input component is visible, if any change is made in the
+     * text property of the JavaFX text component, update the native component.
+     * @param text
+     */
+    void updateInput(String text);
+
+    /**
      * Native keyboard for text input is no longer necessary.
      * Keyboard will be hidden and native text input component too.
      */

@@ -56,7 +56,9 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
     private ContextMenu contextMenu;
     private TwoLevelFocusBehavior tlFocus;
     private ChangeListener<Scene> sceneListener;
+    private ChangeListener<String> textListener = null;
     private ChangeListener<Node> focusOwnerListener;
+    private WeakChangeListener<String> textWeakChangeListener = null;
 
     public TextFieldBehavior(final TextField textField) {
         super(textField, TEXT_INPUT_BINDINGS);
@@ -85,20 +87,38 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
                 textField.selectRange(0, 0);
             }
         };
-
+        
+        if (PlatformUtil.isIOS()) { 
+            textListener = (observable, oldValue, newValue) -> {
+                if (newValue != null) {
+                    textField.getScene().getWindow().impl_getPeer().updateInput(newValue);
+                }
+            };
+            textWeakChangeListener = new WeakChangeListener<>(textListener);
+        }
+        
         final WeakChangeListener<Node> weakFocusOwnerListener =
                                 new WeakChangeListener<Node>(focusOwnerListener);
         sceneListener = (observable, oldValue, newValue) -> {
             if (oldValue != null) {
+                if (PlatformUtil.isIOS()) {
+                    textField.textProperty().removeListener(textWeakChangeListener);
+                }
                 oldValue.focusOwnerProperty().removeListener(weakFocusOwnerListener);
             }
             if (newValue != null) {
+                if (PlatformUtil.isIOS()) {
+                    textField.textProperty().addListener(textWeakChangeListener);
+                }
                 newValue.focusOwnerProperty().addListener(weakFocusOwnerListener);
             }
         };
         textField.sceneProperty().addListener(new WeakChangeListener<Scene>(sceneListener));
 
         if (textField.getScene() != null) {
+            if (PlatformUtil.isIOS()) {
+                textField.textProperty().addListener(textWeakChangeListener);
+            }
             textField.getScene().focusOwnerProperty().addListener(weakFocusOwnerListener);
         }
 
@@ -154,7 +174,7 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
             setCaretAnimating(false);
         }
     }
-
+    
     static Affine3D calculateNodeToSceneTransform(Node node) {
         final Affine3D transform = new Affine3D();
         do {

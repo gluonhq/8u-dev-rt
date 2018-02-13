@@ -87,6 +87,9 @@ final class IosWindow extends Window {
                                                     double fontSize);
     
     @Override
+    native protected void _updateInput(long ptr, String text);
+    
+    @Override
     native protected void _releaseInput(long ptr);
     
     @Override 
