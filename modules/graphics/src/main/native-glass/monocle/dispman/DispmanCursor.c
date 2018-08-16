@@ -78,6 +78,9 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_monocle_DispmanCursor__1initDispman
     cursor.element = 0;
     cursor.currentCursor = 0;
     cursor.isVisible = 0;
+
+    (*wr_bcm_host_init)();
+
     addDispmanxElement();
     updateCursor();
 }
