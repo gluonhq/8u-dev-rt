@@ -1034,8 +1034,12 @@ public class PrismTextLayout implements TextLayout {
         BreakIterator boundary = null;
         if (wrapWidth > 0) {
             if ((flags & (FLAGS_HAS_COMPLEX | FLAGS_HAS_CJK)) != 0) {
-                boundary = BreakIterator.getLineInstance();
-                boundary.setText(new CharArrayIterator(chars));
+                try {
+                    boundary = BreakIterator.getLineInstance();
+                    boundary.setText(new CharArrayIterator(chars));
+                } catch (Exception e) {
+                    System.err.println("Error creating lineinstance for "+new String(chars));
+                }
             }
         }
         int textAlignment = flags & ALIGN_MASK;
