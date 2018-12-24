@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011, 2016, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -42,7 +42,6 @@ import com.sun.prism.Texture.WrapMode;
 import com.sun.prism.impl.BaseResourceFactory;
 import com.sun.prism.impl.PrismSettings;
 import com.sun.prism.impl.TextureResourcePool;
-import com.sun.prism.impl.VertexBuffer;
 import com.sun.prism.impl.shape.BasicRoundRectRep;
 import com.sun.prism.impl.shape.BasicShapeRep;
 import com.sun.prism.shape.ShapeRep;
@@ -80,7 +79,7 @@ final class SWResourceFactory
     SWContext getContext() {
         return context;
     }
-    
+
     @Override public void dispose() {
         context.dispose();
     }
@@ -88,24 +87,19 @@ final class SWResourceFactory
     @Override public ShapeRep createArcRep() {
         return theRep;
     }
-    
+
     @Override public ShapeRep createEllipseRep() {
         return theRep;
     }
-    
+
     @Override public ShapeRep createRoundRectRep() {
         return rectRep;
     }
-    
+
     @Override public ShapeRep createPathRep() {
         return theRep;
     }
-            
-    @Override public VertexBuffer createVertexBuffer(int maxQuads) {
-        throw new UnsupportedOperationException("createVertexBuffer:unimp");
-    }
 
-    
     @Override public Presentable createPresentable(PresentableState pState) {
         if (PrismSettings.debug) {
             System.out.println("+ SWRF.createPresentable()");
@@ -169,7 +163,7 @@ final class SWResourceFactory
     @Override public Texture createTexture(MediaFrame vdb) {
         return new SWArgbPreTexture(this, WrapMode.CLAMP_TO_EDGE, vdb.getWidth(), vdb.getHeight());
     }
-            
+
     @Override public Texture createTexture(PixelFormat formatHint,
                                            Usage usageHint,
                                            WrapMode wrapMode,
