@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2016, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -40,7 +40,6 @@ import com.sun.prism.Texture.Usage;
 import com.sun.prism.Texture.WrapMode;
 import com.sun.prism.impl.BaseResourceFactory;
 import com.sun.prism.impl.TextureResourcePool;
-import com.sun.prism.impl.VertexBuffer;
 import com.sun.prism.impl.shape.BasicShapeRep;
 import com.sun.prism.shape.ShapeRep;
 import java.util.Map;
@@ -177,12 +176,6 @@ class J2DResourceFactory extends BaseResourceFactory
             default:
                 return false;
         }
-    }
-
-    public VertexBuffer createVertexBuffer(int maxQuads) {
-        // This is only used by ES1 and ES2 - it should perhaps be
-        // moved to an ES-specific subclass of ResourceFactory?
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public void dispose() {
