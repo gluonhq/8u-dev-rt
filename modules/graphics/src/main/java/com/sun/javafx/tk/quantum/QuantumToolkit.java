@@ -442,7 +442,6 @@ System.err.println("[JVDBG]RUNTOOLKIT");
     }
 
     @Override public Future addRenderJob(RenderJob r) {
-Thread.dumpStack();
         // Do not run any render jobs (this is for benchmarking only)
         if (noRenderJobs) {
             CompletionListener listener = r.getCompletionListener();
