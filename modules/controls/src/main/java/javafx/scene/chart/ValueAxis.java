@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2016, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -73,7 +73,7 @@ public abstract class ValueAxis<T extends Number> extends Axis<T> {
     /**
      * The current value for the lowerBound of this axis, ie min value.
      * This may be the same as lowerBound or different. It is used by NumberAxis to animate the
-     * lowerBound from the old value to the new value. 
+     * lowerBound from the old value to the new value.
      */
     protected final DoubleProperty currentLowerBound = new SimpleDoubleProperty(this, "currentLowerBound");
 
@@ -105,7 +105,7 @@ public abstract class ValueAxis<T extends Number> extends Axis<T> {
     public final void setMinorTickVisible(boolean value) { minorTickVisible.set(value); }
     public final BooleanProperty minorTickVisibleProperty() { return minorTickVisible; }
 
-    
+
     /** The scale factor from data units to visual units */
     private ReadOnlyDoubleWrapper scale = new ReadOnlyDoubleWrapper(this, "scale", 0) {
         @Override
@@ -276,7 +276,7 @@ public abstract class ValueAxis<T extends Number> extends Axis<T> {
      * @return Range information, this is implementation dependent
      */
     @Override protected final Object autoRange(double length) {
-        // guess a sensible starting size for label size, that is approx 2 lines vertically or 2 charts horizontally        
+        // guess a sensible starting size for label size, that is approx 2 lines vertically or 2 charts horizontally
         if (isAutoRanging()) {
             // guess a sensible starting size for label size, that is approx 2 lines vertically or 2 charts horizontally
             double labelSize = getTickLabelFont().getSize() * 2;
@@ -319,9 +319,9 @@ public abstract class ValueAxis<T extends Number> extends Axis<T> {
      * @return The calculated range
      */
     protected Object autoRange(double minValue, double maxValue, double length, double labelSize) {
-        return null; // this method should have been abstract as there is no way for it to 
+        return null; // this method should have been abstract as there is no way for it to
         // return anything correct. so just return null.
-        
+
     }
 
     /**
@@ -356,23 +356,20 @@ public abstract class ValueAxis<T extends Number> extends Axis<T> {
         }
         // we have done all auto calcs, let Axis position major tickmarks
         super.layoutChildren();
+        int numMinorTicks = (getTickMarks().size() - 1)*(Math.max(1, getMinorTickCount()) - 1);
+        double neededLength = (getTickMarks().size()+numMinorTicks)*2;
 
         // Update minor tickmarks
         minorTickPath.getElements().clear();
+        // Don't draw minor tick marks if there isn't enough space for them!
 
         double minorTickLength = Math.max(0, getMinorTickLength());
-        // The length must be greater then the space required for tick marks, otherwise, there's no reason to create
-        // minor tick marks
-        if (minorTickLength > 0 && length > 2 * getTickMarks().size()) {
-            // Strip factor is >= 1. When == 1, all minor ticks will fit.
-            // It's computed as number of minor tick marks divided by available length
-            int stripFactor = (int)Math.ceil(2 * minorTickMarkValues.size() / (length - 2 * getTickMarks().size()));
+        if (minorTickLength > 0 && length > neededLength) {
             if (Side.LEFT.equals(side)) {
                 // snap minorTickPath to pixels
                 minorTickPath.setLayoutX(-0.5);
                 minorTickPath.setLayoutY(0.5);
-                for (int i = 0; i < minorTickMarkValues.size(); i += stripFactor) {
-                    T value = minorTickMarkValues.get(i);
+                for (T value : minorTickMarkValues) {
                     double y = getDisplayPosition(value);
                     if (y >= 0 && y <= length) {
                         minorTickPath.getElements().addAll(
@@ -384,8 +381,7 @@ public abstract class ValueAxis<T extends Number> extends Axis<T> {
                 // snap minorTickPath to pixels
                 minorTickPath.setLayoutX(0.5);
                 minorTickPath.setLayoutY(0.5);
-                for (int i = 0; i < minorTickMarkValues.size(); i += stripFactor) {
-                    T value = minorTickMarkValues.get(i);
+                for (T value : minorTickMarkValues) {
                     double y = getDisplayPosition(value);
                     if (y >= 0 && y <= length) {
                         minorTickPath.getElements().addAll(
@@ -397,8 +393,7 @@ public abstract class ValueAxis<T extends Number> extends Axis<T> {
                 // snap minorTickPath to pixels
                 minorTickPath.setLayoutX(0.5);
                 minorTickPath.setLayoutY(-0.5);
-                for (int i = 0; i < minorTickMarkValues.size(); i += stripFactor) {
-                    T value = minorTickMarkValues.get(i);
+                for (T value : minorTickMarkValues) {
                     double x = getDisplayPosition(value);
                     if (x >= 0 && x <= length) {
                         minorTickPath.getElements().addAll(
@@ -410,8 +405,7 @@ public abstract class ValueAxis<T extends Number> extends Axis<T> {
                 // snap minorTickPath to pixels
                 minorTickPath.setLayoutX(0.5);
                 minorTickPath.setLayoutY(0.5);
-                for (int i = 0; i < minorTickMarkValues.size(); i += stripFactor) {
-                    T value = minorTickMarkValues.get(i);
+                for (T value : minorTickMarkValues) {
                     double x = getDisplayPosition(value);
                     if (x >= 0 && x <= length) {
                         minorTickPath.getElements().addAll(
@@ -534,7 +528,7 @@ public abstract class ValueAxis<T extends Number> extends Axis<T> {
                 return (StyleableProperty<Number>)(WritableValue<Number>)n.minorTickLengthProperty();
             }
         };
-        
+
         private static final CssMetaData<ValueAxis<? extends Number>,Number> MINOR_TICK_COUNT =
             new CssMetaData<ValueAxis<? extends Number>,Number>("-fx-minor-tick-count",
                 SizeConverter.getInstance(), 5) {
@@ -549,7 +543,7 @@ public abstract class ValueAxis<T extends Number> extends Axis<T> {
                 return (StyleableProperty<Number>)(WritableValue<Number>)n.minorTickCountProperty();
             }
         };
-        
+
          private static final CssMetaData<ValueAxis<? extends Number>,Boolean> MINOR_TICK_VISIBLE =
             new CssMetaData<ValueAxis<? extends Number>,Boolean>("-fx-minor-tick-visible",
                  BooleanConverter.getInstance(), Boolean.TRUE) {

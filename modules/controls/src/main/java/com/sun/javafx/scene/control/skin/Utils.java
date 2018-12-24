@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011, 2017, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -32,6 +32,7 @@ package com.sun.javafx.scene.control.skin;
 
 import java.text.Bidi;
 import java.text.BreakIterator;
+import java.net.URL;
 import java.util.function.Consumer;
 
 import static javafx.scene.control.OverrunStyle.*;
@@ -39,6 +40,7 @@ import javafx.application.Platform;
 import javafx.application.ConditionalFeature;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.geometry.Bounds;
@@ -59,8 +61,7 @@ import com.sun.javafx.scene.control.behavior.TextBinding;
 import com.sun.javafx.scene.text.HitInfo;
 import com.sun.javafx.scene.text.TextLayout;
 import com.sun.javafx.tk.Toolkit;
-import java.util.HashMap;
-import java.util.Objects;
+import javafx.util.Callback;
 
 /**
  * BE REALLY CAREFUL WITH RESTORING OR RESETTING STATE OF helper NODE AS LEFTOVER
@@ -124,96 +125,17 @@ public class Utils {
         return computeTextHeight(font, text, wrappingWidth, 0, boundsType);
     }
 
-    static class TextKey {
-        Font font;
-        String text;
-        double wrappingWidth;
-        double lineSpacing;
-        TextBoundsType boundsType;
-        
-        TextKey(Font font, String text, double wrappingWidth, double lineSpacing, TextBoundsType boundsType) {
-            this.font = font;
-            this.text = text;
-            this.wrappingWidth = wrappingWidth;
-            this.lineSpacing = lineSpacing;
-            this.boundsType = boundsType;
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = 3;
-            hash = 79 * hash + Objects.hashCode(this.font);
-            hash = 79 * hash + Objects.hashCode(this.text);
-            hash = 79 * hash + (int) (Double.doubleToLongBits(this.wrappingWidth) ^ (Double.doubleToLongBits(this.wrappingWidth) >>> 32));
-            hash = 79 * hash + (int) (Double.doubleToLongBits(this.lineSpacing) ^ (Double.doubleToLongBits(this.lineSpacing) >>> 32));
-            hash = 79 * hash + Objects.hashCode(this.boundsType);
-            return hash;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final TextKey 
-                    
-                    
-                    
-                    
-                    other = (TextKey) obj;
-            if (Double.doubleToLongBits(this.wrappingWidth) != Double.doubleToLongBits(other.wrappingWidth)) {
-                return false;
-            }
-            if (Double.doubleToLongBits(this.lineSpacing) != Double.doubleToLongBits(other.lineSpacing)) {
-                return false;
-            }
-            if (!Objects.equals(this.text, other.text)) {
-                return false;
-            }
-            if (!Objects.equals(this.font, other.font)) {
-                return false;
-            }
-            if (this.boundsType != other.boundsType) {
-                return false;
-            }
-            return true;
-        }
-        
-        
-    }
-// TODO: eviction
-    static HashMap<TextKey, Double> textHeightCache = new HashMap<>();
-    private static boolean useCache = System.getProperty("javafxports.textHeightCache", "false").equals("true");
-
     @SuppressWarnings("deprecation")
     static double computeTextHeight(Font font, String text, double wrappingWidth, double lineSpacing, TextBoundsType boundsType) {
-        TextKey key = null;
-        if (useCache) {
-            key = new TextKey(font, text, wrappingWidth, lineSpacing, boundsType);
-            Double cached = textHeightCache.get(key);
-            if (cached != null) {
-                return cached;
-            }
-        }
         layout.setContent(text != null ? text : "", font.impl_getNativeFont());
-        layout.setWrapWidth((float) wrappingWidth);
-        layout.setLineSpacing((float) lineSpacing);
+        layout.setWrapWidth((float)wrappingWidth);
+        layout.setLineSpacing((float)lineSpacing);
         if (boundsType == TextBoundsType.LOGICAL_VERTICAL_CENTER) {
             layout.setBoundsType(TextLayout.BOUNDS_CENTER);
         } else {
             layout.setBoundsType(0);
         }
-        double answer = layout.getBounds().getHeight();
-        if (useCache) {
-            textHeightCache.put(key, answer);
-        }
-        return answer;
+        return layout.getBounds().getHeight();
     }
 
     static int computeTruncationIndex(Font font, String text, double width) {
@@ -832,22 +754,17 @@ public class Utils {
     private static BreakIterator charIterator = null;
     public static int getHitInsertionIndex(HitInfo hit, String text) {
         int charIndex = hit.getCharIndex();
-        try {
-            if (text != null && !hit.isLeading()) {
-                if (charIterator == null) {
-                    charIterator = BreakIterator.getCharacterInstance();
-                }
-                charIterator.setText(text);
-                int next = charIterator.following(charIndex);
-                if (next == BreakIterator.DONE) {
-                    charIndex = hit.getInsertionIndex();
-                } else {
-                    charIndex = next;
-                }
+        if (text != null && !hit.isLeading()) {
+            if (charIterator == null) {
+                charIterator = BreakIterator.getCharacterInstance();
             }
-        } catch (RuntimeException e) {
-            System.out.println ("[JVDBG] got a runtime exception, but we ignore this.");
-            e.printStackTrace();
+            charIterator.setText(text);
+            int next = charIterator.following(charIndex);
+            if (next == BreakIterator.DONE) {
+                charIndex = hit.getInsertionIndex();
+            } else {
+                charIndex = next;
+            }
         }
         return charIndex;
     }
@@ -874,4 +791,9 @@ public class Utils {
             p.addListener(listener);
         }
     }
+
+    public static URL getResource(String str) {
+        return Utils.class.getResource(str);
+    }
+
 }

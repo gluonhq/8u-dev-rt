@@ -45,7 +45,7 @@ public final class NodeEffectInput extends Effect {
         EFFECT_CONTENT,
         CLIPPED_CONTENT,
         FULL_CONTENT,
-    }
+    };
 
     private NGNode node;
     private RenderType renderType;
@@ -251,7 +251,7 @@ public final class NodeEffectInput extends Effect {
     public boolean reducesOpaquePixels() {
         return false;
     }
-    
+
     @Override
     public DirtyRegionContainer getDirtyRegions(Effect defaultInput, DirtyRegionPool regionPool) {
         return null; // Never called

@@ -63,7 +63,7 @@ public class BaseFXRobot extends FXRobot {
             debug = "true".equals(System.getProperty("fxrobot.verbose", "false"));
         } catch (Throwable th) {}
         return debug;
-    }
+    };
 
     private static void out(String s) {
         if (debugOut) {

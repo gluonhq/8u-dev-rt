@@ -84,7 +84,7 @@ public class MotionBlur extends Effect {
     @Override
     com.sun.scenario.effect.MotionBlur impl_createImpl() {
         return new com.sun.scenario.effect.MotionBlur();
-    }
+    };
     /**
      * The input for this {@code Effect}.
      * If set to {@code null}, or left unspecified, a graphical image of

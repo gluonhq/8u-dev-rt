@@ -36,12 +36,29 @@ import com.sun.prism.impl.Disposer;
  * UploadingPainter is used when we need to render into an offscreen buffer.
  */
 final class PresentingPainter extends ViewPainter {
+static {
+Thread.dumpStack();
+}
 
     PresentingPainter(ViewScene view) {
         super(view);
+Thread.dumpStack();
     }
 
     @Override public void run() {
+ System.err.println("RUN PRESENTINGPAINTER");
+String tname = Thread.currentThread().getName();
+System.err.println("NAME = "+tname);
+      if (!com.sun.glass.ui.Application.applicationRunning) {
+      System.err.println("GLASS NOT STARTED, IGNORE");
+return;
+      }
+if (!tname.startsWith("Quantum")) {
+      System.err.println("NOT ON QUANTUM THREAD, IGNORE!");
+return;
+}
+
+System.err.println(Thread.currentThread()+" calls PresentingPainter.run");
         renderLock.lock();
 
         boolean locked = false;
@@ -57,14 +74,14 @@ final class PresentingPainter extends ViewPainter {
                 paintImpl(null);
                 return;
             }
-            
+
             /*
              * As Glass is responsible for creating the rendering contexts,
              * locking should be done prior to the Prism calls.
              */
             sceneState.lock();
             locked = true;
-            
+
             if (factory == null) {
                 factory = GraphicsPipeline.getDefaultResourceFactory();
             }
@@ -82,7 +99,7 @@ final class PresentingPainter extends ViewPainter {
                 penHeight = viewHeight;
                 freshBackBuffer = true;
             }
-            
+
             if (presentable != null) {
                 Graphics g = presentable.createGraphics();
 
@@ -100,7 +117,7 @@ final class PresentingPainter extends ViewPainter {
                     sceneState.getScene().entireSceneNeedsRepaint();
                     return;
                 }
-                
+
                 /* present for vsync buffer swap */
                 if (vs.getDoPresent()) {
                     if (!presentable.present()) {

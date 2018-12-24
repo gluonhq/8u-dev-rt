@@ -69,7 +69,7 @@ public class AcceleratedScreen {
 
         int major[] = {0}, minor[]={0};
         long nativeDisplay = platformGetNativeDisplay();
-        nativeWindow = platformGetNativeWindow();
+        long nativeWindow = platformGetNativeWindow();
 
         if (nativeDisplay == -1l) { // error condition
             throw new GLException(0, "Could not get native display");
@@ -120,15 +120,10 @@ public class AcceleratedScreen {
         }
     }
 
-    protected void createSurface() {
+    private void createSurface() {
         nativeWindow = platformGetNativeWindow();
-        if (nativeWindow != 0) {
-            eglSurface = egl._eglCreateWindowSurface(eglDisplay, eglConfigs[0],
+        eglSurface = egl._eglCreateWindowSurface(eglDisplay, eglConfigs[0],
                                                    nativeWindow, null);
-        }
-        else {
-            System.err.println ("[AcceleratedScreen] Can't create surface when we have no native Window");
-        }
     }
 
 
@@ -189,7 +184,6 @@ public class AcceleratedScreen {
             result = egl.eglSwapBuffers(eglDisplay, eglSurface);
 // TODO this shouldn't happen. In case the surface is invalid, we need to have recreated it before this method is called
             if (!result) {
-                System.err.println ("[WARNING] this shouldn't happen. swapBuffers failed with eglSurface "+eglSurface+", recreate surface and try again.");
                 createSurface();
                 result = egl.eglSwapBuffers(eglDisplay, eglSurface);
             }

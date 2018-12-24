@@ -356,10 +356,8 @@ public abstract class NGNode {
         // images of any ancestors will be invalidated.
         boolean useHint = false;
 
-// System.out.println ("[JVDBG] CACHE? parent = "+parent+ ((parent == null) ? "" : " and f = " + parent.cacheFilter));
         // If the parent is cached, try to check if the transformation is only a translation
         if (parent != null && parent.cacheFilter != null && PrismSettings.scrollCacheOpt) {
-// System.out.println ("[JVDBG] CACHE SUGGESTED!");
             if (hint == null) {
                 // If there's no hint created yet, this is the first setTransformMatrix
                 // call and we have nothing to compare to yet.
@@ -376,7 +374,6 @@ public abstract class NGNode {
                         && transform.getMzz() == tx.getMzz()
                         && transform.getMzt() == tx.getMzt()) {
                     useHint = true;
-// System.out.println ("[JVDBG] CACHE ACCEPTED!");
                     hint.translateXDelta = tx.getMxt() - transform.getMxt();
                     hint.translateYDelta = tx.getMyt() - transform.getMyt();
                 }
@@ -1276,7 +1273,7 @@ public abstract class NGNode {
             // the group exceeds the bounds of the clip on the group. Just trust me.
             region = region.deriveWithNewBounds(transformedBounds);
         }
-        
+
         // We shouldn't do anything with empty region, as we may accidentally make
         // it non empty or turn it into some nonsense (like (-1,-1,0,0) )
         if (!region.isEmpty()) {
@@ -1957,7 +1954,7 @@ public abstract class NGNode {
      * required no visible updates and thus no back buffer graphics was
      * actually obtained.  Implementors must have a backup plan for that
      * case when the Graphics object is null.
-     * 
+     *
      * @param gOptional the Graphics object that was used to render the
      *                  Scene, or null
      */
@@ -2480,7 +2477,7 @@ public abstract class NGNode {
             }
         }
     }
-    
+
     public void applyEffect(final EffectFilter effectFilter, DirtyRegionContainer drc, DirtyRegionPool regionPool) {
         Effect effect = effectFilter.getEffect();
         EffectDirtyBoundsHelper helper = EffectDirtyBoundsHelper.getInstance();

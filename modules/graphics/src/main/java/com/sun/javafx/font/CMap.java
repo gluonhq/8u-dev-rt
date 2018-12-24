@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -464,7 +464,7 @@ abstract class CMap {
     // MS platform Cmaps and MS states (in the Opentype spec on their website)
     // that MS doesn't support this format
     static class CMapFormat10 extends CMap {
-         
+
          long startCharCode;
          int numChars;
          char[] glyphIdArray;
@@ -477,7 +477,7 @@ abstract class CMap {
              if (numChars <= 0 || numChars > MAX_CODE_POINTS ||
                  offset > buffer.capacity() - numChars*2 - 12 - 8)
              {
-                 throw new RuntimeException("Invalid cmap subtable");   
+                 throw new RuntimeException("Invalid cmap subtable");
              }
              glyphIdArray = new char[numChars];
              for (int i=0; i< numChars; i++) {

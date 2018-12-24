@@ -74,7 +74,7 @@ public class Lighting extends Effect {
     @Override
     com.sun.scenario.effect.PhongLighting impl_createImpl() {
         return new PhongLighting(getLightInternal().impl_getImpl());
-    }
+    };
 
     /**
      * Creates a new instance of Lighting with default parameters.
@@ -166,7 +166,7 @@ public class Lighting extends Effect {
                 effectBoundsChanged();
             }
         }
-    }
+    };
     /**
      * The optional bump map input.
      * If not specified, a bump map will be automatically generated

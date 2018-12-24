@@ -41,9 +41,11 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_ios_IosGestureSupport__1initIDs
 
     // Initialize  methods IDs of java IosGestureSupport callbacks.
     
+fprintf(stderr, "[JVDBG] gesturesupport, cl = %p\n", jGestureSupportClass);
     if (jGestureSupportClass == NULL)
     {
-        jGestureSupportClass = (*env)->NewGlobalRef(env, jClass);
+        // jGestureSupportClass = (*env)->NewGlobalRef(env, jClass);
+        jGestureSupportClass = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "com/sun/glass/ui/ios/IosGestureSupport"));
     }
 
     if (jGestureSupportRotateGesturePerformed == NULL)

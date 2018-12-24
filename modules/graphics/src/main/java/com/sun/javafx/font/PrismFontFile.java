@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011, 2016, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -121,7 +121,11 @@ public abstract class PrismFontFile implements FontResource, FontConstants {
             AccessController.doPrivileged(
                     (PrivilegedAction<Void>) () -> {
                         try {
-                            (new File(filename)).delete();
+                            boolean delOK = (new File(filename)).delete();
+                            if (!delOK && PrismFontFactory.debugFonts) {
+                                 System.err.println("Temp file not deleted : "
+                                                    + filename);
+                            }
                             /* Embedded fonts (copy) can also be decoded.
                              * Set both flags to false to avoid double deletes.
                              */
@@ -851,7 +855,7 @@ public abstract class PrismFontFile implements FontResource, FontConstants {
             }
         }
     }
-    
+
     /*** BEGIN LOCALE_ID MAPPING ****/
 
     private static Map<String, Short> lcidMap;

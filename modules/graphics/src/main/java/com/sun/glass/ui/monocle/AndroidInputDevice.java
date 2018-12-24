@@ -25,6 +25,8 @@
 
 package com.sun.glass.ui.monocle;
 
+import java.io.IOException;
+
 /**
  *
  */
@@ -67,7 +69,7 @@ class AndroidInputDevice implements Runnable, InputDevice {
 // if we return false, the JavaFX virtual keyboard will be used instead of the android built-in one
         return true;
     }
-     
+
     void setInputProcessor(AndroidInputProcessor inputProcessor) {
         this.inputProcessor = inputProcessor;
     }

@@ -56,9 +56,7 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
     private ContextMenu contextMenu;
     private TwoLevelFocusBehavior tlFocus;
     private ChangeListener<Scene> sceneListener;
-    private ChangeListener<String> textListener = null;
     private ChangeListener<Node> focusOwnerListener;
-    private WeakChangeListener<String> textWeakChangeListener = null;
 
     public TextFieldBehavior(final TextField textField) {
         super(textField, TEXT_INPUT_BINDINGS);
@@ -87,38 +85,20 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
                 textField.selectRange(0, 0);
             }
         };
-        
-        if (PlatformUtil.isIOS()) { 
-            textListener = (observable, oldValue, newValue) -> {
-                if (newValue != null) {
-                    textField.getScene().getWindow().impl_getPeer().updateInput(newValue);
-                }
-            };
-            textWeakChangeListener = new WeakChangeListener<>(textListener);
-        }
-        
+
         final WeakChangeListener<Node> weakFocusOwnerListener =
                                 new WeakChangeListener<Node>(focusOwnerListener);
         sceneListener = (observable, oldValue, newValue) -> {
             if (oldValue != null) {
-                if (PlatformUtil.isIOS()) {
-                    textField.textProperty().removeListener(textWeakChangeListener);
-                }
                 oldValue.focusOwnerProperty().removeListener(weakFocusOwnerListener);
             }
             if (newValue != null) {
-                if (PlatformUtil.isIOS()) {
-                    textField.textProperty().addListener(textWeakChangeListener);
-                }
                 newValue.focusOwnerProperty().addListener(weakFocusOwnerListener);
             }
         };
         textField.sceneProperty().addListener(new WeakChangeListener<Scene>(sceneListener));
 
         if (textField.getScene() != null) {
-            if (PlatformUtil.isIOS()) {
-                textField.textProperty().addListener(textWeakChangeListener);
-            }
             textField.getScene().focusOwnerProperty().addListener(weakFocusOwnerListener);
         }
 
@@ -135,11 +115,11 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
 
     private void handleFocusChange() {
         TextField textField = getControl();
-        
+
         if (textField.isFocused()) {
             if (PlatformUtil.isIOS()) {
                 // special handling of focus on iOS is required to allow to
-                // control native keyboard, because nat. keyboard is poped-up only when native 
+                // control native keyboard, because nat. keyboard is poped-up only when native
                 // text component gets focus. When we have JFX keyboard we can remove this code
                 TextInputTypes type = TextInputTypes.TEXT_FIELD;
                 if (textField.getClass().equals(javafx.scene.control.PasswordField.class)) {
@@ -155,12 +135,13 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
 //                w -= insets.getLeft() + insets.getRight();
 //                h -= insets.getTop() + insets.getBottom();
                 String text = textField.getText();
+
                 // we need to display native text input component on the place where JFX component is drawn
                 // all parameters needed to do that are passed to native impl. here
-                textField.getScene().getWindow().impl_getPeer().requestInput(text, type.ordinal(), w, h, 
+                textField.getScene().getWindow().impl_getPeer().requestInput(text, type.ordinal(), w, h,
                         trans.getMxx(), trans.getMxy(), trans.getMxz(), trans.getMxt(),// + insets.getLeft(),
                         trans.getMyx(), trans.getMyy(), trans.getMyz(), trans.getMyt(),// + insets.getTop(),
-                        trans.getMzx(), trans.getMzy(), trans.getMzz(), trans.getMzt(), textField.getFont().getSize());
+                        trans.getMzx(), trans.getMzy(), trans.getMzz(), trans.getMzt());
             }
             if (!focusGainedByMouseClick) {
                 setCaretAnimating(true);
@@ -174,7 +155,7 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
             setCaretAnimating(false);
         }
     }
-    
+
     static Affine3D calculateNodeToSceneTransform(Node node) {
         final Affine3D transform = new Affine3D();
         do {
@@ -455,11 +436,11 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
     protected void mouseTripleClick(HitInfo hit) {
         getControl().selectAll();
     }
-    
-    // Enumeration of all types of text input that can be simulated on 
-    // touch device, such as iPad. Type is passed to native code and 
+
+    // Enumeration of all types of text input that can be simulated on
+    // touch device, such as iPad. Type is passed to native code and
     // native text component is shown. It's used as workaround for iOS
-    // devices since keyboard control is not possible without native 
+    // devices since keyboard control is not possible without native
     // text component being displayed
     enum TextInputTypes {
         TEXT_FIELD,

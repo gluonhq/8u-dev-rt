@@ -59,6 +59,7 @@ public abstract class GraphicsPipeline {
 
     public abstract boolean init();
     public void dispose() {
+System.err.println(Thread.currentThread()+" [JVDBG] dispose pipeline!");
         installedPipeline = null;
     }
 
@@ -121,6 +122,7 @@ public abstract class GraphicsPipeline {
     }
 
     public FontFactory getFontFactory() {
+System.err.println("[JVDBG] GETFONTFACTORY, ff = "+fontFactory);
         if (fontFactory == null) {
             fontFactory = PrismFontFactory.getFontFactory();
         }
@@ -197,6 +199,7 @@ public abstract class GraphicsPipeline {
                                            klass.getName());
                     }
                     installedPipeline = newPipeline;
+System.err.println(Thread.currentThread()+" [JVDBG] Ready to return "+installedPipeline);
                     return installedPipeline;
                 }
                 if (newPipeline != null) {
@@ -230,6 +233,7 @@ public abstract class GraphicsPipeline {
     }
 
     public static GraphicsPipeline getPipeline() {
+System.err.println(Thread.currentThread()+" wants to get pipeline, return "+installedPipeline);
         return installedPipeline;
     }
 

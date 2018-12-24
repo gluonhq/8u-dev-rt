@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -41,6 +41,7 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.WritableValue;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
+import javafx.geometry.Side;
 import javafx.scene.AccessibleAction;
 import javafx.scene.AccessibleAttribute;
 import javafx.scene.Node;
@@ -80,7 +81,7 @@ import sun.util.logging.PlatformLogger.Level;
  */
 public abstract class Control extends Region implements Skinnable {
 
-    static {
+    static void postClinit() {
         // Ensures that the default application user agent stylesheet is loaded
         if (Application.getUserAgentStylesheet() == null) {
             PlatformImpl.setDefaultPlatformUserAgentStylesheet();
@@ -103,17 +104,18 @@ public abstract class Control extends Region implements Skinnable {
      * @return The class. Cannot return null
      * @throws ClassNotFoundException If the class cannot be found using any technique.
      */
-    static Class<?> loadClass(final String className, final Object instance)
+    private static Class<?> loadClass(final String className, final Object instance)
             throws ClassNotFoundException
     {
         try {
             // Try just loading the class
-            return Class.forName(className);
+            return Class.forName(className, false, Control.class.getClassLoader());
         } catch (ClassNotFoundException ex) {
             // RT-17525 : Use context class loader only if Class.forName fails.
             if (Thread.currentThread().getContextClassLoader() != null) {
                 try {
-                    return Thread.currentThread().getContextClassLoader().loadClass(className);
+                    final ClassLoader ccl = Thread.currentThread().getContextClassLoader();
+                    return Class.forName(className, false, ccl);
                 } catch (ClassNotFoundException ex2) {
                     // Do nothing, just fall through
                 }
@@ -127,7 +129,8 @@ public abstract class Control extends Region implements Skinnable {
                 Class<?> currentType = instance.getClass();
                 while (currentType != null) {
                     try {
-                        return currentType.getClassLoader().loadClass(className);
+                        final ClassLoader loader = currentType.getClassLoader();
+                        return Class.forName(className, false, loader);
                     } catch (ClassNotFoundException ex2) {
                         currentType = currentType.getSuperclass();
                     }
@@ -245,8 +248,8 @@ public abstract class Control extends Region implements Skinnable {
             // called set on skinClassName in order to keep CSS from overwriting
             // the skin.
             skinClassNameProperty().set(currentSkinClassName);
-            
-            
+
+
             // Dispose of the old skin
             if (oldValue != null) oldValue.dispose();
 
@@ -408,6 +411,7 @@ public abstract class Control extends Region implements Skinnable {
      *  Create a new Control.
      */
     protected Control() {
+        postClinit();
         // focusTraversable is styleable through css. Calling setFocusTraversable
         // makes it look to css like the user set the value and css will not
         // override. Initializing focusTraversable by calling applyStyle
@@ -696,6 +700,17 @@ public abstract class Control extends Region implements Skinnable {
 
         try {
             final Class<?> skinClass = Control.loadClass(skinClassName, control);
+            if (!Skin.class.isAssignableFrom(skinClass)) {
+                final String msg =
+                    "'" + skinClassName + "' is not a valid Skin class for control " + control;
+                final List<CssError> errors = StyleManager.getErrors();
+                if (errors != null) {
+                    CssError error = new CssError(msg);
+                    errors.add(error); // RT-19884
+                }
+                Logging.getControlsLogger().severe(msg);
+                return;
+            }
             Constructor<?>[] constructors = skinClass.getConstructors();
             Constructor<?> skinConstructor = null;
             for (Constructor<?> c : constructors) {
@@ -889,7 +904,7 @@ public abstract class Control extends Region implements Skinnable {
      *                                                                         *
      **************************************************************************/
 
-    @Override 
+    @Override
     public Object queryAccessibleAttribute(AccessibleAttribute attribute, Object... parameters) {
         switch (attribute) {
             case HELP:

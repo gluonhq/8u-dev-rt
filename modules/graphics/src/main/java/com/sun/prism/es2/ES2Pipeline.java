@@ -38,16 +38,20 @@ import java.util.HashMap;
 
 public class ES2Pipeline extends GraphicsPipeline {
 
-    public static final GLFactory glFactory;
-    public static final GLPixelFormat.Attributes
+    public static GLFactory glFactory;
+    public static GLPixelFormat.Attributes
             pixelFormatAttributes = new GLPixelFormat.Attributes();
-    static final boolean msaa;
-    static final boolean npotSupported;
-    static final boolean supports3D;
+    static boolean msaa;
+    static boolean npotSupported;
     private static boolean es2Enabled;
     private static boolean isEglfb = false;
 
     static {
+Thread.dumpStack();
+    }
+
+    static void postClinit () {
+Thread.dumpStack();
         AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
             String libName = "prism_es2";
 
@@ -90,20 +94,24 @@ public class ES2Pipeline extends GraphicsPipeline {
             factories = new ES2ResourceFactory[glFactory.getAdapterCount()];
             msaa = glFactory.isGLExtensionSupported("GL_ARB_multisample");
             npotSupported = glFactory.isNPOTSupported();
-            supports3D = npotSupported || PlatformUtil.isIOS();
         } else {
             theInstance = null;
             msaa = false;
             npotSupported = false;
-            supports3D = false;
         }
 
     }
     private static Thread creator;
-    private static final ES2Pipeline theInstance;
+    private static ES2Pipeline theInstance;
     private static ES2ResourceFactory factories[];
 
     public static ES2Pipeline getInstance() {
+System.err.println("[JVDBG] ES2Pipeline, instance asked, is currently "+theInstance);
+        if (theInstance == null) {
+            postClinit();
+System.err.println("[JVDBG] ES2Pipeline, instance should be created now, return "+theInstance);
+        }
+System.err.println("[JVDBG] ES2Pipeline, instance asked, return "+theInstance);
         return theInstance;
     }
 
@@ -204,7 +212,8 @@ public class ES2Pipeline extends GraphicsPipeline {
 
     @Override
     public boolean is3DSupported() {
-        return supports3D;
+        // 3D requires platform that has non-power of two (NPOT) support.
+        return npotSupported;
     }
 
     @Override

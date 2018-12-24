@@ -24,6 +24,7 @@
  */
 package javafx.scene.control;
 
+import java.net.URL;
 import java.util.List;
 
 import javafx.beans.property.BooleanProperty;
@@ -38,38 +39,38 @@ import javafx.stage.Window;
 abstract class FXDialog {
 
     /**************************************************************************
-     * 
+     *
      * Static fields
-     * 
+     *
      **************************************************************************/
 
 
     /**************************************************************************
-     * 
+     *
      * Private fields
-     * 
+     *
      **************************************************************************/
 
     protected Object owner;
 
 
     /**************************************************************************
-     * 
+     *
      * Constructors
-     * 
+     *
      **************************************************************************/
 
     protected FXDialog() {
-        // pretty much a no-op, but we expect subclasses to call init(...) once 
+        // pretty much a no-op, but we expect subclasses to call init(...) once
         // they have initialised their abstract property methods.
     }
 
 
 
     /**************************************************************************
-     * 
+     *
      * Public API
-     * 
+     *
      **************************************************************************/
 
     public boolean requestPermissionToClose(final Dialog<?> dialog) {
@@ -112,13 +113,13 @@ abstract class FXDialog {
 
 
     /***************************************************************************
-     * 
+     *
      * Abstract API
-     * 
+     *
      **************************************************************************/
 
     public abstract void show();
-    
+
     public abstract void showAndWait();
 
     // This should only be called from Dialog - it should never be called by
@@ -129,11 +130,11 @@ abstract class FXDialog {
     public abstract void initOwner(Window owner);
 
     public abstract Window getOwner();
-    
+
     public abstract void initModality(Modality modality);
-    
+
     public abstract Modality getModality();
-    
+
     public abstract ReadOnlyBooleanProperty showingProperty();
 
     public abstract Window getWindow();
@@ -144,7 +145,7 @@ abstract class FXDialog {
     public abstract double getX();
     public abstract void setX(double x);
     public abstract ReadOnlyDoubleProperty xProperty();
-    
+
     // --- y
     public abstract double getY();
     public abstract void setY(double y);
@@ -173,7 +174,7 @@ abstract class FXDialog {
      * Property representing the width of the dialog.
      */
     abstract ReadOnlyDoubleProperty widthProperty();
-    
+
     abstract void setWidth(double width);
 
 
@@ -182,7 +183,7 @@ abstract class FXDialog {
      * Property representing the height of the dialog.
      */
     abstract ReadOnlyDoubleProperty heightProperty();
-    
+
     abstract void setHeight(double height);
 
 
@@ -194,25 +195,25 @@ abstract class FXDialog {
     abstract double getSceneHeight();
 
     /***************************************************************************
-     *                                                                         
-     * Implementation                                                 
-     *                                                                         
+     *
+     * Implementation
+     *
      **************************************************************************/
 
 
 
 
     /***************************************************************************
-     *                                                                         
-     * Support Classes                                                 
-     *                                                                         
+     *
+     * Support Classes
+     *
      **************************************************************************/
 
 
 
     /***************************************************************************
-     *                                                                         
-     * Stylesheet Handling                                                     
-     *                                                                         
+     *
+     * Stylesheet Handling
+     *
      **************************************************************************/
 }

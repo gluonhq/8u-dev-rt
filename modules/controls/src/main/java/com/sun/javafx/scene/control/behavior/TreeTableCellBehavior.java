@@ -25,6 +25,7 @@
 
 package com.sun.javafx.scene.control.behavior;
 
+import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.control.TableColumnBase;
 import javafx.scene.control.TablePositionBase;
@@ -37,24 +38,24 @@ import javafx.scene.input.MouseButton;
 /**
  */
 public class TreeTableCellBehavior<S,T> extends TableCellBehaviorBase<TreeItem<S>, T, TreeTableColumn<S, ?>, TreeTableCell<S,T>> {
-    
+
     /***************************************************************************
      *                                                                         *
      * Constructors                                                            *
      *                                                                         *
-     **************************************************************************/    
+     **************************************************************************/
 
     public TreeTableCellBehavior(TreeTableCell<S,T> control) {
         super(control);
     }
-    
-    
-    
+
+
+
     /***************************************************************************
      *                                                                         *
      * Implement TableCellBehaviorBase Abstract API                            *
      *                                                                         *
-     **************************************************************************/          
+     **************************************************************************/
 
     /** @{@inheritDoc} */
     @Override protected TreeTableView<S> getCellContainer() {
@@ -137,7 +138,7 @@ public class TreeTableCellBehavior<S,T> extends TableCellBehaviorBase<TreeItem<S
         }
         return false;
     }
-    
+
     @Override
     protected void handleClicks(MouseButton button, int clickCount, boolean isAlreadySelected) {
         // handle editing, which only occurs with the primary mouse button

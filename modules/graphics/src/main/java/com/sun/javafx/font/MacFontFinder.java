@@ -62,7 +62,8 @@ class MacFontFinder {
             HashMap<String,String> fontToFamilyNameMap,
             HashMap<String,ArrayList<String>> familyToFontListMap,
             Locale locale) {
-
+Thread.dumpStack();
+System.err.println("[JVDBG] populateFontFileNameMap in java 0");
         if (fontToFileMap == null ||
             fontToFamilyNameMap == null ||
             familyToFontListMap == null) {
@@ -71,10 +72,13 @@ class MacFontFinder {
         if (locale == null) {
             locale = Locale.ENGLISH;
         }
+System.err.println("[JVDBG] populateFontFileNameMap in java 1");
         String[] fontData = getFontData();
+System.err.println("[JVDBG] populateFontFileNameMap in java 2");
         if (fontData == null) return false;
 
         int i = 0;
+System.err.println("[JVDBG] populateFontFileNameMap in java 0");
         while (i < fontData.length) {
             String name = fontData[i++];
             String family = fontData[i++];
@@ -107,6 +111,7 @@ class MacFontFinder {
             }
             list.add(name);
         }
+System.err.println("[JVDBG] populateFontFileNameMap in java 0");
         return true;
     }
     /*

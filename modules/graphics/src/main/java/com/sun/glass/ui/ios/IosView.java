@@ -34,6 +34,10 @@ import java.util.Map;
  */
 final class IosView extends View {
 
+    static {
+        IosGestureSupport.ping();
+    }
+
     private long nativePtr;
 
     public IosView() {

@@ -56,6 +56,7 @@ jclass mat_jScreenClass = NULL;
 jclass mat_jViewClass = NULL;
 
 jclass jApplicationClass = NULL;
+jclass jApplicationParentClass = NULL;
 jmethodID jApplicationReportException = 0;
 
 jmethodID mat_jViewNotifyResize = 0;
@@ -112,18 +113,38 @@ static int haveIDs = 0;
 static BOOL shouldKeepRunningNestedLoop = YES;
 static jobject nestedLoopReturnValue = NULL;
 
+void MYGLASS_CHECK_EXCEPTION(JNIEnv* ENV) {
+fprintf(stderr, "check MGE1, env = %p\n", ENV);
+    jthrowable t = (*ENV)->ExceptionOccurred(ENV);
+fprintf(stderr, "check MGE2\n");
+    if (t) {                                     
+fprintf(stderr, "check MGE3\n");
+        (*ENV)->ExceptionClear(ENV);            
+fprintf(stderr, "check MGE4, ac= %p, are = %p\n", jApplicationClass, jApplicationReportException);
+        (*ENV)->CallStaticVoidMethod(          
+            ENV, jApplicationClass, jApplicationReportException, t);
+    };                                                             
+fprintf(stderr, "check MGE5\n");
+}
+
 //Library entrypoint
 JNIEXPORT jint JNICALL
 JNI_OnLoad_glass(JavaVM *vm, void *reserved)
 {
+fprintf(stderr, "[NATIVEFX] Glass onload\n");
 #ifdef JNI_VERSION_1_8
     //min. returned JNI_VERSION required by JDK8 for builtin libraries
     JNIEnv *env;
+fprintf(stderr, "s0, env = %p\n");
     if ((*vm)->GetEnv(vm, (void **)&env, JNI_VERSION_1_8) != JNI_OK) {
+fprintf(stderr, "s1, env = %p\n");
         return JNI_VERSION_1_4;
     }
+fprintf(stderr, "s2, env = %p\n");
+jEnv = env;
     return JNI_VERSION_1_8;
 #else
+fprintf(stderr, "s3, env = %p\n");
     return JNI_VERSION_1_4;
 #endif
 }
@@ -171,7 +192,7 @@ jboolean setContextClassLoader(JNIEnv *env, jobject contextClassLoader)
  * Note that the className passed to this function must use "." rather than "/"
  * as a package separator.
  */
-jclass classForName(JNIEnv *env, char *className)
+jclass noclassForName(JNIEnv *env, char *className)
 {
     jclass threadCls = (*env)->FindClass(env, "java/lang/Thread");
     if (threadCls == NULL) {
@@ -452,7 +473,8 @@ jclass classForName(JNIEnv *env, char *className)
     {
         if (self.jLaunchable != NULL)
         {
-            jclass runnableClass = classForName(jEnv, "java.lang.Runnable");
+            // jclass runnableClass = classForName(jEnv, "java.lang.Runnable");
+            jclass runnableClass = (*jEnv)->FindClass(jEnv, "java/lang/Runnable");
             if ((*jEnv)->ExceptionCheck(jEnv) == JNI_TRUE)
             {
                 (*jEnv)->ExceptionDescribe(jEnv);
@@ -490,6 +512,11 @@ jclass classForName(JNIEnv *env, char *className)
 }
 
 
+- (void)dummyrunLoop:(id)selector
+{
+    GLASS_LOG("GlassApplication:runLoop");
+fprintf(stderr, "MAIN THREAD now?\n");
+}
 - (void)runLoop:(id)selector
 {
     GLASS_LOG("GlassApplication:runLoop");
@@ -515,7 +542,8 @@ jclass classForName(JNIEnv *env, char *className)
             GLASS_CHECK_EXCEPTION(jEnv);
             
             // Load IosApplication class using the glass classloader
-            jclass cls = [GlassHelper ClassForName:"com.sun.glass.ui.ios.IosApplication" withEnv:jEnv];
+            // jclass cls = [GlassHelper ClassForName:"com.sun.glass.ui.ios.IosApplication" withEnv:jEnv];
+            jclass cls = (*jEnv)->FindClass(jEnv, "com/sun/glass/ui/ios/IosApplication");
             if (!cls)
             {
                 NSLog(@"ERROR: can't find the IosApplication class");
@@ -625,42 +653,77 @@ jclass classForName(JNIEnv *env, char *className)
 JNIEXPORT void JNICALL Java_com_sun_glass_ui_ios_IosApplication__1initIDs
 (JNIEnv *env, jclass jClass)
 {
+fprintf(stderr, "[NATIVEFX] initIDs00, env = %p and jenv = %p\n", env,jEnv);
+            MYGLASS_CHECK_EXCEPTION(env);
+fprintf(stderr, "[NATIVEFX] initIDs1\n");
     
     GLASS_LOG("Java_com_sun_glass_ui_ios_IosApplication__1initIDs");
+fprintf(stderr, "[NATIVEFX] initIDs2, run on main now...\n");
+UIApplication* myuiapp = [UIApplication sharedApplication];
+fprintf(stderr , "myuiapp = %p and run selector", myuiapp);
+// [myuiapp performSelectorOnMainThread:@selector(dummyrunLoop:) withObject:myuiapp waitUntilDone:[[NSThread currentThread] isMainThread]];
+
     
     if (haveIDs)
         return;
     haveIDs = 1;
+fprintf(stderr, "[NATIVEFX] initIDs3\n");
+            GLASS_CHECK_EXCEPTION(jEnv);
 
     assert(pthread_key_create(&GlassThreadDataKey, NULL) == 0);
+fprintf(stderr, "[NATIVEFX] initIDs4, jClass = %p\n", jClass);
     
-    jApplicationClass = (*env)->NewGlobalRef(env, jClass);
-    jApplicationReportException = (*env)->GetStaticMethodID(env, jClass, "reportException", "(Ljava/lang/Throwable;)V");
+    // jclass jas = (*env)->FindClass(env, "com/sun/glass/ui/ios/IosApplication");
+    jclass jas = (*env)->FindClass(env, "java/lang/String");
+    jApplicationClass = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "com/sun/glass/ui/ios/IosApplication"));
+    jApplicationParentClass = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "com/sun/glass/ui/Application"));
+    // jApplicationClass = (*env)->NewGlobalRef(env, jClass);
+fprintf(stderr, "[NATIVEFX] initIDs5a, jjjas = %p and appc = %p\n",jas, jApplicationClass);
+fprintf(stderr, "[NATIVEFX] initIDs5, appc = %p\n",jApplicationClass);
+    jApplicationReportException = (*env)->GetStaticMethodID(env, jApplicationParentClass, "reportException", "(Ljava/lang/Throwable;)V");
 
+fprintf(stderr, "[NATIVEFX] initIDs6\n");
     mat_jIntegerClass = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "java/lang/Integer"));
     mat_jMapClass = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "java/util/Map"));
+fprintf(stderr, "[NATIVEFX] initIDs7\n");
     mat_jBooleanClass = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "java/lang/Boolean"));
+fprintf(stderr, "[NATIVEFX] initIDs7a\n");
     mat_jLongClass = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "java/lang/Long"));
+fprintf(stderr, "[NATIVEFX] initIDs7b\n");
     
 #if PROTECT_INVOKE_AND_WAIT
+fprintf(stderr, "[NATIVEFX] initIDs7c\n");
     mat_jThreadClass = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "java/lang/Thread"));
+fprintf(stderr, "[NATIVEFX] initIDs7d\n");
     mat_ThreadCurrentThread = (*env)->GetStaticMethodID(env, mat_jThreadClass, "currentThread", "()Ljava/lang/Thread;");
 #endif
+fprintf(stderr, "[NATIVEFX] initIDs7e, jenv = %p\n", jEnv);
+            MYGLASS_CHECK_EXCEPTION(jEnv);
     
+fprintf(stderr, "[NATIVEFX] initIDs8a\n");
     mat_jVectorAddElement = (*env)->GetMethodID(env, (*env)->FindClass(env, "java/util/Vector"), "addElement", "(Ljava/lang/Object;)V");
+fprintf(stderr, "[NATIVEFX] initIDs8b\n");
     
     mat_jMapGetMethod = (*env)->GetMethodID(env, mat_jMapClass, "get", "(Ljava/lang/Object;)Ljava/lang/Object;");
+fprintf(stderr, "[NATIVEFX] initIDs8c\n");
     mat_jBooleanValueMethod = (*env)->GetMethodID(env, mat_jBooleanClass, "booleanValue", "()Z");
+fprintf(stderr, "[NATIVEFX] initIDs8d\n");
     mat_jIntegerValueMethod = (*env)->GetMethodID(env, mat_jIntegerClass, "intValue", "()I");
+fprintf(stderr, "[NATIVEFX] initIDs8e\n");
     mat_jLongValueMethod = (*env)->GetMethodID(env, mat_jLongClass, "longValue", "()J");
     
+fprintf(stderr, "[NATIVEFX] initIDs8f\n");
     jRunnableRun = (*env)->GetMethodID(env, (*env)->FindClass(env, "java/lang/Runnable"), "run", "()V");
     
     // screen specific
+fprintf(stderr, "[NATIVEFX] initIDs8g\n");
     mat_jScreenClass = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "com/sun/glass/ui/Screen"));
+fprintf(stderr, "[NATIVEFX] initIDs8h\n");
     GLASS_CHECK_EXCEPTION(env);
     
+fprintf(stderr, "[NATIVEFX] initIDs9\n");
     // view specific
+    jclass mat_jViewParentClass = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "com/sun/glass/ui/View"));
     mat_jViewClass = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "com/sun/glass/ui/ios/IosView"));
     jclass mat_jViewBaseClass = (*env)->FindClass(env, "com/sun/glass/ui/View");
     GLASS_CHECK_EXCEPTION(env);
@@ -672,31 +735,33 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_ios_IosApplication__1initIDs
     mat_jViewNotifyInputMethod = (*env)->GetMethodID(env, mat_jViewBaseClass, "notifyInputMethod", "(Ljava/lang/String;[I[I[BIII)V");
     mat_jViewNotifyView = (*env)->GetMethodID(env, mat_jViewBaseClass, "notifyView", "(I)V");
     GLASS_CHECK_EXCEPTION(env);
+fprintf(stderr, "[NATIVEFX] initIDs10\n");
     
     
     if (jViewNotifyDragEnter == NULL)
     {
-        jViewNotifyDragEnter = (*env)->GetMethodID(env, mat_jViewClass, "notifyDragEnter", "(IIIII)I");
+        jViewNotifyDragEnter = (*env)->GetMethodID(env, mat_jViewParentClass, "notifyDragEnter", "(IIIII)I");
     }
     
     if (jViewNotifyDragOver == NULL)
     {
-        jViewNotifyDragOver = (*env)->GetMethodID(env, mat_jViewClass, "notifyDragOver", "(IIIII)I");
+        jViewNotifyDragOver = (*env)->GetMethodID(env, mat_jViewParentClass, "notifyDragOver", "(IIIII)I");
     }
     
     if (jViewNotifyDragLeave == NULL)
     {
-        jViewNotifyDragLeave = (*env)->GetMethodID(env, mat_jViewClass, "notifyDragLeave", "()V");
+        jViewNotifyDragLeave = (*env)->GetMethodID(env, mat_jViewParentClass, "notifyDragLeave", "()V");
     }
+fprintf(stderr, "[NATIVEFX] initIDs11\n");
     
     if (jViewNotifyDragDrop == NULL)
     {
-        jViewNotifyDragDrop = (*env)->GetMethodID(env, mat_jViewClass, "notifyDragDrop", "(IIIII)I");
+        jViewNotifyDragDrop = (*env)->GetMethodID(env, mat_jViewParentClass, "notifyDragDrop", "(IIIII)I");
     }
     
     if (jViewNotifyDragEnd == NULL)
     {
-        jViewNotifyDragEnd = (*env)->GetMethodID(env, mat_jViewClass, "notifyDragEnd", "(I)V");
+        jViewNotifyDragEnd = (*env)->GetMethodID(env, mat_jViewParentClass, "notifyDragEnd", "(I)V");
     } 
     
     GLASS_CHECK_EXCEPTION(env);
@@ -751,15 +816,18 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_ios_IosApplication__1initIDs
     mat_jCursorClass = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "com/sun/glass/ui/ios/IosCursor"));
     GLASS_CHECK_EXCEPTION(env);
     
+fprintf(stderr, "[NATIVEFX] initIDs12\n");
     if (pipe(postEventPipe) != 0) {
         mat_JNU_ThrowByName(env, mat_RuntimeException, "Pipe allocation failed");
     }
     
+fprintf(stderr, "[NATIVEFX] initIDs13\n");
     // display link timer
     NSObject<GlassTimerDelegate>  *delegate = [[GlassTimer alloc] init];
     [GlassTimer setDelegate: delegate];
 
     GLASS_LOG("leaving Java_com_sun_glass_ui_ios_IosApplication__1initIDs");
+fprintf(stderr, "[NATIVEFX] initIDs14\n");
 }
 
 

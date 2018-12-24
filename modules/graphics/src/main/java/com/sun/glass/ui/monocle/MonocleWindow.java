@@ -53,8 +53,6 @@ final class MonocleWindow extends Window {
 
     MonocleWindow(Window owner, Screen screen, int styleMask) {
         super(owner, screen, styleMask);
-        setPlatformScale(screen.getUIScale());
-        setRenderScale(screen.getRenderScale());
     }
 
     MonocleWindow(long parent) {
@@ -290,8 +288,8 @@ final class MonocleWindow extends Window {
             }
             x = 0;
             y = 0;
-            width = (int)(screen.getWidth() * screen.getScale());
-            height = (int)(screen.getHeight() * screen.getScale());
+            width = screen.getWidth();
+            height = screen.getHeight();
             MonocleView view = (MonocleView) getView();
             if (view != null) {
                 view.notifyView(ViewEvent.FULLSCREEN_ENTER);
@@ -458,16 +456,10 @@ final class MonocleWindow extends Window {
     protected void _requestInput(long ptr, String text, int type, double width, double height,
                                  double Mxx, double Mxy, double Mxz, double Mxt,
                                  double Myx, double Myy, double Myz, double Myt,
-                                 double Mzx, double Mzy, double Mzz, double Mzt,
-                                 double fontSize) {
+                                 double Mzx, double Mzy, double Mzz, double Mzt) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    @Override
-    protected void _updateInput(long ptr, String text) {
-        throw new UnsupportedOperationException("Not supported yet."); 
-    }
-        
     @Override
     protected void _releaseInput(long ptr) {
         throw new UnsupportedOperationException("Not supported yet.");

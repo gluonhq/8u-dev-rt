@@ -39,7 +39,7 @@ public class IosImageLoaderFactory implements ImageLoaderFactory {
 
     private static IosImageLoaderFactory theInstance;
 
-    private IosImageLoaderFactory() {}
+    private IosImageLoaderFactory() {};
 
     /**
      * Returns an instance of IosImageLoaderFactory

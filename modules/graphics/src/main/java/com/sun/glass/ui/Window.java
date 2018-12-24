@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2018, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -38,7 +38,7 @@ public abstract class Window {
     public static class EventHandler {
         public void handleWindowEvent(Window window, long time, int type) {
         }
-        
+
         /**
          * Notifies a listener that the screen object for this Window instance
          * has been updated.
@@ -158,10 +158,10 @@ public abstract class Window {
      */
     public static final int UNIFIED = 1 << 8;
 
-    final static private class State {
-        private static final int NORMAL = 1;
-        private static final int MINIMIZED = 2;
-        private static final int MAXIMIZED = 3;
+    final static public class State {
+        public static final int NORMAL = 1;
+        public static final int MINIMIZED = 2;
+        public static final int MAXIMIZED = 3;
     }
 
     /**
@@ -251,7 +251,7 @@ public abstract class Window {
             default:
                 throw new RuntimeException("The functional type should be NORMAL, POPUP, or UTILITY, but not a combination of these");
         }
-        
+
         if (((styleMask & UNIFIED) != 0)
                 && !Application.GetApplication().supportsUnifiedWindows()) {
            styleMask &= ~UNIFIED;
@@ -294,6 +294,9 @@ public abstract class Window {
         this.ptr = _createChildWindow(parent);
         if (this.ptr == 0L) {
             throw new RuntimeException("could not create platform window");
+        }
+        if (screen == null) {
+            screen = Screen.getMainScreen(); // start with a default
         }
     }
 
@@ -347,11 +350,11 @@ public abstract class Window {
         return this.delegatePtr != 0L ? this.delegatePtr : this.ptr;
     }
 
-    /** 
+    /**
      * return the "raw' pointer needed by subclasses to pass to native routines
      * @return the native pointer.
      */
-    protected long getRawHandle() {
+    public long getRawHandle() {
         return ptr;
     }
 
@@ -467,7 +470,9 @@ public abstract class Window {
     }
 
     public void setPlatformScale(float platformScale) {
-        if (!PrismSettings.allowHiDPIScaling) return;
+System.err.println("[JVDBG] SET platformScale to "+platformScale);
+System.err.println("allowhdpie is ignored but was "+PrismSettings.allowHiDPIScaling);
+        // if (!PrismSettings.allowHiDPIScaling) return;
         this.platformScale = platformScale;
     }
 
@@ -481,7 +486,8 @@ public abstract class Window {
     }
 
     public void setRenderScale(float renderScale) {
-        if (!PrismSettings.allowHiDPIScaling) return;
+System.err.println("[JVDBG] SET renderScale to "+renderScale);
+        // if (!PrismSettings.allowHiDPIScaling) return;
         this.renderScale = renderScale;
     }
 
@@ -1198,6 +1204,10 @@ public abstract class Window {
         setScreen(newScreen);
     }
 
+    protected void setState(int state) {
+        this.state = state;
+    }
+
     /**
      * type values:
      *   - WindowEvent.RESIZE
@@ -1261,7 +1271,7 @@ public abstract class Window {
     // *****************************************************
     // window event handlers
     // *****************************************************
-    private void handleWindowEvent(long time, int type) {
+    protected void handleWindowEvent(long time, int type) {
         if (this.eventHandler != null) {
             this.eventHandler.handleWindowEvent(this, time, type);
         }
@@ -1390,7 +1400,7 @@ public abstract class Window {
                         (y >= this.y) && (y < (this.y + this.height)));
         }
     }
-    
+
     protected void notifyLevelChanged(int level) {
         this.level = level;
         if (this.eventHandler != null) {
@@ -1550,23 +1560,14 @@ public abstract class Window {
     public void requestInput(String text, int type, double width, double height,
                                 double Mxx, double Mxy, double Mxz, double Mxt,
                                 double Myx, double Myy, double Myz, double Myt,
-                                double Mzx, double Mzy, double Mzz, double Mzt, double fontSize) {
+                                double Mzx, double Mzy, double Mzz, double Mzt) {
         Application.checkEventThread();
         _requestInput(this.ptr, text, type, width, height,
                         Mxx, Mxy, Mxz, Mxt,
                         Myx, Myy, Myz, Myt,
-                        Mzx, Mzy, Mzz, Mzt, fontSize);
+                        Mzx, Mzy, Mzz, Mzt);
     }
 
-    /**
-     * While native text input component is visible, if any change is made in the
-     * text property of the JavaFX text component, update the native component.
-     * @param text
-     */
-    public void updateInput(String text) {
-        Application.checkEventThread();
-        _updateInput(this.ptr, text);
-    }
     /**
      * Native keyboard for text input is no longer necessary.
      * Keyboard will be hidden and native text input component too.
@@ -1579,10 +1580,7 @@ public abstract class Window {
     protected abstract void _requestInput(long ptr, String text, int type, double width, double height,
                                             double Mxx, double Mxy, double Mxz, double Mxt,
                                             double Myx, double Myy, double Myz, double Myt,
-                                            double Mzx, double Mzy, double Mzz, double Mzt,
-                                            double fontSize);
-    
-    protected abstract void _updateInput(long ptr, String text);
+                                            double Mzx, double Mzy, double Mzz, double Mzt);
 
     protected abstract void _releaseInput(long ptr);
 

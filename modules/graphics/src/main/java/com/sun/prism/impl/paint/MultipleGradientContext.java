@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2006, 2016, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -207,17 +207,19 @@ abstract class MultipleGradientContext {
         // to explode.  If the estimated size is too large, break to using
         // separate arrays for each interval, and using an indexing scheme at
         // look-up time.
-        int estimatedSize = 0;
-        for (int i = 0; i < normalizedIntervals.length; i++) {
+        float estimatedSize = 0.0f;
+        for (int i = 0; i < normalizedIntervals.length
+                && Float.isFinite(estimatedSize); i++) {
             estimatedSize += (normalizedIntervals[i]/Imin) * GRADIENT_SIZE;
         }
 
-        if (estimatedSize > MAX_GRADIENT_ARRAY_SIZE) {
-            // slow method
-            calculateMultipleArrayGradient(normalizedColors);
-        } else {
+        if (estimatedSize <= MAX_GRADIENT_ARRAY_SIZE) {
             // fast method
             calculateSingleArrayGradient(normalizedColors, Imin);
+        } else {
+            // fallback to slow method if
+            // |estimatedSize| is > MAX_GRADIENT_ARRAY_SIZE or NaN or Infinity.
+            calculateMultipleArrayGradient(normalizedColors);
         }
     }
 

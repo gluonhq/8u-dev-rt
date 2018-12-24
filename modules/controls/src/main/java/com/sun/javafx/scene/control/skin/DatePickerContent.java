@@ -756,7 +756,7 @@ yearSpinner.setFillHeight(false);
     }
 
     protected Locale getLocale() {
-        return Locale.getDefault(/*Locale.Category.FORMAT*/);
+        return Locale.getDefault(Locale.Category.FORMAT);
     }
 
     /**

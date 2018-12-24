@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2009, 2016, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,6 +29,7 @@ import com.sun.glass.ui.Screen;
 import com.sun.javafx.geom.Rectangle;
 import com.sun.javafx.geom.transform.Affine3D;
 import com.sun.javafx.geom.transform.BaseTransform;
+import com.sun.javafx.geom.transform.GeneralTransform3D;
 import com.sun.javafx.sg.prism.NGCamera;
 import com.sun.prism.CompositeMode;
 import com.sun.prism.PixelFormat;
@@ -38,7 +39,6 @@ import com.sun.prism.ResourceFactory;
 import com.sun.prism.Texture;
 import com.sun.prism.impl.BaseContext;
 import com.sun.prism.impl.BaseGraphics;
-import com.sun.prism.impl.VertexBuffer;
 import com.sun.prism.paint.Color;
 import com.sun.prism.paint.Gradient;
 import com.sun.prism.paint.ImagePattern;
@@ -140,7 +140,7 @@ public abstract class BaseShaderContext extends BaseContext {
         TEXTURE_First_LCD    ("Solid_TextureFirstPassLCD"),
         TEXTURE_SECOND_LCD   ("Solid_TextureSecondPassLCD"),
         SUPER                ("Mask_TextureSuper");
-         
+
         private String name;
         private SpecialShaderType(String name) {
             this.name = name;
@@ -152,7 +152,7 @@ public abstract class BaseShaderContext extends BaseContext {
     private final Shader[] specialShaders = new Shader[SpecialShaderType.values().length];
     // specialShaders with alpha test
     private final Shader[] specialATShaders = new Shader[SpecialShaderType.values().length];
-    
+
     private Shader externalShader;
 
     private RTTexture lcdBuffer;
@@ -160,8 +160,8 @@ public abstract class BaseShaderContext extends BaseContext {
 
     private State state;
 
-    protected BaseShaderContext(Screen screen, ShaderFactory factory, VertexBuffer vb) {
-        super(screen, factory, vb);
+    protected BaseShaderContext(Screen screen, ShaderFactory factory, int vbQuads) {
+        super(screen, factory, vbQuads);
         this.factory = factory;
         init();
     }
@@ -192,6 +192,12 @@ public abstract class BaseShaderContext extends BaseContext {
         private float lastConst5 = Float.NaN;
         private float lastConst6 = Float.NaN;
         private boolean lastState3D = false;
+    }
+
+    @Override
+    protected void setPerspectiveTransform(GeneralTransform3D transform) {
+        state.isXformValid = false;
+        super.setPerspectiveTransform(transform);
     }
 
     protected void resetLastClip(State state) {
@@ -263,6 +269,7 @@ public abstract class BaseShaderContext extends BaseContext {
                                    MaskType maskType, Paint paint,
                                    float bx, float by, float bw, float bh)
     {
+Thread.dumpStack();
         Paint.Type paintType = paint.getType();
         if (paintType == Paint.Type.COLOR || maskType.isNewPaintStyle()) {
             return;

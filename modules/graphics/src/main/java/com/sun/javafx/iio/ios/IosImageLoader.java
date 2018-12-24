@@ -111,7 +111,7 @@ public class IosImageLoader extends ImageLoaderImpl {
 
     static {
         AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
-            NativeLibLoader.loadLibrary("javafx_iio");
+            NativeLibLoader.loadLibrary("nativeiio");
             return null;
         });
 

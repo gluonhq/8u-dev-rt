@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2017, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -34,6 +34,7 @@ import com.sun.glass.events.SwipeGesture;
 import com.sun.glass.ui.Accessible;
 import com.sun.glass.ui.Clipboard;
 import com.sun.glass.ui.ClipboardAssistance;
+import com.sun.glass.ui.Screen;
 import com.sun.glass.ui.View;
 import com.sun.glass.ui.Window;
 import com.sun.javafx.PlatformUtil;
@@ -50,6 +51,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.input.InputMethodEvent;
 import javafx.scene.input.InputMethodHighlight;
 import javafx.scene.input.InputMethodTextRun;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.RotateEvent;
 import javafx.scene.input.ScrollEvent;
@@ -73,7 +75,7 @@ class GlassViewEventHandler extends View.EventHandler {
             scrollGestureEnabled = Boolean.valueOf(System.getProperty("com.sun.javafx.gestures.scroll", "false"));
             return null;
         });
-    }    
+    }
 
     private ViewScene scene;
     private final GlassSceneDnDEventHandler dndHandler;
@@ -81,7 +83,7 @@ class GlassViewEventHandler extends View.EventHandler {
 
     public GlassViewEventHandler(final ViewScene scene) {
         this.scene = scene;
-        
+
         dndHandler = new GlassSceneDnDEventHandler(scene);
 
         gestures = new GestureRecognizers();
@@ -152,6 +154,8 @@ class GlassViewEventHandler extends View.EventHandler {
         char[] chars;
         int modifiers;
 
+        private KeyCode lastKeyCode;
+
         @Override
         public Void run() {
             if (PULSE_LOGGING_ENABLED) {
@@ -159,10 +163,6 @@ class GlassViewEventHandler extends View.EventHandler {
             }
             WindowStage stage = scene.getWindowStage();
             try {
-                if (stage != null) {
-                    stage.setInEventHandler(true);
-                }
-
                 boolean shiftDown = (modifiers & KeyEvent.MODIFIER_SHIFT) != 0;
                 boolean controlDown = (modifiers & KeyEvent.MODIFIER_CONTROL) != 0;
                 boolean altDown = (modifiers & KeyEvent.MODIFIER_ALT) != 0;
@@ -173,9 +173,29 @@ class GlassViewEventHandler extends View.EventHandler {
 
                 javafx.scene.input.KeyEvent keyEvent = new javafx.scene.input.KeyEvent(
                         keyEventType(type),
-                        str, text, 
+                        str, text,
                         KeyCodeMap.valueOf(key) ,
                         shiftDown, controlDown, altDown, metaDown);
+
+                KeyCode keyCode = KeyCodeMap.valueOf(key);
+                switch (type) {
+                    case com.sun.glass.events.KeyEvent.PRESS:
+                    case com.sun.glass.events.KeyEvent.RELEASE:
+                        lastKeyCode = keyCode;
+                        break;
+
+                    case com.sun.glass.events.KeyEvent.TYPED:
+                        keyCode = lastKeyCode;
+                        break;
+                }
+
+                if (stage != null) {
+                    if (keyCode == KeyCode.ESCAPE) {
+                        stage.setInAllowedEventHandler(false);
+                    } else {
+                        stage.setInAllowedEventHandler(true);
+                    }
+                }
 
                 switch (type) {
                     case com.sun.glass.events.KeyEvent.PRESS:
@@ -204,7 +224,7 @@ class GlassViewEventHandler extends View.EventHandler {
                 }
             } finally {
                 if (stage != null) {
-                    stage.setInEventHandler(false);
+                    stage.setInAllowedEventHandler(false);
                 }
                 if (PULSE_LOGGING_ENABLED) {
                     PulseLogger.newInput(null);
@@ -287,7 +307,7 @@ class GlassViewEventHandler extends View.EventHandler {
             if (PULSE_LOGGING_ENABLED) {
                 PulseLogger.newInput(mouseEventType(type).toString());
             }
-                    
+
             int buttonMask;
             switch (button) {
                 case MouseEvent.BUTTON_LEFT:
@@ -336,8 +356,17 @@ class GlassViewEventHandler extends View.EventHandler {
             WindowStage stage = scene.getWindowStage();
             try {
                 if (stage != null) {
-                    stage.setInEventHandler(true);
+                    switch (type) {
+                        case MouseEvent.UP:
+                        case MouseEvent.DOWN:
+                            stage.setInAllowedEventHandler(true);
+                            break;
+                        default:
+                            stage.setInAllowedEventHandler(false);
+                            break;
+                    }
                 }
+
                 if (scene.sceneListener != null) {
                     boolean shiftDown = (modifiers & KeyEvent.MODIFIER_SHIFT) != 0;
                     boolean controlDown = (modifiers & KeyEvent.MODIFIER_CONTROL) != 0;
@@ -347,17 +376,32 @@ class GlassViewEventHandler extends View.EventHandler {
                     boolean middleButtonDown = (modifiers & KeyEvent.MODIFIER_BUTTON_MIDDLE) != 0;
                     boolean secondaryButtonDown = (modifiers & KeyEvent.MODIFIER_BUTTON_SECONDARY) != 0;
                     Window w = view.getWindow();
-                    double pScale = (w == null) ? 1.0 : w.getPlatformScale();
- 
+                    double pScale, sx, sy;
+                    if (w != null) {
+                        pScale = w.getPlatformScale();
+                        Screen scr = w.getScreen();
+                        if (scr != null) {
+                            sx = scr.getX();
+                            sy = scr.getY();
+                        } else {
+                            sx = sy = 0.0;
+                        }
+                    } else {
+                        pScale = 1.0;
+                        sx = sy = 0.0;
+                    }
+
                     scene.sceneListener.mouseEvent(mouseEventType(type),
-                            x / pScale, y / pScale, xAbs / pScale, yAbs / pScale,
+                            x / pScale, y / pScale,
+                            sx + (xAbs - sx) / pScale,
+                            sy + (yAbs - sy) / pScale,
                             mouseEventButton(button), isPopupTrigger, isSynthesized,
                             shiftDown, controlDown, altDown, metaDown,
                             primaryButtonDown, middleButtonDown, secondaryButtonDown);
                 }
             } finally {
                 if (stage != null) {
-                    stage.setInEventHandler(false);
+                    stage.setInAllowedEventHandler(false);
                 }
                 if (PULSE_LOGGING_ENABLED) {
                     PulseLogger.newInput(null);
@@ -399,15 +443,29 @@ class GlassViewEventHandler extends View.EventHandler {
         WindowStage stage = scene.getWindowStage();
         try {
             if (stage != null) {
-                stage.setInEventHandler(true);
+                stage.setInAllowedEventHandler(true);
             }
             QuantumToolkit.runWithoutRenderLock(() -> {
                 return AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
                     if (scene.sceneListener != null) {
+                        double pScale, sx, sy;
                         Window w = view.getWindow();
-                        double pScale = (w == null) ? 1.0 : w.getPlatformScale();
+                        if (w != null) {
+                            pScale = w.getPlatformScale();
+                            Screen scr = w.getScreen();
+                            if (scr != null) {
+                                sx = scr.getX();
+                                sy = scr.getY();
+                            } else {
+                                sx = sy = 0.0;
+                            }
+                        } else {
+                            pScale = 1.0;
+                            sx = sy = 0.0;
+                        }
                         scene.sceneListener.menuEvent(x / pScale, y / pScale,
-                                                      xAbs / pScale, yAbs / pScale,
+                                                      sx + (xAbs - sx) / pScale,
+                                                      sy + (yAbs - sy) / pScale,
                                                       isKeyboardTrigger);
                     }
                     return null;
@@ -415,7 +473,7 @@ class GlassViewEventHandler extends View.EventHandler {
             });
         } finally {
             if (stage != null) {
-                stage.setInEventHandler(false);
+                stage.setInAllowedEventHandler(false);
             }
             if (PULSE_LOGGING_ENABLED) {
                 PulseLogger.newInput(null);
@@ -436,19 +494,34 @@ class GlassViewEventHandler extends View.EventHandler {
         WindowStage stage = scene.getWindowStage();
         try {
             if (stage != null) {
-                stage.setInEventHandler(true);
+                stage.setInAllowedEventHandler(false);
             }
             QuantumToolkit.runWithoutRenderLock(() -> {
                 return AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
                     if (scene.sceneListener != null) {
                         Window w = view.getWindow();
-                        double pScale = (w == null) ? 1.0 : w.getPlatformScale();
+                        double pScale, sx, sy;
+                        if (w != null) {
+                            pScale = w.getPlatformScale();
+                            Screen scr = w.getScreen();
+                            if (scr != null) {
+                                sx = scr.getX();
+                                sy = scr.getY();
+                            } else {
+                                sx = sy = 0.0;
+                            }
+                        } else {
+                            pScale = 1.0;
+                            sx = sy = 0.0;
+                        }
                         scene.sceneListener.scrollEvent(ScrollEvent.SCROLL,
                             deltaX / pScale, deltaY / pScale, 0, 0,
                             xMultiplier, yMultiplier,
                             0, // touchCount
                             chars, lines, defaultChars, defaultLines,
-                            x / pScale, y / pScale, xAbs / pScale, yAbs / pScale,
+                            x / pScale, y / pScale,
+                            sx + (xAbs - sx) / pScale,
+                            sy + (yAbs - sy) / pScale,
                             (modifiers & KeyEvent.MODIFIER_SHIFT) != 0,
                             (modifiers & KeyEvent.MODIFIER_CONTROL) != 0,
                             (modifiers & KeyEvent.MODIFIER_ALT) != 0,
@@ -461,7 +534,7 @@ class GlassViewEventHandler extends View.EventHandler {
             });
         } finally {
             if (stage != null) {
-                stage.setInEventHandler(false);
+                stage.setInAllowedEventHandler(false);
             }
             if (PULSE_LOGGING_ENABLED) {
                 PulseLogger.newInput(null);
@@ -540,7 +613,7 @@ class GlassViewEventHandler extends View.EventHandler {
         WindowStage stage = scene.getWindowStage();
         try {
             if (stage != null) {
-                stage.setInEventHandler(true);
+                stage.setInAllowedEventHandler(true);
             }
             QuantumToolkit.runWithoutRenderLock(() -> {
                 return AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
@@ -558,7 +631,7 @@ class GlassViewEventHandler extends View.EventHandler {
             });
         } finally {
             if (stage != null) {
-                stage.setInEventHandler(false);
+                stage.setInAllowedEventHandler(false);
             }
             if (PULSE_LOGGING_ENABLED) {
                 PulseLogger.newInput(null);
@@ -705,7 +778,7 @@ class GlassViewEventHandler extends View.EventHandler {
     }
 
     private ClipboardAssistance dropSourceAssistant;
-    
+
     @Override public void handleDragStart(View view, final int button,
                                           final int x, final int y, final int xAbs, final int yAbs,
                                           final ClipboardAssistance assistant)
@@ -775,6 +848,7 @@ class GlassViewEventHandler extends View.EventHandler {
                 case ViewEvent.RESIZE: {
                     Window w = view.getWindow();
                     float pScale = (w == null) ? 1.0f : w.getPlatformScale();
+System.err.println("[JVSCALE] resize, pscale = "+pScale);
                     scene.sceneListener.changedSize(view.getWidth()  / pScale,
                                                     view.getHeight() / pScale);
                     scene.entireSceneNeedsRepaint();
@@ -847,7 +921,7 @@ class GlassViewEventHandler extends View.EventHandler {
         WindowStage stage = scene.getWindowStage();
         try {
             if (stage != null) {
-                stage.setInEventHandler(true);
+                stage.setInAllowedEventHandler(false);
             }
             QuantumToolkit.runWithoutRenderLock(() -> {
                 return AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
@@ -867,7 +941,20 @@ class GlassViewEventHandler extends View.EventHandler {
                                 throw new RuntimeException("Unknown scroll event type: " + type);
                         }
                         Window w = view.getWindow();
-                        double pScale = (w == null) ? 1.0 : w.getPlatformScale();
+                        double pScale, sx, sy;
+                        if (w != null) {
+                            pScale = w.getPlatformScale();
+                            Screen scr = w.getScreen();
+                            if (scr != null) {
+                                sx = scr.getX();
+                                sy = scr.getY();
+                            } else {
+                                sx = sy = 0.0;
+                            }
+                        } else {
+                            pScale = 1.0;
+                            sx = sy = 0.0;
+                        }
                         scene.sceneListener.scrollEvent(eventType,
                                 dx / pScale, dy / pScale, totaldx / pScale, totaldy / pScale,
                                 multiplierX, multiplierY,
@@ -875,8 +962,8 @@ class GlassViewEventHandler extends View.EventHandler {
                                 0, 0, 0, 0,
                                 x == View.GESTURE_NO_VALUE ? Double.NaN : x / pScale,
                                 y == View.GESTURE_NO_VALUE ? Double.NaN : y / pScale,
-                                xAbs == View.GESTURE_NO_VALUE ? Double.NaN : xAbs / pScale,
-                                yAbs == View.GESTURE_NO_VALUE ? Double.NaN : yAbs / pScale,
+                                xAbs == View.GESTURE_NO_VALUE ? Double.NaN : sx + (xAbs - sx) / pScale,
+                                yAbs == View.GESTURE_NO_VALUE ? Double.NaN : sy + (yAbs - sy) / pScale,
                                 (modifiers & KeyEvent.MODIFIER_SHIFT) != 0,
                                 (modifiers & KeyEvent.MODIFIER_CONTROL) != 0,
                                 (modifiers & KeyEvent.MODIFIER_ALT) != 0,
@@ -888,7 +975,7 @@ class GlassViewEventHandler extends View.EventHandler {
             });
         } finally {
             if (stage != null) {
-                stage.setInEventHandler(false);
+                stage.setInAllowedEventHandler(false);
             }
             if (PULSE_LOGGING_ENABLED) {
                 PulseLogger.newInput(null);
@@ -910,7 +997,7 @@ class GlassViewEventHandler extends View.EventHandler {
         WindowStage stage = scene.getWindowStage();
         try {
             if (stage != null) {
-                stage.setInEventHandler(true);
+                stage.setInAllowedEventHandler(false);
             }
             QuantumToolkit.runWithoutRenderLock(() -> {
                 return AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
@@ -930,13 +1017,26 @@ class GlassViewEventHandler extends View.EventHandler {
                                 throw new RuntimeException("Unknown scroll event type: " + type);
                         }
                         Window w = view.getWindow();
-                        double pScale = (w == null) ? 1.0 : w.getPlatformScale();
+                        double pScale, sx, sy;
+                        if (w != null) {
+                            pScale = w.getPlatformScale();
+                            Screen scr = w.getScreen();
+                            if (scr != null) {
+                                sx = scr.getX();
+                                sy = scr.getY();
+                            } else {
+                                sx = sy = 0.0;
+                            }
+                        } else {
+                            pScale = 1.0;
+                            sx = sy = 0.0;
+                        }
                         // REMIND: Scale the [total]scale params too?
                         scene.sceneListener.zoomEvent(eventType, scale, totalscale,
                                 originx == View.GESTURE_NO_VALUE ? Double.NaN : originx / pScale,
                                 originy == View.GESTURE_NO_VALUE ? Double.NaN : originy / pScale,
-                                originxAbs == View.GESTURE_NO_VALUE ? Double.NaN : originxAbs / pScale,
-                                originyAbs == View.GESTURE_NO_VALUE ? Double.NaN : originyAbs / pScale,
+                                originxAbs == View.GESTURE_NO_VALUE ? Double.NaN : sx + (originxAbs - sx) / pScale,
+                                originyAbs == View.GESTURE_NO_VALUE ? Double.NaN : sy + (originyAbs - sy) / pScale,
                                 (modifiers & KeyEvent.MODIFIER_SHIFT) != 0,
                                 (modifiers & KeyEvent.MODIFIER_CONTROL) != 0,
                                 (modifiers & KeyEvent.MODIFIER_ALT) != 0,
@@ -948,7 +1048,7 @@ class GlassViewEventHandler extends View.EventHandler {
             });
         } finally {
             if (stage != null) {
-                stage.setInEventHandler(false);
+                stage.setInAllowedEventHandler(false);
             }
             if (PULSE_LOGGING_ENABLED) {
                 PulseLogger.newInput(null);
@@ -969,7 +1069,7 @@ class GlassViewEventHandler extends View.EventHandler {
         WindowStage stage = scene.getWindowStage();
         try {
             if (stage != null) {
-                stage.setInEventHandler(true);
+                stage.setInAllowedEventHandler(false);
             }
             QuantumToolkit.runWithoutRenderLock(() -> {
                 return AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
@@ -989,12 +1089,25 @@ class GlassViewEventHandler extends View.EventHandler {
                                 throw new RuntimeException("Unknown scroll event type: " + type);
                         }
                         Window w = view.getWindow();
-                        double pScale = (w == null) ? 1.0 : w.getPlatformScale();
+                        double pScale, sx, sy;
+                        if (w != null) {
+                            pScale = w.getPlatformScale();
+                            Screen scr = w.getScreen();
+                            if (scr != null) {
+                                sx = scr.getX();
+                                sy = scr.getY();
+                            } else {
+                                sx = sy = 0.0;
+                            }
+                        } else {
+                            pScale = 1.0;
+                            sx = sy = 0.0;
+                        }
                         scene.sceneListener.rotateEvent(eventType, dangle, totalangle,
                                 originx == View.GESTURE_NO_VALUE ? Double.NaN : originx / pScale,
                                 originy == View.GESTURE_NO_VALUE ? Double.NaN : originy / pScale,
-                                originxAbs == View.GESTURE_NO_VALUE ? Double.NaN : originxAbs / pScale,
-                                originyAbs == View.GESTURE_NO_VALUE ? Double.NaN : originyAbs / pScale,
+                                originxAbs == View.GESTURE_NO_VALUE ? Double.NaN : sx + (originxAbs - sx) / pScale,
+                                originyAbs == View.GESTURE_NO_VALUE ? Double.NaN : sy + (originyAbs - sy) / pScale,
                                 (modifiers & KeyEvent.MODIFIER_SHIFT) != 0,
                                 (modifiers & KeyEvent.MODIFIER_CONTROL) != 0,
                                 (modifiers & KeyEvent.MODIFIER_ALT) != 0,
@@ -1006,7 +1119,7 @@ class GlassViewEventHandler extends View.EventHandler {
             });
         } finally {
             if (stage != null) {
-                stage.setInEventHandler(false);
+                stage.setInAllowedEventHandler(false);
             }
             if (PULSE_LOGGING_ENABLED) {
                 PulseLogger.newInput(null);
@@ -1026,7 +1139,7 @@ class GlassViewEventHandler extends View.EventHandler {
         WindowStage stage = scene.getWindowStage();
         try {
             if (stage != null) {
-                stage.setInEventHandler(true);
+                stage.setInAllowedEventHandler(false);
             }
             QuantumToolkit.runWithoutRenderLock(() -> {
                 return AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
@@ -1049,12 +1162,25 @@ class GlassViewEventHandler extends View.EventHandler {
                                 throw new RuntimeException("Unknown swipe event direction: " + dir);
                         }
                         Window w = view.getWindow();
-                        double pScale = (w == null) ? 1.0 : w.getPlatformScale();
+                        double pScale, sx, sy;
+                        if (w != null) {
+                            pScale = w.getPlatformScale();
+                            Screen scr = w.getScreen();
+                            if (scr != null) {
+                                sx = scr.getX();
+                                sy = scr.getY();
+                            } else {
+                                sx = sy = 0.0;
+                            }
+                        } else {
+                            pScale = 1.0;
+                            sx = sy = 0.0;
+                        }
                         scene.sceneListener.swipeEvent(eventType, touchCount,
                                 x == View.GESTURE_NO_VALUE ? Double.NaN : x / pScale,
                                 y == View.GESTURE_NO_VALUE ? Double.NaN : y / pScale,
-                                xAbs == View.GESTURE_NO_VALUE ? Double.NaN : xAbs / pScale,
-                                yAbs == View.GESTURE_NO_VALUE ? Double.NaN : yAbs / pScale,
+                                xAbs == View.GESTURE_NO_VALUE ? Double.NaN : sx + (xAbs - sx) / pScale,
+                                yAbs == View.GESTURE_NO_VALUE ? Double.NaN : sy + (yAbs - sy) / pScale,
                                 (modifiers & KeyEvent.MODIFIER_SHIFT) != 0,
                                 (modifiers & KeyEvent.MODIFIER_CONTROL) != 0,
                                 (modifiers & KeyEvent.MODIFIER_ALT) != 0,
@@ -1066,7 +1192,7 @@ class GlassViewEventHandler extends View.EventHandler {
             });
         } finally {
             if (stage != null) {
-                stage.setInEventHandler(false);
+                stage.setInAllowedEventHandler(false);
             }
             if (PULSE_LOGGING_ENABLED) {
                 PulseLogger.newInput(null);
@@ -1084,7 +1210,7 @@ class GlassViewEventHandler extends View.EventHandler {
         WindowStage stage = scene.getWindowStage();
         try {
             if (stage != null) {
-                stage.setInEventHandler(true);
+                stage.setInAllowedEventHandler(true);
             }
             QuantumToolkit.runWithoutRenderLock(() -> {
                 return AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
@@ -1101,7 +1227,7 @@ class GlassViewEventHandler extends View.EventHandler {
             });
         } finally {
             if (stage != null) {
-                stage.setInEventHandler(false);
+                stage.setInAllowedEventHandler(false);
             }
             if (PULSE_LOGGING_ENABLED) {
                 PulseLogger.newInput(null);
@@ -1121,7 +1247,7 @@ class GlassViewEventHandler extends View.EventHandler {
         WindowStage stage = scene.getWindowStage();
         try {
             if (stage != null) {
-                stage.setInEventHandler(true);
+                stage.setInAllowedEventHandler(true);
             }
             QuantumToolkit.runWithoutRenderLock(() -> {
                     return AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
@@ -1144,24 +1270,38 @@ class GlassViewEventHandler extends View.EventHandler {
                                 throw new RuntimeException("Unknown touch state: " + type);
                         }
                         Window w = view.getWindow();
-                        double pScale = (w == null) ? 1.0 : w.getPlatformScale();
+                        double pScale, sx, sy;
+                        if (w != null) {
+                            pScale = w.getPlatformScale();
+                            Screen scr = w.getScreen();
+                            if (scr != null) {
+                                sx = scr.getX();
+                                sy = scr.getY();
+                            } else {
+                                sx = sy = 0.0;
+                            }
+                        } else {
+                            pScale = 1.0;
+                            sx = sy = 0.0;
+                        }
                         scene.sceneListener.touchEventNext(state, touchId,
-                                x / pScale, y / pScale, xAbs / pScale, yAbs / pScale);
+                                x / pScale, y / pScale,
+                                sx + (xAbs - sx) / pScale,
+                                sy + (yAbs - sy) / pScale);
                     }
                     return null;
                 }, scene.getAccessControlContext());
             });
         } finally {
             if (stage != null) {
-                stage.setInEventHandler(false);
+                stage.setInAllowedEventHandler(false);
             }
             if (PULSE_LOGGING_ENABLED) {
                 PulseLogger.newInput(null);
             }
         }
-        Window w = view.getWindow();
-        double pScale = (w == null) ? 1.0 : w.getPlatformScale();
-        gestures.notifyNextTouchEvent(time, type, touchId, x/pScale, y/pScale, xAbs/pScale, yAbs/pScale);
+
+        gestures.notifyNextTouchEvent(time, type, touchId, x, y, xAbs, yAbs);
     }
 
     @Override public void handleEndTouchEvent(View view, long time) {
@@ -1171,7 +1311,7 @@ class GlassViewEventHandler extends View.EventHandler {
         WindowStage stage = scene.getWindowStage();
         try {
             if (stage != null) {
-                stage.setInEventHandler(true);
+                stage.setInAllowedEventHandler(true);
             }
             QuantumToolkit.runWithoutRenderLock(() -> {
                 return AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
@@ -1183,7 +1323,7 @@ class GlassViewEventHandler extends View.EventHandler {
             });
         } finally {
             if (stage != null) {
-                stage.setInEventHandler(false);
+                stage.setInAllowedEventHandler(false);
             }
             if (PULSE_LOGGING_ENABLED) {
                 PulseLogger.newInput(null);

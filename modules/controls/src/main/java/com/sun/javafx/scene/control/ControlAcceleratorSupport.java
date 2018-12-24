@@ -61,7 +61,7 @@ public class ControlAcceleratorSupport {
         addAcceleratorsIntoScene(items, (Object)anchor);
     }
 
-    public static void addAcceleratorsIntoScene(final ObservableList<MenuItem> items, final Node anchor) {
+    public static void addAcceleratorsIntoScene(ObservableList<MenuItem> items, Node anchor) {
         // we allow an empty items list as we install listeners later on - if
         // we return on empty, the listener is never installed (leading to RT-39249)
         if (items == null/* || items.isEmpty()*/) {
@@ -90,7 +90,7 @@ public class ControlAcceleratorSupport {
         }
     }
 
-    private static void addAcceleratorsIntoScene(final ObservableList<MenuItem> items, Object anchor) {
+    private static void addAcceleratorsIntoScene(ObservableList<MenuItem> items, Object anchor) {
         // with TableColumnBase, we first need to wait until it has a TableView/TreeTableView associated with it
         if (anchor == null) {
             throw new IllegalArgumentException("Anchor cannot be null");

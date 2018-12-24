@@ -124,7 +124,7 @@ public class InnerShadow extends Effect {
     @Override
     com.sun.scenario.effect.InnerShadow impl_createImpl() {
         return new com.sun.scenario.effect.InnerShadow();
-    }
+    };
 
     /**
      * The input for this {@code Effect}.

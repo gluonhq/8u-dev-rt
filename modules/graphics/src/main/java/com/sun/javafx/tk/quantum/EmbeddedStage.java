@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2017, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -254,7 +254,7 @@ final class EmbeddedStage extends GlassStage implements EmbeddedStageInterface {
             notifyStageListenerLater(r);
         }
     }
-    
+
     @Override
     public void focusUngrab() {
         Runnable r = () -> {
@@ -270,17 +270,11 @@ final class EmbeddedStage extends GlassStage implements EmbeddedStageInterface {
     }
 
     @Override
-    public void requestInput(String text, int type, double width, double height, 
+    public void requestInput(String text, int type, double width, double height,
                                 double Mxx, double Mxy, double Mxz, double Mxt,
-                                double Myx, double Myy, double Myz, double Myt, 
-                                double Mzx, double Mzy, double Mzz, double Mzt, 
-                                double fontSize) {
+                                double Myx, double Myy, double Myz, double Myt,
+                                double Mzx, double Mzy, double Mzz, double Mzt) {
         throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void updateInput(String text) {
-        throw new UnsupportedOperationException("Not supported yet."); 
     }
 
     @Override
@@ -290,5 +284,16 @@ final class EmbeddedStage extends GlassStage implements EmbeddedStageInterface {
 
     @Override public void setRTL(boolean b) {
     }
-    
+
+    @Override
+    public void setEnabled(boolean enabled) {
+    }
+
+    @Override
+    public long getRawHandle() {
+        /* Perhaps this could return the ID for the window in which this
+         * stage is embedded, but there is no current requirement for that.
+         */
+        return 0L;
+    }
 }

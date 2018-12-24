@@ -37,24 +37,30 @@ public class RenderJob extends FutureTask {
     private CompletionListener listener;
     private Object             futureReturn;
 
+static {
+Thread.dumpStack();
+}
     public RenderJob(Runnable pen) {
         super(pen, null);
+Thread.dumpStack();
     }
 
     public RenderJob(Runnable pen, CompletionListener cl) {
         super(pen, null);
+Thread.dumpStack();
         setCompletionListener(cl);
     }
-    
+
     public CompletionListener getCompletionListener() {
         return listener;
     }
-    
+
     public void setCompletionListener(CompletionListener cl) {
         listener = cl;
     }
 
     @Override public void run() {
+Thread.dumpStack();
         if (super.runAndReset() == false) {
             // if (PrismSettings.verbose) {
                 try {

@@ -48,15 +48,15 @@ public class NodeHelper {
 
     public static boolean isDerivedDepthTest(Node node) {
         return nodeAccessor.isDerivedDepthTest(node);
-    }
+    };
 
     public static SubScene getSubScene(Node node) {
         return nodeAccessor.getSubScene(node);
-    }
+    };
 
     public static Accessible getAccessible(Node node) {
         return nodeAccessor.getAccessible(node);
-    }
+    };
 
     public static void setNodeAccessor(final NodeAccessor newAccessor) {
         if (nodeAccessor != null) {

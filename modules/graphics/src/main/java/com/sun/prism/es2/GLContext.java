@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, 2016, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -77,7 +77,7 @@ abstract class GLContext {
     final static int GL_LINEAR                    = 53;
     final static int GL_NEAREST_MIPMAP_NEAREST    = 54;
     final static int GL_LINEAR_MIPMAP_LINEAR      = 55;
-    
+
 
     // Use by glPixelStorei
     final static int GL_UNPACK_ALIGNMENT          = 60;
@@ -116,7 +116,7 @@ abstract class GLContext {
     final static int NUM_MATRIX_ELEMENTS          = 16;
 
     long nativeCtxInfo;
-    private int maxTextureSize = -1;    
+    private int maxTextureSize = -1;
     private Boolean nonPowTwoExtAvailable;
     private Boolean clampToZeroAvailable;
 
@@ -224,8 +224,6 @@ abstract class GLContext {
     private static native void nDisableVertexAttributes(long nativeCtxInfo);
     private static native void nDrawIndexedQuads(long nativeCtxInfo, int numVertices,
             float dataf[], byte datab[]);
-    private static native void nDrawTriangleList(long nativeCtxInfo, int numTriangles,
-            float fData[], byte cData[]);
     private static native int nCreateIndexBuffer16(long nativeCtxInfo, short data[], int n);
     private static native void nSetIndexBuffer(long nativeCtxInfo, int buffer);
 
@@ -350,7 +348,7 @@ abstract class GLContext {
     int createFBO(int texID) {
         if (nativeFBOID != FBO_ID_NOCACHE) {
             nativeFBOID = FBO_ID_UNSET; // invalidate FBO ID cache
-        } 
+        }
         return nCreateFBO(nativeCtxInfo, texID);
     }
 
@@ -722,10 +720,6 @@ abstract class GLContext {
 
     void drawIndexedQuads(float coords[], byte colors[], int numVertices) {
         nDrawIndexedQuads(nativeCtxInfo, numVertices, coords, colors);
-    }
-
-    void drawTriangleList(int numTriangles, float fData[], byte cData[]) {
-        nDrawTriangleList(nativeCtxInfo, numTriangles, fData, cData);
     }
 
     int createIndexBuffer16(short data[]) {

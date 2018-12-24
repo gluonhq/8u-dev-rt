@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, 2017, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -53,7 +53,7 @@ public class NGTriangleMesh {
     // faces is an array of v1,v2,v3 interleaved (where v = {point, texCoord})
     private int[] faces;
     private int[] facesFromAndLengthIndices = new int[2];
-    
+
     // faceSmoothingGroups is an array of face smoothing group values
     private int[] faceSmoothingGroups;
     private int[] faceSmoothingGroupsFromAndLengthIndices = new int[2];
@@ -63,7 +63,7 @@ public class NGTriangleMesh {
             mesh = rf.createMesh();
             meshDirty = true;
         }
-        return mesh;        
+        return mesh;
     }
 
     boolean validate() {
@@ -86,7 +86,7 @@ public class NGTriangleMesh {
     }
 
     // Note: This method is intentionally made package scope for security
-    // reason. It is created for internal use only. 
+    // reason. It is created for internal use only.
     // Do not make it a public method without careful consideration.
     void setPointsByRef(float[] points) {
         meshDirty = true;
@@ -102,15 +102,15 @@ public class NGTriangleMesh {
     }
 
     // Note: This method is intentionally made package scope for security
-    // reason. It is created for internal use only. 
+    // reason. It is created for internal use only.
     // Do not make it a public method without careful consideration.
     void setTexCoordsByRef(float[] texCoords) {
         meshDirty = true;
         this.texCoords = texCoords;
     }
-    
+
     // Note: This method is intentionally made package scope for security
-    // reason. It is created for internal use only. 
+    // reason. It is created for internal use only.
     // Do not make it a public method without careful consideration.
     void setFacesByRef(int[] faces) {
         meshDirty = true;
@@ -118,7 +118,7 @@ public class NGTriangleMesh {
     }
 
     // Note: This method is intentionally made package scope for security
-    // reason. It is created for internal use only. 
+    // reason. It is created for internal use only.
     // Do not make it a public method without careful consideration.
     void setFaceSmoothingGroupsByRef(int[] faceSmoothingGroups) {
         meshDirty = true;
@@ -177,5 +177,9 @@ public class NGTriangleMesh {
     // NOTE: This method is used for unit test purpose only.
     float[] test_getTexCoords() {
         return this.texCoords;
+    }
+    // NOTE: This method is used for unit test purpose only.
+    Mesh test_getMesh() {
+        return this.mesh;
     }
 }

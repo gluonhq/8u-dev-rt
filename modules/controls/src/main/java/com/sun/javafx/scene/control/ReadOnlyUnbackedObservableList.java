@@ -37,6 +37,8 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ListChangeListener.Change;
 import javafx.collections.ObservableList;
 
+import java.util.Collections;
+
 /**
  * A read-only and unbacked ObservableList - the data is retrieved on demand by
  * subclasses via the get method. A combination of ObservableList, ObservableListWrapper
@@ -160,7 +162,7 @@ public abstract class ReadOnlyUnbackedObservableList<E> implements ObservableLis
     public <T> T[] toArray(T[] a) {
         Object[] elementData = toArray();
         int size = elementData.length;
-        
+
         if (a.length < size)
             // Make a new array of a's runtime type, but my contents:
             return (T[]) Arrays.copyOf(elementData, size, a.getClass());

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2017, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -171,7 +171,7 @@ public final class QuantumToolkit extends Toolkit {
                 boolean isSWT = "swt".equals(System.getProperty("glass.platform"));
                 String result = PlatformUtil.isMac() && isSWT ? "true" : "false";
                 return "true".equals(System.getProperty("javafx.draw.in.paint", result));});
-    
+
     private static boolean singleThreaded =
             AccessController.doPrivileged((PrivilegedAction<Boolean>) () -> {
                 Boolean result = Boolean.getBoolean("quantum.singlethreaded");
@@ -180,7 +180,7 @@ public final class QuantumToolkit extends Toolkit {
                 }
                 return result;
             });
-    
+
     private static boolean noRenderJobs =
             AccessController.doPrivileged((PrivilegedAction<Boolean>) () -> {
                 Boolean result = Boolean.getBoolean("quantum.norenderjobs");
@@ -213,10 +213,14 @@ public final class QuantumToolkit extends Toolkit {
     private HashMap<Object,EventLoop> eventLoopMap = null;
 
     private final PerformanceTracker perfTracker = new PerformanceTrackerImpl();
-    
-    private boolean pause;
 
     @Override public boolean init() {
+Thread.dumpStack();
+        return true;
+    }
+
+    public boolean postInit() {
+Thread.dumpStack();
         /*
          * Glass Mac, X11 need Application.setDeviceDetails to happen prior to Glass Application.Run
          */
@@ -249,6 +253,9 @@ public final class QuantumToolkit extends Toolkit {
      *                            functionality after the toolkit has been initialized.
      */
     @Override public void startup(final Runnable userStartupRunnable) {
+System.err.println("[JVDBG] STARTUP");
+ postInit();
+Thread.dumpStack();
         // Save the context class loader of the launcher thread
         ccl = Thread.currentThread().getContextClassLoader();
 
@@ -256,7 +263,9 @@ public final class QuantumToolkit extends Toolkit {
             this.userRunnable = userStartupRunnable;
 
             // Ensure that the toolkit can only be started here
+System.err.println("START APPLICATION.RUN");
             Application.run(() -> runToolkit());
+System.err.println("DONE START APPLICATION.RUN");
         } catch (RuntimeException ex) {
             if (verbose) {
                 ex.printStackTrace();
@@ -282,7 +291,7 @@ public final class QuantumToolkit extends Toolkit {
     }
 
     boolean shouldWaitForRenderingToComplete() {
-        return !multithreaded; 
+        return !multithreaded;
     }
 
     /**
@@ -302,6 +311,8 @@ public final class QuantumToolkit extends Toolkit {
 
     // Called by Glass from Application.run()
     void runToolkit() {
+System.err.println("[JVDBG]RUNTOOLKIT");
+        // postInit();
         Thread user = Thread.currentThread();
 
         if (!toolkitRunning.getAndSet(true)) {
@@ -318,7 +329,7 @@ public final class QuantumToolkit extends Toolkit {
              */
             renderer.createResourceFactory();
 
-            pulseRunnable = () -> QuantumToolkit.this.pulse();
+            pulseRunnable = () -> QuantumToolkit.this.pulseFromQueue();
             timerRunnable = () -> {
                 try {
                     QuantumToolkit.this.postPulse();
@@ -431,6 +442,7 @@ public final class QuantumToolkit extends Toolkit {
     }
 
     @Override public Future addRenderJob(RenderJob r) {
+Thread.dumpStack();
         // Do not run any render jobs (this is for benchmarking only)
         if (noRenderJobs) {
             CompletionListener listener = r.getCompletionListener();
@@ -488,16 +500,13 @@ public final class QuantumToolkit extends Toolkit {
         }
     }
 
-    @Override
-    public void pauseRenderer(){
-        Application.invokeAndWait(() -> this.pause = true);
-        PaintCollector.getInstance().waitForRenderingToComplete();
-    };
-    
-    @Override
-    public void resumeRenderer(){
-        Application.invokeAndWait(() -> this.pause = false);
-    };
+    void pulseFromQueue() {
+        try {
+            pulse();
+        } finally {
+            endPulseRunning();
+        }
+    }
 
     protected void pulse() {
         pulse(true);
@@ -509,9 +518,7 @@ public final class QuantumToolkit extends Toolkit {
             if (PULSE_LOGGING_ENABLED) {
                 PulseLogger.pulseStart();
             }
-            if (pause) {
-                return;
-            }
+
             if (!toolkitRunning.get()) {
                 return;
             }
@@ -526,7 +533,6 @@ public final class QuantumToolkit extends Toolkit {
             if (collect) collector.renderAll();
         } finally {
             inPulse--;
-            endPulseRunning();
             if (PULSE_LOGGING_ENABLED) {
                 PulseLogger.pulseEnd();
             }
@@ -600,7 +606,7 @@ public final class QuantumToolkit extends Toolkit {
         if (!isNestedLoopRunning()) {
             notifyLastNestedLoopExited();
         }
-        
+
         return ret;
     }
 
@@ -689,6 +695,7 @@ public final class QuantumToolkit extends Toolkit {
 
     private static void assignScreensAdapters() {
         GraphicsPipeline pipeline = GraphicsPipeline.getPipeline();
+System.err.println("[JVDBG] assign screen, pipeline = "+pipeline);
         for (Screen screen : Screen.getScreens()) {
             screen.setAdapterOrdinal(pipeline.getAdapterOrdinal(screen));
         }
@@ -1156,6 +1163,9 @@ public final class QuantumToolkit extends Toolkit {
 
     @Override
     public boolean isSupported(ConditionalFeature feature) {
+System.err.println("[JVDBG] NEED TO ADD QT.ISSUPPORTED!");
+return true;
+/*
         switch (feature) {
             case SCENE3D:
                 return GraphicsPipeline.getPipeline().is3DSupported();
@@ -1182,6 +1192,7 @@ public final class QuantumToolkit extends Toolkit {
             default:
                 return false;
         }
+*/
     }
 
     @Override

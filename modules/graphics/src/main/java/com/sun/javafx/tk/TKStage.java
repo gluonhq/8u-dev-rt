@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2009, 2018, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -105,7 +105,7 @@ public interface TKStage {
     public void setIconified(boolean iconified);
 
     public void setMaximized(boolean maximized);
-    
+
     public void setAlwaysOnTop(boolean alwaysOnTop);
 
     public void setResizable(boolean resizable);
@@ -125,7 +125,10 @@ public interface TKStage {
     public void toBack();
     public void toFront();
     public void close();
-    
+
+    public default void postponeClose() {}
+    public default void closePostponed() {}
+
     public void requestFocus(FocusCause cause);
 
     /**
@@ -184,7 +187,7 @@ public interface TKStage {
      * @see #grabFocus
      */
     public void ungrabFocus();
-    
+
     /**
      * Requests text input in form of native keyboard for text component
      * contained by this Window. Native text input component is drawn on the place
@@ -200,14 +203,7 @@ public interface TKStage {
     void requestInput(String text, int type, double width, double height,
                         double Mxx, double Mxy, double Mxz, double Mxt,
                         double Myx, double Myy, double Myz, double Myt,
-                        double Mzx, double Mzy, double Mzz, double Mzt, double fontSize);
-
-    /**
-     * While native text input component is visible, if any change is made in the
-     * text property of the JavaFX text component, update the native component.
-     * @param text
-     */
-    void updateInput(String text);
+                        double Mzx, double Mzy, double Mzz, double Mzt);
 
     /**
      * Native keyboard for text input is no longer necessary.
@@ -216,6 +212,18 @@ public interface TKStage {
     void releaseInput();
 
     public void setRTL(boolean b);
+
+    /**
+     * Whether mouse/keyboard events should be sent to this window.
+     * @param whether this stage should receive events/focus
+     */
+    public void setEnabled(boolean enabled);
+
+    /**
+     * Return a handle to the native platform window id.
+     * @return platform window id, or 0L if there is none.
+     */
+    public long getRawHandle();
 
     public static final KeyCodeCombination defaultFullScreenExitKeycombo =
             new KeyCodeCombination(KeyCode.ESCAPE,

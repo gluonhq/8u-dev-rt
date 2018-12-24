@@ -143,8 +143,7 @@ public class GlyphCache {
                 continue;
             }
             pt.setLocation(x + gl.getPosX(gi), y + gl.getPosY(gi));
-            // create a new Point2D as the call below may alter it (round to int)
-            int subPixel = strike.getQuantizedPosition(new Point2D(pt.x, pt.y));
+            int subPixel = strike.getQuantizedPosition(pt);
             GlyphData data = getCachedGlyph(gc, subPixel);
             if (data != null) {
                 if (clip != null) {

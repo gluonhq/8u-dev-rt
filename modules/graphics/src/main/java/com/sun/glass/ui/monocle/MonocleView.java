@@ -33,10 +33,7 @@ import java.util.Map;
 
 final class MonocleView extends View {
 
-    private double scale = 1.;
-
-    MonocleView(double scale) {
-        this.scale = scale;
+    MonocleView() {
     }
 
     private boolean cursorVisibility;
@@ -173,20 +170,11 @@ final class MonocleView extends View {
         super.notifyDragEnd(performedAction);
     }
 
-    //Menu event - i.e context menu hint (usually mouse right click) 
+    //Menu event - i.e context menu hint (usually mouse right click)
     @Override
     protected void notifyMenu(int x, int y, int xAbs, int yAbs, boolean isKeyboardTrigger) {
         super.notifyMenu(x, y, xAbs, yAbs, isKeyboardTrigger);
     }
-//    public void notifyNextTouchEvent(int type, long touchId, int x, int y,
-//                                     int xAbs, int yAbs) {
-//       int newX = (int)(x/scale);
-//       int newY = (int)(y/scale);
-//       int newXAbs = (int)(xAbs/scale);
-//       int newYAbs = (int)(yAbs/scale);
-//       super.notifyNextTouchEvent(type, touchId, newX, newY, newXAbs, newYAbs);
-//    }
-
 
     @Override
     protected int _getNativeFrameBuffer(long ptr) {

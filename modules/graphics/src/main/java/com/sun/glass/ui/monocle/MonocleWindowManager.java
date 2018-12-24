@@ -156,7 +156,7 @@ final class MonocleWindowManager {
             window._notifyFocusDisabled();
         }
     }
-    
+
     MonocleWindow getFocusedWindow() {
         return focusedWindow;
     }
@@ -176,12 +176,8 @@ final class MonocleWindowManager {
             @Override
             public void run() {
                 Screen.notifySettingsChanged();
-                if (instance != null) {
-                    if (instance.getFocusedWindow() != null) {
-                        instance.getFocusedWindow().setFullScreen(true);
-                        instance.repaintAll();
-                    }
-                }
+                instance.getFocusedWindow().setFullScreen(true);
+                instance.repaintAll();
                 Toolkit.getToolkit().requestNextPulse();
             }
         });

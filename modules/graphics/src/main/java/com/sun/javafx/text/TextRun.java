@@ -74,7 +74,7 @@ public class TextRun implements GlyphList {
         this.script = script;
         this.span = span;
         this.slot = slot;
-        // if (complex) flags |= FLAGS_COMPLEX;
+        if (complex) flags |= FLAGS_COMPLEX;
         if (canonical) flags |= FLAGS_CANONICAL;
     }
 

@@ -25,8 +25,8 @@
 package com.sun.glass.ui;
 
 import com.sun.glass.events.KeyEvent;
-import com.sun.glass.ui.CommonDialogs.ExtensionFilter; 
-import com.sun.glass.ui.CommonDialogs.FileChooserResult; 
+import com.sun.glass.ui.CommonDialogs.ExtensionFilter;
+import com.sun.glass.ui.CommonDialogs.FileChooserResult;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -43,6 +43,12 @@ public abstract class Application {
 
     private final static String DEFAULT_NAME = "java";
     protected String name = DEFAULT_NAME;
+
+    public static com.sun.glass.ui.Screen[] dummyScreens;
+    static {
+        System.err.println("initialize screen[]");
+        dummyScreens = new com.sun.glass.ui.Screen[1];
+    }
 
     public static class EventHandler {
         // currently used only on Mac OS X
@@ -96,6 +102,8 @@ public abstract class Application {
 
     private static boolean loaded = false;
     private static Application application;
+    public static boolean applicationRunning = false;
+
     private static Thread eventThread;
     private static final boolean disableThreadChecks =
         AccessController.doPrivileged((PrivilegedAction<Boolean>) () -> {
@@ -103,9 +111,10 @@ public abstract class Application {
                     System.getProperty("glass.disableThreadChecks", "false");
             return "true".equalsIgnoreCase(str);
         });
-    
+
     // May be called on any thread.
     protected static synchronized void loadNativeLibrary(final String libname) {
+System.out.println("[JVDBG] LOAD NATIVE LIBRARY NAMED "+libname);
         // load the native library of the specified libname.
         // the platform default by convention is "glass", all others should have a suffix, ie glass-x11
         if (!loaded) {
@@ -116,7 +125,7 @@ public abstract class Application {
 
     // May be called on any thread.
     protected static synchronized void loadNativeLibrary() {
-        // use the "platform default" name of "glass" 
+        // use the "platform default" name of "glass"
         loadNativeLibrary("glass");
     }
 
@@ -137,13 +146,18 @@ public abstract class Application {
 
     protected Application() {
     }
-    
+
     // May be called on any thread.
     public static void run(final Runnable launchable) {
-        if (application != null) {
+        if (applicationRunning) {
             throw new IllegalStateException("Application is already running");
         }
-        application = PlatformFactory.getPlatformFactory().createApplication();
+        if (application == null) {
+            System.err.println("[JVDBG] Will create application now");
+            application = PlatformFactory.getPlatformFactory().createApplication();
+            System.err.println("[JVDBG] Did create application now");
+        }
+        applicationRunning = true;
         // each concrete Application should set the app name using its own platform mechanism:
         // on Mac OS X - use NSBundle info, which can be overriden by -Xdock:name
         // on Windows - TODO
@@ -168,22 +182,22 @@ public abstract class Application {
         application = null;
         // The eventThread is null at this point, no need to check it
     }
-    
+
     /**
      * Gets the name for the application.  The application name may
      * be used to identify the application in the user interface or
      * as part of the platform specific path used to store application
      * data.
-     * 
+     *
      * This is a hint and may not be used on some platforms.
-     * 
+     *
      * @return the application name
      */
     public String getName() {
         checkEventThread();
         return name;
     }
-    
+
     /**
      * Sets the name for the application.  The application name may
      * be used to identify the application in the user interface or
@@ -193,7 +207,7 @@ public abstract class Application {
      * The name could be set only once. All subsequent calls are ignored.
      *
      * This is a hint and may not be used on some platforms.
-     * 
+     *
      * @param name the new application name
      */
     public void setName(String name) {
@@ -207,10 +221,10 @@ public abstract class Application {
      * Gets a platform specific path that can be used to store
      * application data.  The application name typically appears
      * as part of the path.
-     * 
+     *
      * On some platforms, the path may not yet exist and the caller
      * will need to create it.
-     * 
+     *
      * @return the platform specific path for the application data
      */
     public String getDataDirectory() {
@@ -225,21 +239,21 @@ public abstract class Application {
             handler.handleWillFinishLaunchingAction(this, System.nanoTime());
         }
     }
-    
+
     private void notifyDidFinishLaunching() {
         EventHandler handler = getEventHandler();
         if (handler != null) {
             handler.handleDidFinishLaunchingAction(this, System.nanoTime());
         }
     }
-    
+
     private void notifyWillBecomeActive() {
         EventHandler handler = getEventHandler();
         if (handler != null) {
             handler.handleWillBecomeActiveAction(this, System.nanoTime());
         }
     }
-    
+
     private void notifyDidBecomeActive() {
         this.initialActiveEventReceived = true;
         EventHandler handler = getEventHandler();
@@ -247,14 +261,14 @@ public abstract class Application {
             handler.handleDidBecomeActiveAction(this, System.nanoTime());
         }
     }
-    
+
     private void notifyWillResignActive() {
         EventHandler handler = getEventHandler();
         if (handler != null) {
             handler.handleWillResignActiveAction(this, System.nanoTime());
         }
     }
-    
+
     private boolean notifyThemeChanged(String themeName) {
         EventHandler handler = getEventHandler();
         if (handler != null) {
@@ -269,42 +283,42 @@ public abstract class Application {
             handler.handleDidResignActiveAction(this, System.nanoTime());
         }
     }
-    
+
     private void notifyDidReceiveMemoryWarning() {
         EventHandler handler = getEventHandler();
         if (handler != null) {
             handler.handleDidReceiveMemoryWarning(this, System.nanoTime());
         }
     }
-    
+
     private void notifyWillHide() {
         EventHandler handler = getEventHandler();
         if (handler != null) {
             handler.handleWillHideAction(this, System.nanoTime());
         }
     }
-    
+
     private void notifyDidHide() {
         EventHandler handler = getEventHandler();
         if (handler != null) {
             handler.handleDidHideAction(this, System.nanoTime());
         }
     }
-    
+
     private void notifyWillUnhide() {
         EventHandler handler = getEventHandler();
         if (handler != null) {
             handler.handleWillUnhideAction(this, System.nanoTime());
         }
     }
-    
+
     private void notifyDidUnhide() {
         EventHandler handler = getEventHandler();
         if (handler != null) {
             handler.handleDidUnhideAction(this, System.nanoTime());
         }
     }
-    
+
     // notificiation when user drag and drops files onto app icon
     private void notifyOpenFiles(String files[]) {
         if ((this.initialActiveEventReceived == false) && (this.initialOpenedFiles == null)) {
@@ -401,6 +415,11 @@ public abstract class Application {
 
     // May be called on any thread
     static public Application GetApplication() {
+        // We now create the app in the constructor once.
+        if (application == null) {
+System.err.println("[FIX GETAPPLICATION] shouldn't reach here");
+            // application = PlatformFactory.getPlatformFactory().createApplication();
+        }
         return Application.application;
     }
 
@@ -424,7 +443,7 @@ public abstract class Application {
     /**
      * Verifies that the current thread is the event thread, and throws
      * an exception if this is not so.
-     * 
+     *
      * The check can be disabled by setting the "glass.disableThreadChecks"
      * system property. It is preferred, however, to fix the application code
      * instead.

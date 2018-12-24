@@ -83,8 +83,8 @@ class MouseInput {
         }
         // Restrict new state coordinates to screen bounds
         NativeScreen screen = NativePlatformFactory.getNativePlatform().getScreen();
-        int x = Math.max(0, Math.min(newState.getX(), (int)(screen.getWidth() * screen.getScale()) - 1));
-        int y = Math.max(0, Math.min(newState.getY(), (int)(screen.getHeight() * screen.getScale()) - 1));
+        int x = Math.max(0, Math.min(newState.getX(), screen.getWidth() - 1));
+        int y = Math.max(0, Math.min(newState.getY(), screen.getHeight() - 1));
         newState.setX(x);
         newState.setY(y);
         // Get the cached window for the old state and compute the window for

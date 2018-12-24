@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2016, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -40,7 +40,6 @@ import com.sun.prism.RTTexture;
 import com.sun.prism.RenderTarget;
 import com.sun.prism.Texture;
 import com.sun.prism.impl.PrismSettings;
-import com.sun.prism.impl.VertexBuffer;
 import com.sun.prism.impl.ps.BaseShaderContext;
 import com.sun.prism.ps.Shader;
 
@@ -95,12 +94,8 @@ class D3DContext extends BaseShaderContext {
 
     public static final int NUM_QUADS = PrismSettings.superShader ? 4096 : 256;
 
-    static VertexBuffer createVertexBuffer(long contextHandle) {
-        return new D3DVertexBuffer(contextHandle, NUM_QUADS);
-    }
-
     D3DContext(long pContext, Screen screen, D3DResourceFactory factory) {
-        super(screen, factory, createVertexBuffer(pContext));
+        super(screen, factory, NUM_QUADS);
         this.pContext = pContext;
         this.factory = factory;
     }
@@ -200,7 +195,7 @@ class D3DContext extends BaseShaderContext {
         m[8] = (m[8] + m[12])/2;
         m[9] = (m[9] + m[13])/2;
         m[10] = (m[10] + m[14])/2;
-        m[11] = (m[11] + m[15])/2; 
+        m[11] = (m[11] + m[15])/2;
         projViewTx.set(m);
         return projViewTx;
     }
@@ -288,15 +283,27 @@ class D3DContext extends BaseShaderContext {
 
     @Override
     protected void updateShaderTransform(Shader shader, BaseTransform xform) {
+        if (xform == null) {
+            xform = BaseTransform.IDENTITY_TRANSFORM;
+        }
+
+        final GeneralTransform3D perspectiveTransform = getPerspectiveTransformNoClone();
         int res;
-        if (xform == null || xform.isIdentity()) {
+        if (xform.isIdentity() && perspectiveTransform.isIdentity()) {
             res = nResetTransform(pContext);
-        } else {
+        } else if (perspectiveTransform.isIdentity()) {
             res = nSetTransform(pContext,
                 xform.getMxx(), xform.getMxy(), xform.getMxz(), xform.getMxt(),
                 xform.getMyx(), xform.getMyy(), xform.getMyz(), xform.getMyt(),
                 xform.getMzx(), xform.getMzy(), xform.getMzz(), xform.getMzt(),
                 0.0, 0.0, 0.0, 1.0);
+        } else {
+            scratchTx.setIdentity().mul(xform).mul(perspectiveTransform);
+            res = nSetTransform(pContext,
+                scratchTx.get(0), scratchTx.get(1), scratchTx.get(2), scratchTx.get(3),
+                scratchTx.get(4), scratchTx.get(5), scratchTx.get(6), scratchTx.get(7),
+                scratchTx.get(8), scratchTx.get(9), scratchTx.get(10), scratchTx.get(11),
+                scratchTx.get(12), scratchTx.get(13), scratchTx.get(14), scratchTx.get(15));
         }
         validate(res);
     }
@@ -420,6 +427,8 @@ class D3DContext extends BaseShaderContext {
     private static native void nSetPointLight(long pContext, long nativeMeshView,
             int index, float x, float y, float z, float r, float g, float b, float w);
     private static native void nRenderMeshView(long pContext, long nativeMeshView);
+    private static native int nDrawIndexedQuads(long pContext,
+            float coords[], byte colors[], int numVertices);
 
 
     /*
@@ -543,6 +552,12 @@ class D3DContext extends BaseShaderContext {
 
     void setPointLight(long nativeMeshView, int index, float x, float y, float z, float r, float g, float b, float w) {
         nSetPointLight(pContext, nativeMeshView, index, x, y, z, r, g, b, w);
+    }
+
+    @Override
+    protected void renderQuads(float coordArray[], byte colorArray[], int numVertices) {
+        int res = nDrawIndexedQuads(pContext, coordArray, colorArray, numVertices);
+        D3DContext.validate(res);
     }
 
     void renderMeshView(long nativeMeshView, Graphics g) {

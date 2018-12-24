@@ -65,7 +65,7 @@ class SwipeGestureRecognizer implements GestureRecognizer {
 
     @Override
     public void notifyNextTouchEvent(long time, int type, long touchId,
-                                     double x, double y, double xAbs, double yAbs) {
+                                     int x, int y, int xAbs, int yAbs) {
         switch(type) {
             case TouchEvent.TOUCH_PRESSED:
                 tracker.pressed(touchId, time, x, y, xAbs, yAbs);
@@ -95,7 +95,7 @@ class SwipeGestureRecognizer implements GestureRecognizer {
         final double distanceY = tracker.getDistanceY();
         final double absDistanceX = Math.abs(distanceX);
         final double absDistanceY = Math.abs(distanceY);
-        
+
         final boolean horizontal = absDistanceX > absDistanceY;
 
         final double primaryDistance = horizontal ? distanceX : distanceY;
@@ -228,7 +228,7 @@ class SwipeGestureRecognizer implements GestureRecognizer {
             this.direct = direct;
         }
 
-        public void pressed(long id, long nanos, double x, double y, double xAbs, double yAbs) {
+        public void pressed(long id, long nanos, int x, int y, int xAbs, int yAbs) {
             currentTouchCount++;
             switch (state) {
                 case IDLE:
@@ -249,7 +249,7 @@ class SwipeGestureRecognizer implements GestureRecognizer {
             }
         }
 
-        public void released(long id, long nanos, double x, double y, double xAbs, double yAbs) {
+        public void released(long id, long nanos, int x, int y, int xAbs, int yAbs) {
             if (state != SwipeRecognitionState.FAILURE) {
                 TouchPointTracker tracker = trackers.get(id);
 
@@ -303,7 +303,7 @@ class SwipeGestureRecognizer implements GestureRecognizer {
             }
         }
 
-        public void progress(long id, long nanos, double x, double y) {
+        public void progress(long id, long nanos, int x, int y) {
 
             if (state == SwipeRecognitionState.FAILURE) {
                 return;
@@ -357,31 +357,31 @@ class SwipeGestureRecognizer implements GestureRecognizer {
         }
 
         public void progress(long nanos, double x, double y) {
-			final double deltaX = x - lastX;
-			final double deltaY = y - lastY;
+            final double deltaX = x - lastX;
+            final double deltaY = y - lastY;
 
-			lengthX += Math.abs(deltaX);
-			lengthY += Math.abs(deltaY);
-			lastX = x;
-			lastY = y;
+            lengthX += Math.abs(deltaX);
+            lengthY += Math.abs(deltaY);
+            lastX = x;
+            lastY = y;
 
-			final double devX = Math.abs(x - beginAbsX);
-			if (devX > maxDeviationX) { maxDeviationX = devX; }
+            final double devX = Math.abs(x - beginAbsX);
+            if (devX > maxDeviationX) { maxDeviationX = devX; }
 
-			final double devY = Math.abs(y - beginAbsY);
-			if (devY > maxDeviationY) { maxDeviationY = devY; }
+            final double devY = Math.abs(y - beginAbsY);
+            if (devY > maxDeviationY) { maxDeviationY = devY; }
 
-			if (Math.signum(deltaX) == Math.signum(lastXMovement)) {
-				lastXMovement += deltaX;
-			} else {
-				lastXMovement = deltaX;
-			}
+            if (Math.signum(deltaX) == Math.signum(lastXMovement)) {
+                lastXMovement += deltaX;
+            } else {
+                lastXMovement = deltaX;
+            }
 
-			if (Math.signum(deltaY) == Math.signum(lastYMovement)) {
-				lastYMovement += deltaY;
-			} else {
-				lastYMovement = deltaY;
-			}
+            if (Math.signum(deltaY) == Math.signum(lastYMovement)) {
+                lastYMovement += deltaY;
+            } else {
+                lastYMovement = deltaY;
+            }
         }
 
         public double getDistanceX() {

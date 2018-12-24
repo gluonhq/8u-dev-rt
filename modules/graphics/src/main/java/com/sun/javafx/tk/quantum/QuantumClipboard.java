@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -41,7 +41,6 @@ import java.net.SocketPermission;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.security.AccessControlContext;
-import java.security.AllPermission;
 import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,6 +61,7 @@ import com.sun.glass.ui.Clipboard;
 import com.sun.glass.ui.ClipboardAssistance;
 import com.sun.glass.ui.Pixels;
 import com.sun.javafx.tk.ImageLoader;
+import com.sun.javafx.tk.PermissionHelper;
 import com.sun.javafx.tk.TKClipboard;
 import com.sun.javafx.tk.Toolkit;
 import javafx.scene.image.PixelReader;
@@ -329,8 +329,6 @@ final class QuantumClipboard implements TKClipboard {
         return null;
     }
 
-    private static final Permission all = new AllPermission();
-
     private static Image convertObjectToImage(Object obj) {
         if (obj instanceof Image) {
             return (Image) obj;
@@ -385,16 +383,18 @@ final class QuantumClipboard implements TKClipboard {
                             }
                             if (protocol.equalsIgnoreCase("file")) {
                                 FilePermission fp = new FilePermission(u.getFile(), "read");
-                                context.checkPermission(fp);
+                                sm.checkPermission(fp, context);
                             } else if (protocol.equalsIgnoreCase("ftp") ||
                                        protocol.equalsIgnoreCase("http") ||
                                        protocol.equalsIgnoreCase("https")) {
                                 int port = u.getPort();
                                 String hoststr = (port == -1 ? u.getHost() : u.getHost() + ":" + port);
                                 SocketPermission sp = new SocketPermission(hoststr, "connect");
-                                context.checkPermission(sp);
+                                sm.checkPermission(sp, context);
                             } else {
-                                context.checkPermission(all);
+                                final Permission clipboardPerm =
+                                        PermissionHelper.getAccessClipboardPermission();
+                                sm.checkPermission(clipboardPerm, context);
                             }
                         }
                         return (new Image(url));

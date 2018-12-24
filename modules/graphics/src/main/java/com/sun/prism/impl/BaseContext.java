@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2009, 2016, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -34,6 +34,7 @@ import com.sun.javafx.font.FontResource;
 import com.sun.javafx.font.FontStrike;
 import com.sun.javafx.geom.RectBounds;
 import com.sun.javafx.geom.transform.BaseTransform;
+import com.sun.javafx.geom.transform.GeneralTransform3D;
 import com.sun.javafx.image.ByteToBytePixelConverter;
 import com.sun.javafx.image.impl.ByteGray;
 import com.sun.javafx.sg.prism.NGCamera;
@@ -70,16 +71,18 @@ public abstract class BaseContext {
     private Texture wrapRectTex;
     private Texture ovalTex;
 
+    private final GeneralTransform3D perspectiveTransform = new GeneralTransform3D();
+
     // TODO: need to dispose these when the context is disposed... (RT-27421)
     private final Map<FontStrike, GlyphCache>
         greyGlyphCaches = new HashMap<FontStrike, GlyphCache>();
     private final Map<FontStrike, GlyphCache>
         lcdGlyphCaches = new HashMap<FontStrike, GlyphCache>();
 
-    protected BaseContext(Screen screen, ResourceFactory factory, VertexBuffer vb) {
+    protected BaseContext(Screen screen, ResourceFactory factory, int vbQuads) {
         this.screen = screen;
         this.factory = factory;
-        this.vertexBuffer = vb;
+        this.vertexBuffer = new VertexBuffer(this, vbQuads);
     }
 
     protected void setDeviceParametersFor2D() {}
@@ -98,18 +101,40 @@ public abstract class BaseContext {
     }
 
     public void flushVertexBuffer() {
+        vertexBuffer.flush();
+    }
+
+    protected final void flushMask() {
         if (curMaskRow > 0 || curMaskCol > 0) {
             maskTex.lock();
             // assert !maskTex.isSurfaceLost();
             // since it was bound and unflushed...
             maskTex.update(maskBuffer, maskTex.getPixelFormat(),
-                           0, 0, 0, 0, highMaskCol, nextMaskRow,
-                           maskTex.getContentWidth(), true);
+                                       0, 0, 0, 0, highMaskCol, nextMaskRow,
+                                       maskTex.getContentWidth(), true);
             maskTex.unlock();
             curMaskRow = curMaskCol = nextMaskRow = highMaskCol = 0;
         }
-        vertexBuffer.flush();
     }
+
+    public void drawQuads(float coordArray[], byte colorArray[], int numVertices) {
+        flushMask();
+        renderQuads(coordArray, colorArray, numVertices);
+    }
+
+    protected GeneralTransform3D getPerspectiveTransformNoClone() {
+        return perspectiveTransform;
+    }
+
+    protected void setPerspectiveTransform(GeneralTransform3D transform) {
+        if (transform == null) {
+            perspectiveTransform.setIdentity();
+        } else {
+            perspectiveTransform.set(transform);
+        }
+    }
+
+    protected abstract void renderQuads(float coordArray[], byte colorArray[], int numVertices);
 
     /**
      *

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2018, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -26,7 +26,6 @@
 package com.sun.javafx.tk.quantum;
 
 import java.nio.ByteBuffer;
-import java.security.AccessControlException;
 import java.security.AccessController;
 import java.security.AllPermission;
 import java.security.Permission;
@@ -74,10 +73,11 @@ class WindowStage extends GlassStage {
     private boolean isAppletStage = false; // true if this is an embedded applet window
     private boolean isPopupStage = false;
     private boolean isInFullScreen = false;
+    private boolean isAlwaysOnTop = false;
 
     // A flag to indicate whether a call was generated from
-    // an input event handler.
-    private boolean inEventHandler = false;
+    // an allowed input event handler.
+    private boolean inAllowedEventHandler = false;
 
     // An active window is visible && enabled && focusable.
     // The list is maintained in the z-order, so that the last element
@@ -96,7 +96,7 @@ class WindowStage extends GlassStage {
     }
 
     private static final Locale LOCALE = Locale.getDefault();
-    
+
     private static final ResourceBundle RESOURCES =
         ResourceBundle.getBundle(WindowStage.class.getPackage().getName() +
                                  ".QuantumMessagesBundle", LOCALE);
@@ -150,6 +150,7 @@ class WindowStage extends GlassStage {
     }
 
     private void initPlatformWindow() {
+System.err.println("[JVDBG] INITPLATFORMWINDOW");
         if (platformWindow == null) {
             Application app = Application.GetApplication();
             if (isPrimaryStage && (null != appletWindow)) {
@@ -177,10 +178,10 @@ class WindowStage extends GlassStage {
                             // fall through
                         case DECORATED:
                             windowMask |=
-                                Window.TITLED | Window.CLOSABLE | 
+                                Window.TITLED | Window.CLOSABLE |
                                 Window.MINIMIZABLE | Window.MAXIMIZABLE;
                             if (ownerWindow != null || modality != Modality.NONE) {
-                                windowMask &= 
+                                windowMask &=
                                     ~(Window.MINIMIZABLE | Window.MAXIMIZABLE);
                             }
                             resizable = true;
@@ -217,11 +218,11 @@ class WindowStage extends GlassStage {
     protected GlassStage getOwner() {
         return owner;
     }
-    
+
     protected ViewScene getViewScene() {
         return (ViewScene)getScene();
     }
-    
+
     StageStyle getStyle() {
         return style;
     }
@@ -231,13 +232,15 @@ class WindowStage extends GlassStage {
         scene.setSecurityContext(acc);
         return scene;
     }
-    
+
     /**
      * Set the scene to be displayed in this stage
      *
      * @param scene The peer of the scene to be displayed
      */
     @Override public void setScene(TKScene scene) {
+System.err.println("[JVDBG] WINDOWSTAGE SETSCENE");
+Thread.dumpStack();
         GlassScene oldScene = getScene();
         if (oldScene == scene) {
             // Nothing to do
@@ -275,7 +278,7 @@ class WindowStage extends GlassStage {
             QuantumRenderer.getInstance().disposePresentable(painter.presentable);   // latched on RT
         }
     }
-    
+
     @Override public void setBounds(float x, float y, boolean xSet, boolean ySet,
                                     float w, float h, float cw, float ch,
                                     float xGravity, float yGravity)
@@ -315,8 +318,8 @@ class WindowStage extends GlassStage {
         int ph = (int) (h > 0 ? Math.ceil(h * pScale) : h);
         int pcw = (int) (cw > 0 ? Math.ceil(cw * pScale) : cw);
         int pch = (int) (ch > 0 ? Math.ceil(ch * pScale) : ch);
-        platformWindow.setBounds(px, py, xSet, ySet, 
-                                 pw, ph, pcw, pch, 
+        platformWindow.setBounds(px, py, xSet, ySet,
+                                 pw, ph, pcw, pch,
                                  xGravity, yGravity);
     }
 
@@ -331,10 +334,16 @@ class WindowStage extends GlassStage {
     }
 
     @Override public void setMinimumSize(int minWidth, int minHeight) {
+        float pScale = platformWindow.getPlatformScale();
+        minWidth  = (int) Math.ceil(minWidth  * pScale);
+        minHeight = (int) Math.ceil(minHeight * pScale);
         platformWindow.setMinimumSize(minWidth, minHeight);
     }
 
     @Override public void setMaximumSize(int maxWidth, int maxHeight) {
+        float pScale = platformWindow.getPlatformScale();
+        maxWidth  = (int) Math.ceil(maxWidth  * pScale);
+        maxHeight = (int) Math.ceil(maxHeight * pScale);
         platformWindow.setMaximumSize(maxWidth, maxHeight);
     }
 
@@ -515,14 +524,14 @@ class WindowStage extends GlassStage {
                 appletWindow.assertStageOrder();
             }
         }
-        
+
         applyFullScreen();
     }
-    
+
     @Override boolean isVisible() {
         return platformWindow.isVisible();
     }
-    
+
     @Override public void setOpacity(float opacity) {
         platformWindow.setAlpha(opacity);
         GlassScene gs = getScene();
@@ -554,14 +563,23 @@ class WindowStage extends GlassStage {
         // The securityDialog flag takes precedence over alwaysOnTop
         if (securityDialog) return;
 
+        if (isAlwaysOnTop == alwaysOnTop) {
+            return;
+        }
+
         if (alwaysOnTop) {
             if (hasPermission(alwaysOnTopPermission)) {
                 platformWindow.setLevel(Level.FLOATING);
+            } else {
+                alwaysOnTop = false;
+                if (stageListener != null) {
+                    stageListener.changedAlwaysOnTop(alwaysOnTop);
+                }
             }
         } else {
             platformWindow.setLevel(Level.NORMAL);
         }
-        
+        isAlwaysOnTop = alwaysOnTop;
     }
 
     @Override public void setResizable(boolean resizable) {
@@ -580,18 +598,19 @@ class WindowStage extends GlassStage {
     void exitFullScreen() {
         setFullScreen(false);
     }
-    
+
     boolean isApplet() {
         return isPrimaryStage && null != appletWindow;
     }
 
     private boolean hasPermission(Permission perm) {
         try {
-            if (System.getSecurityManager() != null) {
-                getAccessControlContext().checkPermission(perm);
+            final SecurityManager sm = System.getSecurityManager();
+            if (sm != null) {
+                sm.checkPermission(perm, getAccessControlContext());
             }
             return true;
-        } catch (AccessControlException ae) {
+        } catch (SecurityException se) {
             return false;
         }
     }
@@ -626,6 +645,7 @@ class WindowStage extends GlassStage {
                 final boolean isTrusted = isTrustedFullScreen();
                 if (!isTrusted && !fullScreenFromUserEvent) {
                     exitFullScreen();
+                    fullscreenChanged(false);
                 } else {
                     v.enterFullscreen(false, false, false);
                     if (warning != null && warning.inWarningTransition()) {
@@ -707,8 +727,8 @@ class WindowStage extends GlassStage {
         }
 
        // Set a flag indicating whether this method was called from
-        // an input event handler.
-        if (isInEventHandler()) {
+        // an allowed input event handler.
+        if (isInAllowedEventHandler()) {
             fullScreenFromUserEvent = true;
         }
 
@@ -754,14 +774,34 @@ class WindowStage extends GlassStage {
             appletWindow.assertStageOrder();
         }
     }
-    
+
+    private boolean isClosePostponed = false;
+    private Window deadWindow = null;
+
+    @Override
+    public void postponeClose() {
+        isClosePostponed = true;
+    }
+
+    @Override
+    public void closePostponed() {
+        if (deadWindow != null) {
+            deadWindow.close();
+            deadWindow = null;
+        }
+    }
+
     @Override public void close() {
         super.close();
         QuantumToolkit.runWithRenderLock(() -> {
             // prevents closing a closed platform window
             if (platformWindow != null) {
                 platformWindows.remove(platformWindow);
-                platformWindow.close();
+                if (isClosePostponed) {
+                    deadWindow = platformWindow;
+                } else {
+                    platformWindow.close();
+                }
                 platformWindow = null;
             }
             GlassScene oldScene = getViewScene();
@@ -809,7 +849,7 @@ class WindowStage extends GlassStage {
     @Override public void requestFocus() {
         platformWindow.requestFocus();
     }
-    
+
     @Override public void requestFocus(FocusCause cause) {
         switch (cause) {
             case TRAVERSED_FORWARD:
@@ -841,13 +881,14 @@ class WindowStage extends GlassStage {
         }
     }
 
-    void setEnabled(boolean enabled) {
+    @Override
+    public void setEnabled(boolean enabled) {
         if ((owner != null) && (owner instanceof WindowStage)) {
             ((WindowStage) owner).setEnabled(enabled);
         }
         /*
-         * RT-17588 - exit if stage is closed from under us as 
-         *            any further access to the Glass layer 
+         * RT-17588 - exit if stage is closed from under us as
+         *            any further access to the Glass layer
          *            will throw an exception
          */
         if (enabled && (platformWindow == null || platformWindow.isClosed())) {
@@ -861,6 +902,11 @@ class WindowStage extends GlassStage {
         }
     }
 
+    @Override
+    public long getRawHandle() {
+       return platformWindow.getRawHandle();
+    }
+
     // Note: This method is required to workaround a glass issue mentioned in RT-12607
     protected void requestToFront() {
         if (platformWindow != null) {
@@ -869,28 +915,23 @@ class WindowStage extends GlassStage {
         }
     }
 
-    public void setInEventHandler(boolean inEventHandler) {
-        this.inEventHandler = inEventHandler;
+    public void setInAllowedEventHandler(boolean inAllowedEventHandler) {
+        this.inAllowedEventHandler = inAllowedEventHandler;
     }
 
-    public boolean isInEventHandler() {
-        return inEventHandler;
+    private boolean isInAllowedEventHandler() {
+        return inAllowedEventHandler;
     }
 
     @Override
-    public void requestInput(String text, int type, double width, double height, 
+    public void requestInput(String text, int type, double width, double height,
                         double Mxx, double Mxy, double Mxz, double Mxt,
-                        double Myx, double Myy, double Myz, double Myt, 
-                        double Mzx, double Mzy, double Mzz, double Mzt, double fontSize) {
-        platformWindow.requestInput(text, type, width, height, 
-                                    Mxx, Mxy, Mxz, Mxt, 
-                                    Myx, Myy, Myz, Myt, 
-                                    Mzx, Mzy, Mzz, Mzt, fontSize);
-    }
-
-    @Override
-    public void updateInput(String text) {
-        platformWindow.updateInput(text);
+                        double Myx, double Myy, double Myz, double Myt,
+                        double Mzx, double Mzy, double Mzz, double Mzt) {
+        platformWindow.requestInput(text, type, width, height,
+                                    Mxx, Mxy, Mxz, Mxt,
+                                    Myx, Myy, Myz, Myt,
+                                    Mzx, Mzy, Mzz, Mzt);
     }
 
     @Override

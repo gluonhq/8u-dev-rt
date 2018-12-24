@@ -28,6 +28,7 @@ package com.sun.javafx.scene.control.skin;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.chrono.HijrahChronology;
+import java.time.format.DateTimeParseException;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -59,7 +60,7 @@ public class DatePickerSkin extends ComboBoxPopupControl<LocalDate> {
             @Override public void invalidated(Observable observable) {
                 if (!rounding) {
                     Insets padding = arrow.getPadding();
-                    Insets rounded = new Insets(Math.round(padding.getTop()), Math.round(padding.getRight()), 
+                    Insets rounded = new Insets(Math.round(padding.getTop()), Math.round(padding.getRight()),
                                                 Math.round(padding.getBottom()), Math.round(padding.getLeft()));
                     if (!rounded.equals(padding)) {
                         rounding = true;

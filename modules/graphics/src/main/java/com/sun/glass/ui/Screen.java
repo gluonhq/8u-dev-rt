@@ -74,7 +74,7 @@ public final class Screen {
     }
 
     private static EventHandler eventHandler;
-    
+
     private volatile long ptr;
     private volatile int adapter;
 
@@ -118,7 +118,7 @@ public final class Screen {
         this(nativePtr,
              depth, x, y, width, height,
              visibleX, visibleY, visibleWidth, visibleHeight,
-             resolutionX, resolutionY,
+             resolutionX, resolutionY, // renderScale, renderScale);
              1.0f, renderScale);
     }
 
@@ -142,6 +142,7 @@ public final class Screen {
             float uiScale,
             float renderScale
             ) {
+Thread.dumpStack();
         this.ptr = nativePtr;
 
         this.depth = depth;
@@ -250,6 +251,7 @@ public final class Screen {
      * Could be called from any thread
      */
     public float getUIScale() {
+System.out.println("[JVDBG] UIsasked, return "+this.uiScale);
         return this.uiScale;
     }
 
@@ -259,6 +261,7 @@ public final class Screen {
      * Could be called from any thread
      */
     public float getRenderScale() {
+System.out.println("[JVDBG] RS asked, return "+this.renderScale);
         return this.renderScale;
     }
 
@@ -285,7 +288,7 @@ public final class Screen {
         Application.checkEventThread();
         eventHandler = eh;
     }
-    
+
     /**
      * Called from native when the Screen definitions change.
      */
@@ -314,7 +317,7 @@ public final class Screen {
                 }
             }
         }
-        
+
         // Dispose the old screens
         if (oldScreens != null) {
             for (Screen screen : oldScreens) {

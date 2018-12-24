@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011, 2017, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -50,6 +50,7 @@ public class PrismFontLoader extends FontLoader {
         // locate the META-INF directory and search for a fonts.mf
         // located there
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        if (loader == null) return map;
         URL u = loader.getResource("META-INF/fonts.mf");
         if (u == null) return map;
 
@@ -192,6 +193,11 @@ public class PrismFontLoader extends FontLoader {
      */
     @Override public void loadFont(Font font) {
         FontFactory fontFactory = getFontFactoryFromPipeline();
+System.err.println("[JVDBG] FontFactory = "+fontFactory);
+System.err.println("[JVDBG] font= "+font);
+        if (fontFactory == null) {
+System.err.println("[JVDBG] No fontfactory found");
+        }
         String fullName = font.getName();
         if (!embeddedFontsLoaded && !fontFactory.isPlatformFont(fullName)) {
             loadEmbeddedFonts();
@@ -247,12 +253,18 @@ public class PrismFontLoader extends FontLoader {
         }
         try {
             Class plc = Class.forName("com.sun.prism.GraphicsPipeline");
+System.err.println("plc = "+plc);
             Method gpm = plc.getMethod("getPipeline", (Class[])null);
+System.err.println("gpm = "+gpm);
             Object plo = gpm.invoke(null);
+System.err.println("plo = "+plo);
             Method gfm = plc.getMethod("getFontFactory", (Class[])null);
+System.err.println("gfm = "+gfm);
             Object ffo = gfm.invoke(plo);
+System.err.println("ffo = "+ffo);
             installedFontFactory = (FontFactory)ffo;
         } catch (Exception e) {
+e.printStackTrace();
         }
         return installedFontFactory;
     }

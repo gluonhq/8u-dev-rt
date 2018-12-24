@@ -73,14 +73,18 @@ final class MacApplication extends Application implements InvokeLaterDispatcher.
                          boolean isTaskbarApplication);
     @Override
     protected void runLoop(final Runnable launchable) {
+System.err.println("[JVDBG] Mac Runloop will now run, java thread = "+Thread.currentThread());
+Thread.dumpStack();
         isTaskbarApplication =
             AccessController.doPrivileged((PrivilegedAction<Boolean>) () -> {
                 String taskbarAppProp = System.getProperty("glass.taskbarApplication");
                 return  !"false".equalsIgnoreCase(taskbarAppProp);
             });
-        
+
         ClassLoader classLoader = MacApplication.class.getClassLoader();
+System.err.println("[JVDBG] Mac Runloop will now call native runloop");
         _runLoop(classLoader, launchable, isTaskbarApplication);
+System.err.println("[JVDBG] Mac Runloop did call native runloop");
     }
 
     native private void _finishTerminating();
@@ -172,7 +176,7 @@ final class MacApplication extends Application implements InvokeLaterDispatcher.
 
         menubar.add(this.appleMenu);
     }
-    
+
     public Menu getAppleMenu() {
         return this.appleMenu;
     }
@@ -187,7 +191,7 @@ final class MacApplication extends Application implements InvokeLaterDispatcher.
     @Override public Window createWindow(Window owner, Screen screen, int styleMask) {
         return new MacWindow(owner, screen, styleMask);
     }
-    
+
     final static long BROWSER_PARENT_ID = -1L;
     @Override public Window createWindow(long parent) {
         Window window = new MacWindow(parent);
@@ -231,6 +235,12 @@ final class MacApplication extends Application implements InvokeLaterDispatcher.
     public Pixels createPixels(int width, int height, IntBuffer data, float scale) {
         return new MacPixels(width, height, data, scale);
     }
+
+/*
+    static Pixels createPixels(int width, int height, int[] data, float scale) { 
+        return Application.GetApplication().createPixels(width, height, IntBuffer.wrap(data), scale);
+    }
+*/
 
     @Override protected int staticPixels_getNativeFormat() {
         return MacPixels.getNativeFormat_impl();
@@ -317,7 +327,7 @@ final class MacApplication extends Application implements InvokeLaterDispatcher.
     public String getRemoteLayerServerName() {
         return _getRemoteLayerServerName();
     }
-    
+
     private native String _getDataDirectory();
     public String getDataDirectory() {
         checkEventThread();

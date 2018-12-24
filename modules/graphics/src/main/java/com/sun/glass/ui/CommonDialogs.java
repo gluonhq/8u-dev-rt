@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2016, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -200,7 +200,7 @@ public class CommonDialogs {
         if (extensionFilters != null) {
             _extensionFilters = extensionFilters.toArray(new ExtensionFilter[extensionFilters.size()]);
         }
-        
+
         if (extensionFilters == null
                 || extensionFilters.isEmpty()
                 || defaultFilterIndex < 0
@@ -252,7 +252,9 @@ public class CommonDialogs {
     {
         List<File> list = new ArrayList<File>();
         for (String s : files) {
-            list.add(new File(s));
+            if (s != null) {
+                list.add(new File(s));
+            }
         }
         return new FileChooserResult(list,
                 extensionFilters == null || index < 0 || index >= extensionFilters.length ?

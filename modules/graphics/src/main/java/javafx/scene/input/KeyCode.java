@@ -1157,11 +1157,11 @@ public enum KeyCode {
     MUTE(0x1C1, "Mute", KeyCodeClass.MEDIA),
 
     /**
-     * Constant for the Apple {@code Command} key. 
+     * Constant for the Apple {@code Command} key.
      * @since JavaFX 2.1
      */
     COMMAND(0x300, "Command", KeyCodeClass.MODIFIER),
-    
+
     /**
      * Constant for the {@code Shortcut} key.
      */
@@ -1174,7 +1174,7 @@ public enum KeyCode {
 
     // Need to bundle this in another class to avoid "forward reference" compiler error
     private static class KeyCodeClass {
-        private KeyCodeClass() {}
+        private KeyCodeClass() {};
 
         private static final int FUNCTION = 1;
         private static final int NAVIGATION = 1 << 1;
@@ -1308,10 +1308,10 @@ public enum KeyCode {
         return code;
     }
 
-   
+
     private static final Map<String, KeyCode> nameMap;
     static {
-        
+
         nameMap = new HashMap<String, KeyCode>(KeyCode.values().length);
         for (KeyCode c : KeyCode.values()) {
             nameMap.put(c.name, c);

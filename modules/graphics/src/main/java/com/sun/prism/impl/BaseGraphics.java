@@ -34,6 +34,7 @@ import com.sun.javafx.geom.RoundRectangle2D;
 import com.sun.javafx.geom.Shape;
 import com.sun.javafx.geom.transform.Affine3D;
 import com.sun.javafx.geom.transform.BaseTransform;
+import com.sun.javafx.geom.transform.GeneralTransform3D;
 import com.sun.javafx.sg.prism.NGCamera;
 import com.sun.javafx.sg.prism.NodePath;
 import com.sun.prism.BasicStroke;
@@ -134,6 +135,11 @@ public abstract class BaseGraphics implements RectShadowGraphics {
 
     public BaseTransform getTransformNoClone() {
         return transform3D;
+    }
+
+    @Override
+    public void setPerspectiveTransform(GeneralTransform3D transform) {
+        context.setPerspectiveTransform(transform);
     }
 
     public void setTransform(BaseTransform transform) {
@@ -260,7 +266,7 @@ public abstract class BaseGraphics implements RectShadowGraphics {
     }
 
     // If true use fragment shader that does alpha testing (i.e. discard if alpha == 0.0)
-    // Currently it is required when depth testing is in use. 
+    // Currently it is required when depth testing is in use.
     public boolean isAlphaTestShader() {
         return (PrismSettings.forceAlphaTestShader || (isDepthTest() && isDepthBuffer()));
     }

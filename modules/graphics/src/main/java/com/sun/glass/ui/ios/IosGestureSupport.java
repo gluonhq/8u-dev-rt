@@ -38,13 +38,17 @@ final class IosGestureSupport {
         _initIDs();
     }
 
+    public static void ping() {
+        System.err.println("[JVDBG] IosGestureSupport\n");
+    }
+
     // The multiplier used to convert scroll units to pixels
     private final static double multiplier = 1.0;
 
     private final static boolean isDirect = true;
 
     private final static GestureSupport gestures = new GestureSupport(false);
-    private final static TouchInputSupport touches = 
+    private final static TouchInputSupport touches =
             new TouchInputSupport(gestures.createTouchCountListener(), false);
 
 

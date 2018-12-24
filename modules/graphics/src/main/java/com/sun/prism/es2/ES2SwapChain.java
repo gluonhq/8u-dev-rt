@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2009, 2016, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -134,9 +134,9 @@ class ES2SwapChain implements ES2RenderTarget, Presentable, GraphicsResource {
                 copyFullBuffer = false;
                 if (isMSAA()) {
                     context.flushVertexBuffer();
-                    // Note must flip the z axis during blit
+                    // Note must flip the image vertically during blit
                     g.blit(stableBackbuffer, null,
-                            0, 0, sw, sh, 0, 0, dw, dh);
+                            0, 0, sw, sh, 0, dh, dw, 0);
                 } else {
                     drawTexture(g, stableBackbuffer,
                                 0, 0, dw, dh, 0, 0, sw, sh);
@@ -179,6 +179,10 @@ class ES2SwapChain implements ES2RenderTarget, Presentable, GraphicsResource {
     }
 
     public ES2Graphics createGraphics() {
+        if (drawable.getNativeWindow() != pState.getNativeWindow()) {
+            drawable = ES2Pipeline.glFactory.createGLDrawable(
+                    pState.getNativeWindow(), context.getPixelFormat());
+        }
         context.makeCurrent(drawable);
 
         nativeDestHandle = pState.getNativeFrameBuffer();

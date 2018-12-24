@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2018, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -111,7 +111,7 @@ class GtkWindow extends Window {
 
     @Override
     protected native void _toBack(long ptr);
-    
+
     @Override
     protected native void _enterModal(long ptr);
 
@@ -120,11 +120,11 @@ class GtkWindow extends Window {
 
     @Override
     protected native void _exitModal(long ptr);
-    
+
     protected native long _getNativeWindowImpl(long ptr);
 
     private native boolean isVisible(long ptr);
-    
+
     @Override
     protected boolean _setVisible(long ptr, boolean visible) {
         setVisibleImpl(ptr, visible);
@@ -132,7 +132,7 @@ class GtkWindow extends Window {
     }
 
     @Override
-    protected boolean _minimize(long ptr, boolean minimize) {   
+    protected boolean _minimize(long ptr, boolean minimize) {
         minimizeImpl(ptr, minimize);
         notifyStateChanged(WindowEvent.MINIMIZE);
         return minimize;
@@ -217,21 +217,21 @@ class GtkWindow extends Window {
     private native void getFrameExtents(long ptr, int[] extarr);
 
     @Override
-    protected void _requestInput(long ptr, String text, int type, double width, double height, 
+    protected void _requestInput(long ptr, String text, int type, double width, double height,
                                     double Mxx, double Mxy, double Mxz, double Mxt,
-                                    double Myx, double Myy, double Myz, double Myt, 
-                                    double Mzx, double Mzy, double Mzz, double Mzt,
-                                    double fontSize) {
+                                    double Myx, double Myy, double Myz, double Myt,
+                                    double Mzx, double Mzy, double Mzz, double Mzt) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    protected void _updateInput(long ptr, String text) {
-        throw new UnsupportedOperationException("Not supported yet."); 
-    }
-        
-    @Override
     protected void _releaseInput(long ptr) {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public long getRawHandle() {
+        long ptr = super.getRawHandle();
+        return ptr == 0L ? 0L : _getNativeWindowImpl(ptr);
     }
 }

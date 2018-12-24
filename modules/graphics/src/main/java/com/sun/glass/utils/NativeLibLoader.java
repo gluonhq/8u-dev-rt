@@ -35,25 +35,29 @@ public class NativeLibLoader {
     private static final HashSet<String> loaded = new HashSet<String>();
 
     public static synchronized void loadLibrary(String libname) {
-        if (!loaded.contains(libname)) {
+System.out.println("[NLL] loaded = "+loaded+" and now I have to load "+libname);
+        // if (!loaded.contains(libname)) {
             loadLibraryInternal(libname);
-            loaded.add(libname);
-        }
+            // loaded.add(libname);
+        // }
+System.out.println("[NLL] loaded = "+loaded+" and I DID load "+libname);
     }
 
-    private static boolean verbose = false;
+    private static boolean verbose = true;
 
     private static File libDir = null;
     private static String libPrefix = "";
     private static String libSuffix = "";
 
+/*
     static {
         AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
             verbose = Boolean.getBoolean("javafx.verbose");
             return null;
         });
     }
-    
+*/
+
     private static String[] initializePath(String propname) {
         String ldpath = System.getProperty(propname, "");
         String ps = File.pathSeparator;
@@ -91,8 +95,12 @@ public class NativeLibLoader {
         // containing this class.
         // If that fails, then try System.loadLibrary as a last resort.
         try {
+System.err.println("[NLL] loadLibraryInternal called for "+libraryName);
             loadLibraryFullPath(libraryName);
+System.err.println("[NLL] loadLibraryInternal worked for "+libraryName);
         } catch (UnsatisfiedLinkError ex) {
+System.err.println("[NLL] loadLibraryInternal tried fullpath, that failed.");
+// ex.printStackTrace();
             // NOTE: First attempt to load the libraries from the java.library.path.
             // This allows FX to find more recent versions of the shared libraries
             // from java.library.path instead of ones that might be part of the JRE
@@ -119,22 +127,26 @@ public class NativeLibLoader {
             // print a warning. If it fails, rethrow the exception from
             // the earlier System.load()
             try {
+System.out.println("[NLL] using loadLibrary now for "+libraryName);
                 System.loadLibrary(libraryName);
+System.out.println("[NLL] using loadLibrary worked for "+libraryName);
                 if (verbose) {
                     System.err.println("WARNING: " + ex.toString());
                     System.err.println("    using System.loadLibrary("
                             + libraryName + ") as a fallback");
                 }
             } catch (UnsatisfiedLinkError ex2) {
-                //On iOS we link all libraries staticaly. Presence of library 
+                //On iOS we link all libraries staticaly. Presence of library
                 //is recognized by existence of JNI_OnLoad_libraryname() C function.
-                //If libraryname contains hyphen, it needs to be translated 
+                //If libraryname contains hyphen, it needs to be translated
                 //to underscore to form valid C function indentifier.
                 if ("iOS".equals(System.getProperty("os.name"))
                         && libraryName.contains("-")) {
                     libraryName = libraryName.replace("-", "_");
                     try {
+System.out.println("[NLL] using loadLibrary with hyphen now for "+libraryName);
                         System.loadLibrary(libraryName);
+System.out.println("[NLL] using loadLibrary with hyphen worked for "+libraryName);
                         return;
                     } catch (UnsatisfiedLinkError ex3) {
                         throw ex3;
@@ -167,7 +179,7 @@ public class NativeLibLoader {
                 int lastIndexOfSlash = Math.max(tmpStr.lastIndexOf('/'), tmpStr.lastIndexOf('\\'));
 
                 // Set the native directory based on the OS
-                String osName = System.getProperty("os.name");
+                String osName = "iOS";//System.getProperty("os.name");
                 String relativeDir = null;
                 if (osName.startsWith("Windows")) {
                     relativeDir = "../../bin";
@@ -189,12 +201,14 @@ public class NativeLibLoader {
                 } else if (osName.startsWith("Mac")) {
                     libPrefix = "lib";
                     libSuffix = ".dylib";
+                } else if (osName.startsWith("iOS")) {
+                    libPrefix = "lib";
+                    libSuffix = ".a";
                 } else if (osName.startsWith("Linux")) {
                     libPrefix = "lib";
                     libSuffix = ".so";
                 }
             }
-
             File libFile = new File(libDir, libPrefix + libraryName + libSuffix);
             String libFileName = libFile.getCanonicalPath();
             try {

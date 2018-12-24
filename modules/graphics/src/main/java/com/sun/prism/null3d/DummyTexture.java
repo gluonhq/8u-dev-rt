@@ -38,7 +38,7 @@ class DummyTexture extends BaseTexture  {
         DummyManagedResource() {
             super(new Object(), DummyTexturePool.instance);
         }
-    }
+    };
 
     DummyContext context;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2009, 2016, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -54,7 +54,6 @@ import com.sun.prism.Texture.Usage;
 import com.sun.prism.Texture.WrapMode;
 import com.sun.prism.d3d.D3DResource.D3DRecord;
 import com.sun.prism.impl.PrismSettings;
-import com.sun.prism.impl.VertexBuffer;
 import com.sun.prism.impl.ps.BaseShaderFactory;
 import com.sun.prism.impl.TextureResourcePool;
 import com.sun.prism.ps.Shader;
@@ -132,7 +131,7 @@ class D3DResourceFactory extends BaseShaderFactory {
     public boolean isCompatibleTexture(Texture tex) {
         return tex instanceof D3DTexture;
     }
-  
+
     @Override
     public D3DTexture createTexture(PixelFormat format, Usage usagehint,
             WrapMode wrapMode, int w, int h) {
@@ -343,11 +342,6 @@ class D3DResourceFactory extends BaseShaderFactory {
         }
         return null;
 
-    }
-
-
-    public VertexBuffer createVertexBuffer(int maxQuads) {
-        return new VertexBuffer(maxQuads);
     }
 
     private static ByteBuffer getBuffer(InputStream is) {

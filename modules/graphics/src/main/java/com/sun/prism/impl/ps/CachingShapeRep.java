@@ -231,7 +231,7 @@ class CachingShapeRepState {
                 if (toPos < 0) {
                     toPos = ~toPos;
                 }
-                while (entries[pos] != entry && pos < toPos) { ++pos; }
+                while (entries[pos] != entry && pos < toPos) { ++pos; };
                 if (pos >= toPos) {
                     throw new IllegalStateException("Trying to remove a cached item that's not in the cache");
                 }

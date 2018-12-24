@@ -39,7 +39,10 @@ import javafx.scene.Parent;
 
 class ViewScene extends GlassScene {
 
-    private static final String UNSUPPORTED_FORMAT = 
+static {
+Thread.dumpStack();
+}
+    private static final String UNSUPPORTED_FORMAT =
         "Transparent windows only supported for BYTE_BGRA_PRE format on LITTLE_ENDIAN machines";
 
     private View platformView;
@@ -49,6 +52,7 @@ class ViewScene extends GlassScene {
 
     public ViewScene(boolean depthBuffer, boolean msaa) {
         super(depthBuffer, msaa);
+Thread.dumpStack();
 
         this.platformView = Application.GetApplication().createView();
         this.platformView.setEventHandler(new GlassViewEventHandler(this));
@@ -61,14 +65,24 @@ class ViewScene extends GlassScene {
     protected View getPlatformView() {
         return this.platformView;
     }
-    
+
     ViewPainter getPainter() {
         return painter;
     }
 
+    private GlassStage myStage = null;
+
     @Override
     public void setStage(GlassStage stage) {
+Thread.dumpStack();
         super.setStage(stage);
+/*
+this.myStage = stage;
+}
+    public void postSetStage() {
+Thread.dumpStack();
+        GlassStage stage = myStage;
+*/
         if (stage != null) {
             WindowStage wstage  = (WindowStage)stage;
             if (wstage.needsUpdateWindow() || GraphicsPipeline.getPipeline().isUploading()) {
@@ -80,6 +94,7 @@ class ViewScene extends GlassScene {
             } else {
                 painter = new PresentingPainter(this);
             }
+System.err.println("[JVDBG] ViewScene sets stage, creates painter: "+painter);
             painter.setRoot(getRoot());
             paintRenderJob = new PaintRenderJob(this, PaintCollector.getInstance().getRendered(), painter);
         }
@@ -105,7 +120,7 @@ class ViewScene extends GlassScene {
         }
         super.dispose();
     }
-    
+
     @Override public void setRoot(NGNode root) {
         super.setRoot(root);
         if (painter != null) {
@@ -131,16 +146,21 @@ class ViewScene extends GlassScene {
     }
 
     @Override void repaint() {
+System.err.println("REPAINT");
         if (platformView == null) {
             return;
         }
 
         if (!setPainting(true)) {
+if (paintRenderJob == null) {
+// postSetStage();
+}
             Toolkit tk = Toolkit.getToolkit();
             tk.addRenderJob(paintRenderJob);
+System.err.println("REPAINT returns");
         }
     }
-    
+
     @Override
     public void enableInputMethodEvents(boolean enable) {
         platformView.enableInputMethodEvents(enable);

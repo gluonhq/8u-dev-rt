@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2009, 2016, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -27,7 +27,6 @@ package com.sun.prism;
 
 import com.sun.prism.Texture.WrapMode;
 import com.sun.prism.impl.TextureResourcePool;
-import com.sun.prism.impl.VertexBuffer;
 import com.sun.prism.shape.ShapeRep;
 
 public interface ResourceFactory extends GraphicsResource {
@@ -174,7 +173,7 @@ public interface ResourceFactory extends GraphicsResource {
      * @param image the pixel data to be uploaded if the texture is new or
      *     needs new fringe pixels to simulate a new wrap mode
      * @param wrapMode the mode that describes the behavior for samples
-     *     outside the content 
+     *     outside the content
      * @param useMipmap the flag indicates should mipmapping be used for this
      *     texture
      * @return a cached texture
@@ -207,7 +206,7 @@ public interface ResourceFactory extends GraphicsResource {
     /**
      * Returns true iff the indicated {@link WrapMode wrap mode} is directly
      * supported (i.e. not simulated) by the underlying pipeline and platform.
-     * 
+     *
      * @param mode the desired {@code WrapMode}
      * @return true iff the wrap mode is supported and not simulated
      */
@@ -229,7 +228,7 @@ public interface ResourceFactory extends GraphicsResource {
     public Texture createFloatTexture(int width, int height);
     public RTTexture createRTTexture(int width, int height, Texture.WrapMode wrapMode);
     public RTTexture createRTTexture(int width, int height, Texture.WrapMode wrapMode, boolean msaa);
-    
+
     /**
      * A Texture may have been obtained from a different resource factory.
      * @param tex the texture to check.
@@ -238,7 +237,6 @@ public interface ResourceFactory extends GraphicsResource {
     public boolean isCompatibleTexture(Texture tex);
 
     public Presentable createPresentable(PresentableState pState);
-    public VertexBuffer createVertexBuffer(int maxQuads);
 
     public ShapeRep createPathRep();
     public ShapeRep createRoundRectRep();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2009, 2016, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -44,7 +44,6 @@ import com.sun.prism.Texture.Usage;
 import com.sun.prism.Texture.WrapMode;
 import com.sun.prism.impl.PrismSettings;
 import com.sun.prism.impl.TextureResourcePool;
-import com.sun.prism.impl.VertexBuffer;
 import com.sun.prism.impl.ps.BaseShaderFactory;
 import com.sun.prism.ps.Shader;
 import com.sun.prism.ps.ShaderFactory;
@@ -72,7 +71,7 @@ public class ES2ResourceFactory extends BaseShaderFactory {
             System.out.println("Maximum number of vertex attributes = "
                     + context.getGLContext().getIntParam(GLContext.GL_MAX_VERTEX_ATTRIBS));
             int maxVUC, maxFUC, maxVC;
-            // We need this if-else block is because iMX6 doesn't support component queries 
+            // We need this if-else block is because iMX6 doesn't support component queries
             // and Mac  doesn't support vectors queries.
             if (PlatformUtil.isEmbedded()) {
                 // Multiply by 4 as it is documented that a vector has 4 components.
@@ -299,9 +298,11 @@ public class ES2ResourceFactory extends BaseShaderFactory {
             throw new IllegalArgumentException("Shader name must be non-null");
         }
         try {
-            InputStream stream =
-                    ES2ResourceFactory.class.getResourceAsStream(
-                    "glsl/" + name + ".frag");
+java.io.File f = new java.io.File("/tmp/shader/glsl/"+name+".frag");
+InputStream stream = new java.io.FileInputStream(f);
+            // InputStream stream =
+                    // ES2ResourceFactory.class.getResourceAsStream(
+                    // "glsl/" + name + ".frag");
             Class klass =
                     Class.forName("com.sun.prism.shader." + name + "_Loader");
             if (PrismSettings.verbose) {
@@ -315,10 +316,6 @@ public class ES2ResourceFactory extends BaseShaderFactory {
             e.printStackTrace();
             throw new InternalError("Error loading stock shader " + name);
         }
-    }
-
-    public VertexBuffer createVertexBuffer(int maxQuads) {
-        return new VertexBuffer(maxQuads);
     }
 
     public void dispose() {

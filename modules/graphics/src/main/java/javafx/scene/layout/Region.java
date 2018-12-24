@@ -804,7 +804,7 @@ public class
             }
             return cache;
         }
-    }
+    };
 
     /**
      * cached results of snapped insets, this are used a lot during layout so makes sense
@@ -1250,7 +1250,7 @@ public class
             impl_geomChanged();
             impl_markDirty(DirtyBits.REGION_SHAPE);
         }
-    }
+    };
 
     /**
      * Specifies whether the shape, if defined, is scaled to match the size of the Region.

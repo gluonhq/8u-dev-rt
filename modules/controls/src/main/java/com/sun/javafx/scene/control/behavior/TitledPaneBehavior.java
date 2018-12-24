@@ -29,6 +29,7 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.input.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import static javafx.scene.input.KeyCode.ENTER;
 import static javafx.scene.input.KeyCode.SPACE;
 
 public class TitledPaneBehavior extends BehaviorBase<TitledPane> {

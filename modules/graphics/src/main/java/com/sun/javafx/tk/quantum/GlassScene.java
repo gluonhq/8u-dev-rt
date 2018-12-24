@@ -48,13 +48,13 @@ import com.sun.javafx.tk.TKScenePaintListener;
 import com.sun.prism.impl.PrismSettings;
 import com.sun.prism.paint.Color;
 import com.sun.prism.paint.Paint;
-//import sun.misc.JavaSecurityAccess;
-//import sun.misc.SharedSecrets;
+import sun.misc.JavaSecurityAccess;
+import sun.misc.SharedSecrets;
 
 abstract class GlassScene implements TKScene {
 
-//    private static final JavaSecurityAccess javaSecurityAccess =
-//            SharedSecrets.getJavaSecurityAccess();
+    private static final JavaSecurityAccess javaSecurityAccess =
+            SharedSecrets.getJavaSecurityAccess();
 
     private GlassStage stage;
 
@@ -119,9 +119,8 @@ abstract class GlassScene implements TKScene {
         AccessControlContext acc = AccessController.getContext();
         // JDK doesn't provide public APIs to get ACC intersection,
         // so using this ugly workaround
-//        accessCtrlCtx = javaSecurityAccess.doIntersectionPrivilege(
-//                () -> AccessController.getContext(), acc, ctx);
-        accessCtrlCtx = AccessController.getContext();
+        accessCtrlCtx = javaSecurityAccess.doIntersectionPrivilege(
+                () -> AccessController.getContext(), acc, ctx);
     }
 
     public void waitForRenderingToComplete() {

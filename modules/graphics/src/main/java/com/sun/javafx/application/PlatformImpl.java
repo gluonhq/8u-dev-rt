@@ -137,6 +137,7 @@ public class PlatformImpl {
      * @param r
      */
     public static void startup(final Runnable r) {
+System.err.println("[JVDBG] STARTUP PLATFORMIMPL");
 
         // NOTE: if we ever support re-launching an application and/or
         // launching a second application in the same VM/classloader
@@ -148,6 +149,7 @@ public class PlatformImpl {
         if (initialized.getAndSet(true)) {
             // If we've already initialized, just put the runnable on the queue.
             runLater(r);
+System.err.println("[JVDBG] STARTUP PLATFORMIMPL2");
             return;
         }
         AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
@@ -183,8 +185,10 @@ public class PlatformImpl {
             if (s != null) {
                 isThreadMerged = Boolean.valueOf(s);
             }
+System.err.println("[JVDBG] STARTUP PLATFORMIMPL3");
             return null;
         });
+System.err.println("[JVDBG] STARTUP PLATFORMIMPL4");
 
         if (!taskbarApplication) {
             AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
@@ -208,15 +212,23 @@ public class PlatformImpl {
         };
         Toolkit.getToolkit().addTkListener(toolkitListener);
 
+System.err.println("[JVDBG] STARTUP PLATFORMIMPL5");
         Toolkit.getToolkit().startup(() -> {
+System.err.println("[JVDBG] STARTUP PLATFORMIMPL6");
             startupLatch.countDown();
+System.err.println("[JVDBG] STARTUP PLATFORMIMPL7");
             r.run();
+System.err.println("[JVDBG] STARTUP PLATFORMIMPL8");
         });
+System.err.println("[JVDBG] STARTUP PLATFORMIMPLA");
 
         //Initialize the thread merging mechanism
         if (isThreadMerged) {
+System.err.println("[JVDBG] STARTUP PLATFORMIMPLB");
             installFwEventQueue();
+System.err.println("[JVDBG] STARTUP PLATFORMIMPLC");
         }
+System.err.println("[JVDBG] STARTUP PLATFORMIMPL9");
     }
 
     private static void installFwEventQueue() {
@@ -558,7 +570,7 @@ public class PlatformImpl {
             StyleManager.getInstance().removeUserAgentStylesheet(accessibilityTheme);
             accessibilityTheme = null;
         }
-        
+
         _setAccessibilityTheme(platformTheme);
 
         if (accessibilityTheme != null) {
@@ -611,7 +623,7 @@ public class PlatformImpl {
                             break;
                         default:
                     }
-                }   
+                }
             }
         }
     }
@@ -625,7 +637,7 @@ public class PlatformImpl {
         if (overrideStylesheetUrl != null) {
             stylesheetUrl = overrideStylesheetUrl;
         }
-        
+
         final List<String> uaStylesheets = new ArrayList<>();
 
         // check for named theme constants for modena and caspian
@@ -654,7 +666,7 @@ public class PlatformImpl {
 
             if (!isSupported(ConditionalFeature.TRANSPARENT_WINDOW)) {
                 uaStylesheets.add("com/sun/javafx/scene/control/skin/caspian/caspian-no-transparency.css");
-            }            
+            }
 
         } else if (Application.STYLESHEET_MODENA.equalsIgnoreCase(stylesheetUrl)) {
             isModena = true;
@@ -737,7 +749,7 @@ public class PlatformImpl {
                     if (isMediaSupported && PlatformUtil.isEmbedded()) {
                         AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
                             String s = System.getProperty(
-                                    "com.sun.javafx.experimental.embedded.media", 
+                                    "com.sun.javafx.experimental.embedded.media",
                                     "false");
                             isMediaSupported = Boolean.valueOf(s);
                             return null;
@@ -752,7 +764,7 @@ public class PlatformImpl {
                     if (isWebSupported && PlatformUtil.isEmbedded()) {
                         AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
                             String s = System.getProperty(
-                                    "com.sun.javafx.experimental.embedded.web", 
+                                    "com.sun.javafx.experimental.embedded.web",
                                     "false");
                             isWebSupported = Boolean.valueOf(s);
                             return null;

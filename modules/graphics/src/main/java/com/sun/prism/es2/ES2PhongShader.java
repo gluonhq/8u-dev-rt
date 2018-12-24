@@ -71,8 +71,6 @@ class ES2PhongShader {
     private static String normalMapShaderParts[] = new String[BumpMapState.values().length];
     private static String lightingShaderParts[] = new String[lightStateCount];
 
-    private static String EXTENSION = "#extension GL_OES_standard_derivatives : enable";
-
     static {
         shaders = new ES2Shader[DiffuseState.values().length][SpecularState.values().length]
                 [SelfIllumState.values().length][BumpMapState.values().length][lightStateCount];
@@ -159,17 +157,6 @@ class ES2PhongShader {
             fragShader = fragShader.replace("vec4 apply_specular();", specularShaderParts[specularState.ordinal()]);
             fragShader = fragShader.replace("vec3 apply_normal();", normalMapShaderParts[bumpState.ordinal()]);
             fragShader = fragShader.replace("vec4 apply_selfIllum();", selfIllumShaderParts[selfIllumState.ordinal()]);
-
-            // we need to remove duplicates of the EXTENSION
-            int extCnt = fragShader.indexOf(EXTENSION);
-            if (extCnt > 0) {
-                int extCnt2 = fragShader.indexOf(EXTENSION, extCnt + 10);
-                if (extCnt2 > 0) {
-                    fragShader = fragShader.replaceFirst(EXTENSION, "#xtension");
-                    fragShader = fragShader.replaceAll(EXTENSION,"");
-                    fragShader = fragShader.replaceFirst("#xtension", EXTENSION);
-                }
-            }
 
             String[] pixelShaders = new String[]{
                 fragShader

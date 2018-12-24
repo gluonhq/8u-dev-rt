@@ -135,6 +135,7 @@ public class PrismTextLayout implements TextLayout {
         reset();
         this.spans = null;
         this.font = (PGFont)font;
+System.err.println("[JVDBG] setContent, text = "+text+", font = "+font+" of class "+font.getClass()+", IDENTIY = "+IDENTITY);
         this.strike = ((PGFont)font).getStrike(IDENTITY);
         this.text = text.toCharArray();
         if (MAX_CACHE_SIZE > 0) {
@@ -1034,12 +1035,8 @@ public class PrismTextLayout implements TextLayout {
         BreakIterator boundary = null;
         if (wrapWidth > 0) {
             if ((flags & (FLAGS_HAS_COMPLEX | FLAGS_HAS_CJK)) != 0) {
-                try {
-                    boundary = BreakIterator.getLineInstance();
-                    boundary.setText(new CharArrayIterator(chars));
-                } catch (Exception e) {
-                    System.err.println("Error creating lineinstance for "+new String(chars));
-                }
+                boundary = BreakIterator.getLineInstance();
+                boundary.setText(new CharArrayIterator(chars));
             }
         }
         int textAlignment = flags & ALIGN_MASK;

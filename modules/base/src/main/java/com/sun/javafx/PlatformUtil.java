@@ -42,7 +42,7 @@ public class PlatformUtil {
     // a doPrivileged block except for standard JVM properties such as
     // os.name, os.version, os.arch, java.vm.name, etc.
 
-    private static final String os = System.getProperty("os.name");
+    private static final String os = "iOS";//System.getProperty("os.name");
     private static final String version = System.getProperty("os.version");
     private static final boolean embedded;
     private static final String embeddedType;

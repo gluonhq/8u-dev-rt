@@ -24,34 +24,18 @@
  */
 package com.sun.glass.ui.android;
 
-import javafx.application.Platform;
 
 public class SoftwareKeyboard {
 
-    public static void delayShow() {
-        Thread t = new Thread() {
-            @Override public void run() {
-                try {
-                    Thread.sleep(500);
-                    System.out.println ("[JVDBG] restore VK");
-                    Platform.runLater( () -> show());
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-        t.start();
-    }
-	public static void show() {
+    public static void show() {
         _show();
     }
-	
-	public static void hide() {
+
+    public static void hide() {
         _hide();
     }
-    
+
     private static native void _show();
-    
+
     private static native void _hide();
 }

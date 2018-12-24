@@ -108,7 +108,7 @@ public class ImageStorage {
          * RGBARGBARGBA...
          */
         RGBA_PRE
-    }
+    };
     /**
      * A mapping of lower case file extensions to loader factories.
      */

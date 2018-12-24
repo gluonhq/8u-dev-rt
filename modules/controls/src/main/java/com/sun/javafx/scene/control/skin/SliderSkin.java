@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2016, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -79,6 +79,7 @@ public class SliderSkin extends BehaviorSkinBase<Slider, SliderBehavior> {
         registerChangeListener(slider.majorTickUnitProperty(), "MAJOR_TICK_UNIT");
         registerChangeListener(slider.minorTickCountProperty(), "MINOR_TICK_COUNT");
         registerChangeListener(slider.labelFormatterProperty(), "TICK_LABEL_FORMATTER");
+        registerChangeListener(slider.snapToTicksProperty(), "SNAP_TO_TICKS");
     }
 
     private void initialize() {
@@ -111,7 +112,7 @@ public class SliderSkin extends BehaviorSkinBase<Slider, SliderBehavior> {
                 trackClicked = false;
             }
         });
-        
+
         track.setOnMouseDragged(me -> {
             if (!thumb.isPressed()) {
                 if (getSkinnable().getOrientation() == Orientation.HORIZONTAL) {
@@ -150,7 +151,7 @@ public class SliderSkin extends BehaviorSkinBase<Slider, SliderBehavior> {
             return slider.getLabelFormatter().fromString(string);
         }
     };
-    
+
      private void setShowTickMarks(boolean ticksVisible, boolean labelsVisible) {
         showTickMarks = (ticksVisible || labelsVisible);
         Slider slider = getSkinnable();
@@ -178,7 +179,7 @@ public class SliderSkin extends BehaviorSkinBase<Slider, SliderBehavior> {
                 tickLine.setTickMarkVisible(ticksVisible);
                 tickLine.setMinorTickVisible(ticksVisible);
             }
-        } 
+        }
         else  {
             getChildren().clear();
             getChildren().addAll(track, thumb);
@@ -230,6 +231,8 @@ public class SliderSkin extends BehaviorSkinBase<Slider, SliderBehavior> {
                     tickLine.requestAxisLayout();
                 }
             }
+        } else if ("SNAP_TO_TICKS".equals(p)) {
+            slider.adjustValue(slider.getValue());
         }
     }
 
@@ -238,14 +241,14 @@ public class SliderSkin extends BehaviorSkinBase<Slider, SliderBehavior> {
      */
     void positionThumb(final boolean animate) {
         Slider s = getSkinnable();
-        if (s.getValue() > s.getMax()) return;// this can happen if we are bound to something 
+        if (s.getValue() > s.getMax()) return;// this can happen if we are bound to something
         boolean horizontal = s.getOrientation() == Orientation.HORIZONTAL;
         final double endX = (horizontal) ? trackStart + (((trackLength * ((s.getValue() - s.getMin()) /
                 (s.getMax() - s.getMin()))) - thumbWidth/2)) : thumbLeft;
         final double endY = (horizontal) ? thumbTop :
             snappedTopInset() + trackLength - (trackLength * ((s.getValue() - s.getMin()) /
                 (s.getMax() - s.getMin()))); //  - thumbHeight/2
-        
+
         if (animate) {
             // lets animate the thumb transition
             final double startX = thumb.getLayoutX();

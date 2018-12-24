@@ -404,6 +404,7 @@ Java_com_sun_javafx_font_PrismFontFactory_populateFontFileNameMap
 (JNIEnv *env, jclass obj, jobject fontToFileMap,
  jobject fontToFamilyMap, jobject familyToFontListMap, jobject locale)
 {
+fprintf(stderr, "[POP0]\n");
 #define MAX_BUFFER (FILENAME_MAX+1)
     const wchar_t wname[MAX_BUFFER];
     const char data[MAX_BUFFER];
@@ -425,21 +426,25 @@ Java_com_sun_javafx_font_PrismFontFactory_populateFontFileNameMap
     /* Check we were passed all the maps we need, and do lookup of
      * methods for JNI up-calls
      */
+fprintf(stderr, "[POP1]\n");
     if (fontToFileMap == NULL ||
         fontToFamilyMap == NULL ||
         familyToFontListMap == NULL) {
         return;
     }
+fprintf(stderr, "[POP2]\n");
     classID = (*env)->FindClass(env, "java/util/HashMap");
     if (classID == NULL) {
         return;
     }
+fprintf(stderr, "[POP3]\n");
     putMID = (*env)->GetMethodID(env, classID, "put",
                  "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
     if (putMID == NULL) {
         return;
     }
 
+fprintf(stderr, "[POP4]\n");
     fmi.env = env;
     fmi.fontToFamilyMap = fontToFamilyMap;
     fmi.familyToFontListMap = familyToFontListMap;
@@ -451,17 +456,20 @@ Java_com_sun_javafx_font_PrismFontFactory_populateFontFileNameMap
         return;
     }
 
+fprintf(stderr, "[POP5]\n");
     fmi.arrayListClass = (*env)->FindClass(env, "java/util/ArrayList");
     if (fmi.arrayListClass == NULL) {
         return;
     }
     fmi.arrayListCtr = (*env)->GetMethodID(env, fmi.arrayListClass,
                                               "<init>", "(I)V");
+fprintf(stderr, "[POP6]\n");
     if (fmi.arrayListCtr == NULL) {
         return;
     }
     fmi.addMID = (*env)->GetMethodID(env, fmi.arrayListClass,
                                      "add", "(Ljava/lang/Object;)Z");
+fprintf(stderr, "[POP7]\n");
     if (fmi.addMID == NULL) {
         return;
     }
@@ -475,6 +483,7 @@ Java_com_sun_javafx_font_PrismFontFactory_populateFontFileNameMap
     if (fmi.toLowerCaseMID == NULL) {
         return;
     }
+fprintf(stderr, "[POP8]\n");
 
     /* This HDC is initialised and released in this populate family map
      * JNI entry point, and used within the call which would otherwise
@@ -485,6 +494,7 @@ Java_com_sun_javafx_font_PrismFontFactory_populateFontFileNameMap
         return;
     }
 
+fprintf(stderr, "[POP9]\n");
     /* Enumerate fonts via GDI to build maps of fonts and families */
     memset(&lfw, 0, sizeof(lfw));
     lfw.lfCharSet = DEFAULT_CHARSET;  /* all charsets */
@@ -497,6 +507,7 @@ Java_com_sun_javafx_font_PrismFontFactory_populateFontFileNameMap
     fontKeyName =  FONTKEY_NT;
     ret = RegOpenKeyEx(HKEY_LOCAL_MACHINE,
                        fontKeyName, 0L, KEY_READ, &hkeyFonts);
+fprintf(stderr, "[POP10]\n");
     if (ret != ERROR_SUCCESS) {
         ReleaseDC(NULL, fmi.screenDC);
         fmi.screenDC = NULL;
@@ -507,6 +518,7 @@ Java_com_sun_javafx_font_PrismFontFactory_populateFontFileNameMap
                            &dwNumValues, &dwMaxValueNameLen,
                            &dwMaxValueDataLen, NULL, NULL);
     
+fprintf(stderr, "[POP11]\n");
     if (ret != ERROR_SUCCESS ||
         dwMaxValueNameLen >= MAX_BUFFER ||
         dwMaxValueDataLen >= MAX_BUFFER) {
@@ -541,6 +553,7 @@ Java_com_sun_javafx_font_PrismFontFactory_populateFontFileNameMap
             }
             registerFontW(&fmi, fontToFileMap, (LPWSTR)wname, (LPWSTR)data);
     }
+fprintf(stderr, "[POP12]\n");
     RegCloseKey(hkeyFonts);
     ReleaseDC(NULL, fmi.screenDC);
     fmi.screenDC = NULL;

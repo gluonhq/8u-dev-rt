@@ -106,7 +106,7 @@ public class DisplacementMap extends Effect {
         return new com.sun.scenario.effect.DisplacementMap(
                             new com.sun.scenario.effect.FloatMap(1, 1),
                             com.sun.scenario.effect.Effect.DefaultInput);
-    }
+    };
 
     /**
      * Creates a new instance of DisplacementMap with default parameters.
@@ -241,7 +241,7 @@ public class DisplacementMap extends Effect {
                 effectBoundsChanged();
             }
         }
-    }
+    };
 
     /**
      * The scale factor by which all x coordinate offset values in the

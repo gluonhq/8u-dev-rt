@@ -485,7 +485,9 @@ public class Text extends Shape {
      */
     private Object getFontInternal() {
         Font font = getFont();
+System.err.println("[JVDBG] getFontInternal font1 = "+font);
         if (font == null) font = Font.getDefault();
+System.err.println("[JVDBG] getFontInternal font2 = "+font);
         return font.impl_getNativeFont();
     }
 
@@ -495,7 +497,7 @@ public class Text extends Shape {
                 @Override public Object getBean() { return Text.this; }
                 @Override public String getName() { return "font"; }
                 @Override public CssMetaData<Text,Font> getCssMetaData() {
-                    return StyleableProperties.FONT;
+                    return StyleableProperties.FONT();
                 }
                 @Override public void invalidated() {
                     needsFullTextLayout();
@@ -1269,8 +1271,14 @@ public class Text extends Shape {
       */
      private static class StyleableProperties {
 
-         private static final CssMetaData<Text,Font> FONT =
-            new FontCssMetaData<Text>("-fx-font", Font.getDefault()) {
+         private static CssMetaData<Text,Font> myFONT = null;
+         private static CssMetaData<Text,Font> FONT() {
+             postClinit();
+             return myFONT;
+         }
+
+         private static void postClinit() {
+            myFONT = new FontCssMetaData<Text>("-fx-font", Font.getDefault()) {
 
             @Override
             public boolean isSettable(Text node) {
@@ -1282,6 +1290,7 @@ public class Text extends Shape {
                 return (StyleableProperty<Font>)node.fontProperty();
             }
          };
+         }
 
          private static final CssMetaData<Text,Boolean> UNDERLINE =
             new CssMetaData<Text,Boolean>("-fx-underline",
@@ -1411,11 +1420,11 @@ public class Text extends Shape {
             }
          };
 
-	 private final static List<CssMetaData<? extends Styleable, ?>> STYLEABLES;
+     private final static List<CssMetaData<? extends Styleable, ?>> STYLEABLES;
          static {
             final List<CssMetaData<? extends Styleable, ?>> styleables =
                 new ArrayList<CssMetaData<? extends Styleable, ?>>(Shape.getClassCssMetaData());
-            styleables.add(FONT);
+            // styleables.add(FONT);
             styleables.add(UNDERLINE);
             styleables.add(STRIKETHROUGH);
             styleables.add(TEXT_ALIGNMENT);
@@ -1954,7 +1963,7 @@ public class Text extends Shape {
                 int start = (Integer)parameters[0];
                 int end = (Integer)parameters[1];
                 PathElement[] elements = impl_getRangeShape(start, end + 1);
-                /* Each bounds is defined by a MoveTo (top-left) followed by 
+                /* Each bounds is defined by a MoveTo (top-left) followed by
                  * 4 LineTo (to top-right, bottom-right, bottom-left, back to top-left).
                  */
                 Bounds[] bounds = new Bounds[elements.length / 5];
@@ -1963,7 +1972,7 @@ public class Text extends Shape {
                     MoveTo topLeft = (MoveTo)elements[index];
                     LineTo topRight = (LineTo)elements[index+1];
                     LineTo bottomRight = (LineTo)elements[index+2];
-                    BoundingBox b = new BoundingBox(topLeft.getX(), topLeft.getY(), 
+                    BoundingBox b = new BoundingBox(topLeft.getX(), topLeft.getY(),
                                                     topRight.getX() - topLeft.getX(),
                                                     bottomRight.getY() - topRight.getY());
                     bounds[i] = localToScreen(b);

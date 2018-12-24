@@ -88,7 +88,7 @@ public final class PrismSettings {
     public static final boolean forceUploadingPainter;
     public static final boolean forceAlphaTestShader;
     public static final boolean forceNonAntialiasedShape;
-    
+
 
     private PrismSettings() {
     }
@@ -169,7 +169,7 @@ public final class PrismSettings {
         useNewImageLoader = getBoolean(systemProperties, "prism.newiio", true);
 
         /* Verbose output*/
-        verbose = getBoolean(systemProperties, "prism.verbose", false);
+        verbose = true; //getBoolean(systemProperties, "prism.verbose", false);
 
         /* Prism statistics print frequency, <=0 means "do not print" */
         prismStatFrequency =
@@ -192,7 +192,7 @@ public final class PrismSettings {
 
         /* Force GPU, if GPU is PS 3 capable, disable GPU qualification check. */
         forceGPU = getBoolean(systemProperties, "prism.forceGPU", false);
-        
+
         /* Skip mesh normal computation */
         skipMeshNormalComputation = getBoolean(systemProperties,
                 "prism.experimental.skipMeshNormalComputation", false);

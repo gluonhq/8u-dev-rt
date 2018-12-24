@@ -139,6 +139,7 @@ CFIndex addCTFontDescriptor(CTFontDescriptorRef fd, JNIEnv *env, jobjectArray re
 JNIEXPORT jobjectArray JNICALL Java_com_sun_javafx_font_MacFontFinder_getFontData
 (JNIEnv *env, jclass obj)
 {
+fprintf(stderr, "[JVDBG]GETFONTDATA\n");
     /* No caching as this method is only invoked once */
     jclass jStringClass = (*env)->FindClass(env, "java/lang/String");
     if (checkAndClearException(env) || !jStringClass) {
@@ -151,6 +152,7 @@ JNIEXPORT jobjectArray JNICALL Java_com_sun_javafx_font_MacFontFinder_getFontDat
     CFRelease(collection);
 
     CFIndex count = CFArrayGetCount(fonts);
+fprintf(stderr, "[JVDBG]GETFONTDATA2\n");
     jobjectArray result = (*env)->NewObjectArray(env, (count + 2) * 3, jStringClass, NULL);
     if (checkAndClearException(env) || !result) {
         fprintf(stderr, "getFontData error: JNI exception or result == NULL");
@@ -186,6 +188,7 @@ JNIEXPORT jobjectArray JNICALL Java_com_sun_javafx_font_MacFontFinder_getFontDat
     j = addCTFontDescriptor(fd, env, result, j);
     CFRelease(fd);
     CFRelease(font);
+fprintf(stderr, "[JVDBG]GETFONTDATA3, result = %p\n",result);
 
     return result;
 }

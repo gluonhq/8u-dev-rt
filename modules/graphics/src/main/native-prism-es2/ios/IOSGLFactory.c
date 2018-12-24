@@ -36,6 +36,8 @@
 //Builtin library entrypoint
 JNIEXPORT jint JNICALL
 JNI_OnLoad_prism_es2(JavaVM *vm, void * reserved) {
+fprintf(stderr, "[NATIVEFX] err onloadprism\n");
+fprintf(stdout, "[NATIVEFX] out onloadprism\n");
 #ifdef JNI_VERSION_1_8
     //min. returned JNI_VERSION required by JDK8 for builtin libraries
     JNIEnv *env;
@@ -84,6 +86,7 @@ JNIEXPORT jlong JNICALL Java_com_sun_prism_es2_IOSGLFactory_nInitialize
     char *tmpVersionStr;
     int  versionNumbers[2];
     const char *glExtensions;
+ fprintf(stderr, "[NATIVEFX] nInitialize prism\n");
 
     if (attrArr == NULL) {
         return 0;
@@ -121,6 +124,7 @@ JNIEXPORT jlong JNICALL Java_com_sun_prism_es2_IOSGLFactory_nInitialize
     tmpVersionStr = strdup(glVersion);
     extractVersionInfo(tmpVersionStr, versionNumbers);
     free(tmpVersionStr);
+ fprintf(stderr, "[NATIVEFX] nInitialize prism2 \n");
 
     fprintf(stderr, "GL_VERSION string = %s\n", glVersion);
     fprintf(stderr, "GL_VERSION (major.minor) = %d.%d\n",

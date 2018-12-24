@@ -33,6 +33,7 @@ import javafx.scene.control.TextInputControl;
 import javafx.scene.input.KeyEvent;
 
 import java.text.Bidi;
+import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.List;
 

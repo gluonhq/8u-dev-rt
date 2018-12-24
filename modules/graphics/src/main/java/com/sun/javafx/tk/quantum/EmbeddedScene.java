@@ -53,19 +53,23 @@ import com.sun.glass.ui.Pixels;
 
 final class EmbeddedScene extends GlassScene implements EmbeddedSceneInterface {
 
+static {
+Thread.dumpStack();
+}
+
     // TODO: synchronize access to embedder from ET and RT
     private HostInterface host;
 
-    private UploadingPainter        painter;
+    // private UploadingPainter        painter;
     private PaintRenderJob          paintRenderJob;
     private float                   renderScale;
-    
+
     private final EmbeddedSceneDnD embeddedDnD;
 
     private volatile IntBuffer  texBits;
     private volatile int        texLineStride; // pre-scaled
     private volatile float      texScaleFactor = 1.0f;
- 
+
     public EmbeddedScene(HostInterface host, boolean depthBuffer, boolean msaa) {
         super(depthBuffer, msaa);
         sceneState = new EmbeddedState(this);
@@ -74,8 +78,8 @@ final class EmbeddedScene extends GlassScene implements EmbeddedSceneInterface {
         this.embeddedDnD = new EmbeddedSceneDnD(this);
 
         PaintCollector collector = PaintCollector.getInstance();
-        painter = new UploadingPainter(this);
-        paintRenderJob = new PaintRenderJob(this, collector.getRendered(), painter);
+        // painter = new UploadingPainter(this);
+        // paintRenderJob = new PaintRenderJob(this, collector.getRendered(), painter);
     }
 
     @Override
@@ -85,7 +89,7 @@ final class EmbeddedScene extends GlassScene implements EmbeddedSceneInterface {
             host.setEmbeddedScene(null);
             host = null;
             updateSceneState();
-            painter = null;
+            // painter = null;
             paintRenderJob = null;
             texBits = null;
             return null;
@@ -107,7 +111,7 @@ final class EmbeddedScene extends GlassScene implements EmbeddedSceneInterface {
 
     @Override public void setRoot(NGNode root) {
         super.setRoot(root);
-        painter.setRoot(root);
+        // painter.setRoot(root);
     }
 
     @Override
@@ -128,7 +132,7 @@ final class EmbeddedScene extends GlassScene implements EmbeddedSceneInterface {
             System.err.println("EmbeddedScene.finishInputMethodComposition");
         }
     }
-    
+
     @Override
     public void setPixelScaleFactor(float scale) {
         renderScale = scale;
@@ -184,7 +188,7 @@ final class EmbeddedScene extends GlassScene implements EmbeddedSceneInterface {
      * @param width the logical width of the buffer
      * @param height the logical height of the buffer
      * @param scale the scale factor
-     * @return 
+     * @return
      */
     @Override
     public boolean getPixels(final IntBuffer dest, final int width, final int height) {
@@ -198,7 +202,7 @@ final class EmbeddedScene extends GlassScene implements EmbeddedSceneInterface {
             }
             scaledWidth = (int)Math.round(scaledWidth * texScaleFactor);
             scaledHeight = (int)Math.round(scaledHeight * texScaleFactor);
-        
+
             dest.rewind();
             texBits.rewind();
             if (dest.capacity() != texBits.capacity()) {
@@ -222,7 +226,7 @@ final class EmbeddedScene extends GlassScene implements EmbeddedSceneInterface {
             return true;
         });
     }
-    
+
     @Override
     protected Color getClearColor() {
         if (fillPaint != null && fillPaint.getType() == Paint.Type.COLOR &&

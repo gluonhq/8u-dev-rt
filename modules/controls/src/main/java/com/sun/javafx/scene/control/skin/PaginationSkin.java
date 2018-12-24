@@ -45,6 +45,7 @@ import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.beans.value.WritableValue;
 import javafx.collections.ListChangeListener;
 import javafx.css.Styleable;
@@ -1082,7 +1083,7 @@ public class PaginationSkin extends BehaviorSkinBase<Pagination, PaginationBehav
             }
             double arrowGap = arrowButtonGap.get();
 
-            return left + leftArrowWidth + 2 *arrowGap + minButtonSize /*at least one button*/ 
+            return left + leftArrowWidth + 2 *arrowGap + minButtonSize /*at least one button*/
                     + 2 * spacing + rightArrowWidth + right + pageInformationWidth;
         }
 

@@ -33,7 +33,7 @@ import com.sun.glass.ui.Window;
 
 /**
  * PresentableState is intended to provide for a shadow copy of View/Window
- * state for use off the event thread. It is the task of the invoker of 
+ * state for use off the event thread. It is the task of the invoker of
  * Prism to make sure that the state is consistent for a rendering probably
  * by use of the AbstractPainter.renderLock to ensure consistent state.
  */
@@ -42,7 +42,7 @@ public abstract class PresentableState {
     /** The underlying Window and View */
     protected Window window;
     protected View view;
-    
+
     // Captured state
     protected int nativeFrameBuffer;
     protected int windowX, windowY;
@@ -58,8 +58,8 @@ public abstract class PresentableState {
     protected int screenWidth;
     protected boolean isWindowVisible;
     protected boolean isWindowMinimized;
-    protected static final boolean hasWindowManager =
-            Application.GetApplication().hasWindowManager();
+    protected static final boolean hasWindowManager = true;
+            // Application.GetApplication().hasWindowManager();
     // Between PaintCollector and *Painter, there is a window where
     // the associated View can be closed. This variable allows us
     // to shortcut the queued *Painter task.
@@ -129,7 +129,7 @@ public abstract class PresentableState {
 
     /**
      * @return Screen.getScale
-     * 
+     *
      * May be called on any thread
      */
     public float getRenderScale() {
@@ -282,10 +282,10 @@ public abstract class PresentableState {
     public void unlock() {
         if (view != null) view.unlock();
     }
-    
+
     /**
      * Put the pixels on the screen.
-     * 
+     *
      * @param source - the source for the Pixels object to be uploaded
      */
     public void uploadPixels(PixelSource source) {
@@ -356,7 +356,7 @@ public abstract class PresentableState {
                    window.getOutputScale());
             Screen screen = window.getScreen();
             if (screen != null) {
-                // note only used by Embedded Z order painting 
+                // note only used by Embedded Z order painting
                 // !hasWindowManager so should be safe to ignore
                 // when null, most likely because of "In Browswer"
                 screenHeight = screen.getHeight();

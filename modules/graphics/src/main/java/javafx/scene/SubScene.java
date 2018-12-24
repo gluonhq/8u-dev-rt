@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, 2017, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -94,7 +94,7 @@ import sun.util.logging.PlatformLogger;
  *
  * <p>
  * A default headlight will be added to a {@SubScene} that contains one or more
- * {@code Shape3D} nodes, but no light nodes. This light source is a 
+ * {@code Shape3D} nodes, but no light nodes. This light source is a
  * {@code Color.WHITE} {@code PointLight} placed at the camera position.
  * </p>
  *
@@ -167,7 +167,7 @@ public class SubScene extends Node {
         }
     }
 
-    private static boolean is3DSupported =
+    private boolean is3DSupported =
             Platform.isSupported(ConditionalFeature.SCENE3D);
 
     private final SceneAntialiasing antiAliasing;
@@ -262,11 +262,11 @@ public class SubScene extends Node {
 
                     if (oldRoot != null) {
                         StyleManager.getInstance().forget(SubScene.this);
-                        oldRoot.setScenes(null, null, false);
+                        oldRoot.setScenes(null, null);
                     }
                     oldRoot = _value;
                     _value.getStyleClass().add(0, "root");
-                    _value.setScenes(getScene(), SubScene.this, true);
+                    _value.setScenes(getScene(), SubScene.this);
                     markDirty(SubSceneDirtyBits.ROOT_SG_DIRTY);
                     _value.resize(getWidth(), getHeight()); // maybe no-op if root is not resizable
                     _value.requestLayout();
@@ -318,7 +318,7 @@ public class SubScene extends Node {
                     Camera _value = get();
                     if (_value != null) {
                         if (_value instanceof PerspectiveCamera
-                                && !SubScene.is3DSupported) {
+                                && !is3DSupported) {
                             String logname = SubScene.class.getName();
                             PlatformLogger.getLogger(logname).warning("System can't support "
                                     + "ConditionalFeature.SCENE3D");
@@ -897,7 +897,7 @@ public class SubScene extends Node {
             @Override
             public boolean isDepthBuffer(SubScene subScene) {
                 return subScene.isDepthBufferInternal();
-            }
+            };
 
             @Override
             public Camera getEffectiveCamera(SubScene subScene) {

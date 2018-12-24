@@ -166,8 +166,8 @@ class HTMLCodec extends InputStream {
                 if( -1 == stUpContext.indexOf("<BODY") ) {
                     htmlPrefix = htmlPrefix +"<BODY>";
                     htmlSuffix = "</BODY>" + htmlSuffix;
-                }
-            }
+                };
+            };
             htmlPrefix = htmlPrefix + START_FRAGMENT_CMT;
             htmlSuffix = END_FRAGMENT_CMT + htmlSuffix;
         }
@@ -381,7 +381,7 @@ class HTMLCodec extends InputStream {
                         case 7:
                             stBaseURL = stValue;
                             break;
-                        }
+                        };
                     } catch ( NumberFormatException e ) {
                         throw new IOException(FAILURE_MSG + astEntries[iEntry]+ " value " + e + INVALID_MSG);
                     }
