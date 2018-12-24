@@ -224,8 +224,6 @@ Thread.dumpStack();
     }
 
     protected Future submitRenderJob(RenderJob r) {
-Thread.dumpStack();
-System.err.println("[JVDBG] submitrenderjob: "+r);
         return (submit(r));
     }
 

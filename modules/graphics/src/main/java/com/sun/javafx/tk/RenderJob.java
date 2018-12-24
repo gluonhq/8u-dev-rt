@@ -42,12 +42,10 @@ Thread.dumpStack();
 }
     public RenderJob(Runnable pen) {
         super(pen, null);
-Thread.dumpStack();
     }
 
     public RenderJob(Runnable pen, CompletionListener cl) {
         super(pen, null);
-Thread.dumpStack();
         setCompletionListener(cl);
     }
 
@@ -60,7 +58,6 @@ Thread.dumpStack();
     }
 
     @Override public void run() {
-Thread.dumpStack();
         if (super.runAndReset() == false) {
             // if (PrismSettings.verbose) {
                 try {
