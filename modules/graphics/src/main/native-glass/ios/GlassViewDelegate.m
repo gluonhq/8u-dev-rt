@@ -265,6 +265,7 @@ static jint getTouchStateFromPhase(int phase)
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+fprintf(stderr, "[JVDBG] native scrollViewDidScroll\n");
     if ([GlassDragDelegate isDragging] == YES) { // no gestures while dragging
         return;
     }
@@ -283,6 +284,7 @@ static jint getTouchStateFromPhase(int phase)
     point.x = lastScrollOffset.x - currOffset.x;
     point.y = lastScrollOffset.y - currOffset.y;
     lastScrollOffset = currOffset;
+fprintf(stderr, "[JVDBG] SVDS, gestclass = %p, method = %p\n", jGestureSupportClass,jGestureSupportScrollGesturePerformed);
 
     (*env)->CallStaticVoidMethod(env,
                                  jGestureSupportClass,
