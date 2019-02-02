@@ -180,7 +180,7 @@ System.out.println("[NLL] using loadLibrary with hyphen worked for "+libraryName
 
                 // Set the native directory based on the OS
                 String osName = "iOS";//System.getProperty("os.name");
-                String relativeDir = null;
+                String relativeDir = "../";
                 if (osName.startsWith("Windows")) {
                     relativeDir = "../../bin";
                 } else if (osName.startsWith("Mac")) {
