@@ -75,11 +75,12 @@ String getLatestToolchain(String ndk, String tch) {
     file(cygpath("$ndk/toolchains")).eachFile() {file->        
         def filename = file.getName()
         if (filename.startsWith(tch)) {
-            def p = filename - "$tch-"
-            if (compareVersions(p, max) > 0) {
-                max = p
                 matchFile = file
-            }
+            // def p = filename - "$tch-"
+            // if (compareVersions(p, max) > 0) {
+                // max = p
+                // matchFile = file
+            // }
         }
     }
     return matchFile.getAbsolutePath()
@@ -95,8 +96,8 @@ boolean assertDir(String dir) {
 
 def closedDir = file("$projectDir/../rt-closed")
 
-def toolchainArchs = ["arm-linux-androideabi", "mipsel-linux-android", "x86"]
-def armArchs = ["armeabi", "armeabi-v7a"]
+def toolchainArchs = ["llvm", "aarch64-linux-android-4.9","arm-linux-androideabi", "mipsel-linux-android", "x86"]
+def armArchs = ["arm64-v8a", "armeabi-v7a"]
 
 ext.DALVIK = [:]
 DALVIK.compileSwing = false;
@@ -104,7 +105,7 @@ DALVIK.compileSWT = false;
 DALVIK.compileFXPackager = false;
 DALVIK.compileDesignTime = false;
 DALVIK.glassPlatform = "android"
-DALVIK.armArch = armArchs[1]
+DALVIK.armArch = armArchs[0]
 DALVIK.libDest = "lib/${DALVIK.armArch}"
 DALVIK.jfxdvklib = "jfxdvk.jar"
 DALVIK.library = { name -> return "lib${name}.so" as String }
@@ -175,8 +176,10 @@ if (!assertDir(freetypeDir)) {
 }
 def compileNativeText = freetypeDir != null
 
-def compiler = file("$compilerHome/bin/${toolchainArchs[0]}-gcc").getAbsolutePath()
-def linker = file("$compilerHome/bin/${toolchainArchs[0]}-g++").getAbsolutePath()
+// def compiler = file("$compilerHome/bin/${toolchainArchs[0]}-gcc").getAbsolutePath()
+// def linker = file("$compilerHome/bin/${toolchainArchs[0]}-g++").getAbsolutePath()
+def compiler = file("$compilerHome/bin/clang").getAbsolutePath()
+def linker = file("$compilerHome/bin/clang++").getAbsolutePath()
 
 // Define the wearable version in the 'com.google.android.support:wearable' artifact
 // Required by the FXWearableActivity
@@ -589,56 +592,88 @@ def ccFlags = ["--sysroot=$ndk/sysroot","-std=c99", "-DANDROID", "-c", "-nostdli
                "-I$ndk/sysroot/usr/include/${toolchainArchs[0]}"]
 
 def ccOptFlags = ["-fpic", "-ffunction-sections", "-funwind-tables","-fstack-protector",
-                  "-Os", "-O2", "-fno-strict-aliasing", "-finline-limit=64", "-fomit-frame-pointer"]
-def ccWarnFlags = ["-Wa,--noexecstack", "-Wno-psabi"]
+                  "-Os", "-O2", "-fno-strict-aliasing", "-fomit-frame-pointer"]
+def ccWarnFlags = ["-Wa,--noexecstack"] //, "-Wno-psabi"]
 def ccArchFlags = []
 if (DALVIK.armArch == 'armeabi') {
     ccArchFlags = ["-mthumb", "-msoft-float", "-D__ARM_ARCH_5__", "-D__ARM_ARCH_5T__", "-D__ARM_ARCH_5E__",
                    "-D__ARM_ARCH_5TE__", "-march=armv5te" , "-mtune=xscale"]
 } else if (DALVIK.armArch == 'armeabi-v7a') {
-    ccArchFlags = ["-mthumb", "-mfloat-abi=softfp", "-mfpu=vfpv3-d16", "-march=armv7-a"]
+    ccArchFlags = ["-mthumb", "-mfloat-abi=softfp", "-mfpu=vfpv3-d16"]
+} else if (DALVIK.armArch == 'arm64-v8a') {
+    ccArchFlags = ["-target", "aarch64-linux-android21"]
 }
-def ccDebugFlags = [IS_DEBUG_NATIVE ? "-DDEBUG" : "-DNDEBUG"]
-def ccDefaultIncludeFlags = ["-I$ndk/platforms/$ndk_target/arch-arm/usr/include"]
+def ccArmeabiv7aFlags = ["-target", "armv7a-linux-androideabi21"]
+def ccArm64v8aFlags = ["-target", "aarch64-linux-android21"]
 
-def linkFlags = ["--sysroot=$ndk/platforms/$ndk_target/arch-arm",
+def ccDebugFlags = [IS_DEBUG_NATIVE ? "-DDEBUG" : "-DNDEBUG"]
+def ccDefaultIncludeFlags = ["-I$ndk/platforms/$ndk_target/arch-arm64/usr/include"]
+
+def linkFlags = [// "--sysroot=$ndk/platforms/$ndk_target/arch-arm64",
                  "-Wl,--no-undefined", "-Wl,-z,noexecstack", "-lc", "-lm", "-shared",
-                 "-L$ndk/platforms/$ndk_target/arch-arm/usr/lib"]
+                 "-L$ndk/platforms/$ndk_target/arch-arm64/usr/lib"]
+def linkArmeabiv7aFlags = ["-target", "armv7a-linux-androideabi21"]
+def linkArm64v8aFlags = ["-target", "aarch64-linux-android21"]
 def linkArchFlags = []
-if (DALVIK.armArch == 'armeabi-v7a') {
-    linkArchFlags = ["-march=armv7-a", "-Wl,--fix-cortex-a8"]
-}
+
 
 DALVIK.activity = [:]
+DALVIK.activity.variants = ["armeabiv7a", "arm64v8a"]
+DALVIK.activity.armeabiv7a = [:]
+DALVIK.activity.arm64v8a = [:]
+
 DALVIK.activity.javahSource = files("modules/graphics/build/classes/dalvik")
 DALVIK.activity.javahClasspath = files("modules/graphics/build/classes/dalvik", \
 "$sdk/platforms/$sdk_target/android.jar", \
 "$sdk/extras/google/m2repository/com/google/android/support/wearable/$wearableVersion/exploded/wearable-${wearableVersion}.jar")
 DALVIK.activity.javahInclude = ["javafxports/android/**"]
-DALVIK.activity.nativeSource = file("modules/graphics/src/dalvik/native")
-DALVIK.activity.compiler = compiler
-DALVIK.activity.linker = linker
-DALVIK.activity.lib = "activity"
-DALVIK.activity.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
+
+DALVIK.activity.armeabiv7a.nativeSource = file("modules/graphics/src/dalvik/native")
+DALVIK.activity.armeabiv7a.compiler = compiler
+DALVIK.activity.armeabiv7a.linker = linker
+DALVIK.activity.armeabiv7a.lib = "activity"
+DALVIK.activity.armeabiv7a.ccFlags = [ccFlags, ccWarnFlags, ccArmeabiv7aFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags].flatten()
-DALVIK.activity.linkFlags = [linkFlags, linkArchFlags, "-landroid", "-llog"].flatten()
+DALVIK.activity.armeabiv7a.linkFlags = [linkFlags, linkArmeabiv7aFlags, "-landroid", "-llog"].flatten()
+
+DALVIK.activity.arm64v8a.nativeSource = file("modules/graphics/src/dalvik/native")
+DALVIK.activity.arm64v8a.compiler = compiler
+DALVIK.activity.arm64v8a.linker = linker
+DALVIK.activity.arm64v8a.lib = "activity"
+DALVIK.activity.arm64v8a.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
+    ccDebugFlags, ccDefaultIncludeFlags].flatten()
+DALVIK.activity.arm64v8a.linkFlags = [linkFlags, linkArm64v8aFlags, "-landroid", "-llog"].flatten()
 
 DALVIK.webview = [:]
+DALVIK.webview.variants = ["armeabiv7a", "arm64v8a"]
+DALVIK.webview.armeabiv7a = [:]
+DALVIK.webview.arm64v8a = [:]
+
 DALVIK.webview.javahSource = files("modules/web/build/classes/android")
 DALVIK.webview.javahClasspath = files("modules/web/build/classes/android")
 DALVIK.webview.javahInclude = [
     "com/sun/webkit/NativeWebView.class"
 ]
-DALVIK.webview.nativeSource = [
+DALVIK.webview.armeabiv7a.nativeSource = [
     files("modules/web/src/android/native/native_webview.c",
 "modules/web/src/android/native/android_webview.c")
 ]
-DALVIK.webview.compiler = compiler
-DALVIK.webview.linker = linker
-DALVIK.webview.lib = "webview"
-DALVIK.webview.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
+DALVIK.webview.armeabiv7a.compiler = compiler
+DALVIK.webview.armeabiv7a.linker = linker
+DALVIK.webview.armeabiv7a.lib = "webview"
+DALVIK.webview.armeabiv7a.ccFlags = [ccFlags, ccWarnFlags, ccArmeabiv7aFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags].flatten()
-DALVIK.webview.linkFlags = [linkFlags, linkArchFlags, "-ldl", "-llog"].flatten()
+DALVIK.webview.armeabiv7a.linkFlags = [linkFlags, linkArmeabiv7aFlags, "-ldl", "-llog"].flatten()
+DALVIK.webview.arm64v8a.nativeSource = [
+    files("modules/web/src/android/native/native_webview.c",
+"modules/web/src/android/native/android_webview.c")
+]
+DALVIK.webview.arm64v8a.compiler = compiler
+DALVIK.webview.arm64v8a.linker = linker
+DALVIK.webview.arm64v8a.lib = "webview"
+DALVIK.webview.arm64v8a.ccFlags = [ccFlags, ccWarnFlags, ccArm64v8aFlags, ccOptFlags,
+    ccDebugFlags, ccDefaultIncludeFlags].flatten()
+DALVIK.webview.arm64v8a.linkFlags = [linkFlags, linkArm64v8aFlags, "-ldl", "-llog"].flatten()
 
 DALVIK.dvkwebview = [:]
 DALVIK.dvkwebview.javahSource = files("modules/web/build/classes/android")
@@ -659,7 +694,8 @@ DALVIK.dvkwebview.linkFlags = [linkFlags, linkArchFlags, "-ldl", "-llog"].flatte
 DALVIK.glass = [:]
 // DALVIK.glass.variants = ["eglfb", "lensport"]
 DALVIK.glass.variants = []
-DALVIK.glass.variants = ["monocle"]
+// DALVIK.glass.variants = ["monocle"]
+DALVIK.glass.variants = ["armeabiv7a", "arm64v8a"]
 DALVIK.glass.javahSource = files("modules/graphics/build/classes/dalvik",
  "modules/graphics/build/classes/main")
 DALVIK.glass.javahClasspath = files("modules/graphics/build/classes/main",
@@ -676,36 +712,38 @@ DALVIK.glass.javahInclude = [
     "com/sun/glass/ui/android/*",
     "com/sun/glass/ui/lens/*"]
 
-DALVIK.glass.lensport = [:]
-DALVIK.glass.lensport.nativeSource = [
-    file("modules/graphics/src/main/native-glass/lens/lensport/initPlatform.c"),
-    file("modules/graphics/src/main/native-glass/lens/wrapped/wrapped_functions.c")    
-]
-DALVIK.glass.lensport.compiler = compiler
-DALVIK.glass.lensport.linker = linker
-DALVIK.glass.lensport.lib = "lens_porting"
-DALVIK.glass.lensport.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
-    ccDebugFlags, ccDefaultIncludeFlags, "-DISEGLFB", "-DLENSPORT",
-    "-I", file("modules/graphics/src/main/native-glass/lens")].flatten()
-DALVIK.glass.lensport.linkFlags = [linkFlags, linkArchFlags, "-ldl", "-llog"].flatten()
+def monocleArmeabiCFlags = [ccFlags, ccWarnFlags, ccArmeabiv7aFlags, ccOptFlags,
+    ccDebugFlags, ccDefaultIncludeFlags, "-DISEGLFB",
+    "-I", file("modules/graphics/src/main/native-glass/monocle/"),
+    "-I", file("modules/graphics/src/dalvik/native/")].flatten()
 
-def monocleCFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
+def monocleArm64CFlags = [ccFlags, ccWarnFlags, ccArm64v8aFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags, "-DISEGLFB",
     "-I", file("modules/graphics/src/main/native-glass/monocle/"),
     "-I", file("modules/graphics/src/dalvik/native/")
 ].flatten()
 
-DALVIK.glass.monocle = [:]
-DALVIK.glass.monocle.nativeSource = [
+DALVIK.glass.armeabiv7a = [:]
+DALVIK.glass.armeabiv7a.nativeSource = [
         file("modules/graphics/src/main/native-glass/monocle"),
         file("modules/graphics/src/main/native-glass/monocle/android"),
         file("modules/graphics/src/main/native-glass/monocle/util") ]
-DALVIK.glass.monocle.compiler = compiler
-DALVIK.glass.monocle.ccFlags = monocleCFlags
-DALVIK.glass.monocle.linker = linker
-DALVIK.glass.monocle.linkFlags =  [linkFlags, linkArchFlags, "-ldl", "-llog", "-landroid", "-lGLESv2", "-lEGL"].flatten()
+DALVIK.glass.armeabiv7a.compiler = compiler
+DALVIK.glass.armeabiv7a.ccFlags = monocleArmeabiCFlags
+DALVIK.glass.armeabiv7a.linker = linker
+DALVIK.glass.armeabiv7a.linkFlags =  [linkFlags, linkArmeabiv7aFlags, "-ldl", "-llog", "-landroid", "-lGLESv2", "-lEGL"].flatten()
+DALVIK.glass.armeabiv7a.lib = "glass_monocle"
 
-DALVIK.glass.monocle.lib = "glass_monocle"
+DALVIK.glass.arm64v8a = [:]
+DALVIK.glass.arm64v8a.nativeSource = [
+        file("modules/graphics/src/main/native-glass/monocle"),
+        file("modules/graphics/src/main/native-glass/monocle/android"),
+        file("modules/graphics/src/main/native-glass/monocle/util") ]
+DALVIK.glass.arm64v8a.compiler = compiler
+DALVIK.glass.arm64v8a.ccFlags = monocleArm64CFlags
+DALVIK.glass.arm64v8a.linker = linker
+DALVIK.glass.arm64v8a.linkFlags =  [linkFlags, linkArm64v8aFlags, "-ldl", "-llog", "-landroid", "-lGLESv2", "-lEGL"].flatten()
+DALVIK.glass.arm64v8a.lib = "glass_monocle"
 
 DALVIK.javafxPlatformDefault="eglfb"
 
@@ -729,29 +767,27 @@ monocle.com.sun.javafx.gestures.scroll=true"""
 
 
 
-DALVIK.glass.eglfb = [:]
-DALVIK.glass.eglfb.nativeSource = [
-    file("modules/graphics/src/main/native-glass/lens"),
-    file("modules/graphics/src/main/native-glass/lens/wm"),
-    file("modules/graphics/src/main/native-glass/lens/cursor/nullCursor"),
-    file("modules/graphics/src/main/native-glass/lens/dalvik")
-]
-DALVIK.glass.eglfb.compiler = compiler
-DALVIK.glass.eglfb.linker = linker
-DALVIK.glass.eglfb.lib = "glass_lens_eglfb"
-DALVIK.glass.eglfb.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
-    ccDebugFlags, ccDefaultIncludeFlags].flatten()
-DALVIK.glass.eglfb.linkFlags = [linkFlags, linkArchFlags, "-ldl", "-landroid", "-llog"].flatten()
-
 DALVIK.prism = [:]
 DALVIK.prism.javahInclude = ["com/sun/prism/impl/**/*", "com/sun/prism/PresentableState*"]
-DALVIK.prism.nativeSource = file("modules/graphics/src/main/native-prism")
-DALVIK.prism.compiler = compiler
-DALVIK.prism.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
+DALVIK.prism.variants = ["armeabiv7a", "arm64v8a"]
+
+DALVIK.prism.armeabiv7a = [:]
+DALVIK.prism.arm64v8a = [:]
+DALVIK.prism.armeabiv7a.nativeSource = file("modules/graphics/src/main/native-prism")
+DALVIK.prism.armeabiv7a.compiler = compiler
+DALVIK.prism.armeabiv7a.ccFlags = [ccFlags, ccWarnFlags, ccArmeabiv7aFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags].flatten()
-DALVIK.prism.linker = linker
-DALVIK.prism.linkFlags = [linkFlags, linkArchFlags, "-ldl", "-landroid", "-llog"].flatten()
-DALVIK.prism.lib = "prism_common"
+DALVIK.prism.armeabiv7a.linker = linker
+DALVIK.prism.armeabiv7a.linkFlags = [linkFlags, linkArmeabiv7aFlags, "-ldl", "-landroid", "-llog"].flatten()
+DALVIK.prism.armeabiv7a.lib = "prism_common"
+
+DALVIK.prism.arm64v8a.nativeSource = file("modules/graphics/src/main/native-prism")
+DALVIK.prism.arm64v8a.compiler = compiler
+DALVIK.prism.arm64v8a.ccFlags = [ccFlags, ccWarnFlags, ccArm64v8aFlags, ccOptFlags,
+    ccDebugFlags, ccDefaultIncludeFlags].flatten()
+DALVIK.prism.arm64v8a.linker = linker
+DALVIK.prism.arm64v8a.linkFlags = [linkFlags, linkArm64v8aFlags, "-ldl", "-landroid", "-llog"].flatten()
+DALVIK.prism.arm64v8a.lib = "prism_common"
 
 DALVIK.prismSW = [:]
 DALVIK.prismSW.javahInclude = ["com/sun/pisces/**/*"]
@@ -764,104 +800,146 @@ DALVIK.prismSW.linkFlags = [linkFlags, linkArchFlags].flatten()
 DALVIK.prismSW.lib = "prism_sw"
 
 DALVIK.decora = [:]
-DALVIK.decora.compiler = compiler
-DALVIK.decora.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
+DALVIK.decora.variants = ["armeabiv7a", "arm64v8a"]
+DALVIK.decora.armeabiv7a = [:]
+DALVIK.decora.arm64v8a = [:]
+
+DALVIK.decora.armeabiv7a.compiler = compiler
+DALVIK.decora.armeabiv7a.ccFlags = [ccFlags, ccWarnFlags, ccArmeabiv7aFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags].flatten()
-DALVIK.decora.linker = linker
-DALVIK.decora.linkFlags = [linkFlags, linkArchFlags].flatten()
-DALVIK.decora.lib = "decora_sse"
+DALVIK.decora.armeabiv7a.linker = linker
+DALVIK.decora.armeabiv7a.linkFlags = [linkFlags, linkArmeabiv7aFlags].flatten()
+DALVIK.decora.armeabiv7a.lib = "decora_sse"
+
+DALVIK.decora.arm64v8a.compiler = compiler
+DALVIK.decora.arm64v8a.ccFlags = [ccFlags, ccWarnFlags, ccArm64v8aFlags, ccOptFlags,
+    ccDebugFlags, ccDefaultIncludeFlags].flatten()
+DALVIK.decora.arm64v8a.linker = linker
+DALVIK.decora.arm64v8a.linkFlags = [linkFlags, linkArm64v8aFlags].flatten()
+DALVIK.decora.arm64v8a.lib = "decora_sse"
 
 DALVIK.iio = [:]
+DALVIK.iio.variants = ["armeabiv7a", "arm64v8a"]
+DALVIK.iio.armeabiv7a = [:]
+DALVIK.iio.arm64v8a = [:]
 DALVIK.iio.javahInclude = ["com/sun/javafx/iio/**/*"]
-DALVIK.iio.nativeSource = [
+
+DALVIK.iio.armeabiv7a.nativeSource = [
     file("modules/graphics/src/main/native-iio"),
     file("modules/graphics/src/main/native-iio/libjpeg7")]
-DALVIK.iio.compiler = compiler
-DALVIK.iio.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
+DALVIK.iio.armeabiv7a.compiler = compiler
+DALVIK.iio.armeabiv7a.ccFlags = [ccFlags, ccWarnFlags, ccArmeabiv7aFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags].flatten()
-DALVIK.iio.linker = linker
-DALVIK.iio.linkFlags = [linkFlags, linkArchFlags].flatten()
-DALVIK.iio.lib = "javafx_iio"
+DALVIK.iio.armeabiv7a.linker = linker
+DALVIK.iio.armeabiv7a.linkFlags = [linkFlags, linkArmeabiv7aFlags].flatten()
+DALVIK.iio.armeabiv7a.lib = "javafx_iio"
+
+DALVIK.iio.arm64v8a.nativeSource = [
+    file("modules/graphics/src/main/native-iio"),
+    file("modules/graphics/src/main/native-iio/libjpeg7")]
+DALVIK.iio.arm64v8a.compiler = compiler
+DALVIK.iio.arm64v8a.ccFlags = [ccFlags, ccWarnFlags, ccArm64v8aFlags, ccOptFlags,
+    ccDebugFlags, ccDefaultIncludeFlags].flatten()
+DALVIK.iio.arm64v8a.linker = linker
+DALVIK.iio.arm64v8a.linkFlags = [linkFlags, linkArm64v8aFlags].flatten()
+DALVIK.iio.arm64v8a.lib = "javafx_iio"
 
 DALVIK.prismES2 = [:]
-DALVIK.prismES2.variants = ["monocle"]
+DALVIK.prismES2.variants = ["armeabiv7a", "arm64v8a"]
+DALVIK.prismES2.armeabiv7a = [:]
+DALVIK.prismES2.arm64v8a = [:]
 DALVIK.prismES2.javahInclude = ["com/sun/prism/es2/**/*"]
 
-DALVIK.prismES2.monocle= [:]
-DALVIK.prismES2.monocle.nativeSource = [
+DALVIK.prismES2.armeabiv7a.nativeSource = [
     file("modules/graphics/src/main/native-prism-es2"),
     file("modules/graphics/src/main/native-prism-es2/GL"),
     file("modules/graphics/src/main/native-prism-es2/eglWrapper"),
     file("modules/graphics/src/main/native-prism-es2/monocle")
 ]
-DALVIK.prismES2.monocle.compiler = compiler
-DALVIK.prismES2.monocle.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
+DALVIK.prismES2.armeabiv7a.compiler = compiler
+DALVIK.prismES2.armeabiv7a.ccFlags = [ccFlags, ccWarnFlags, ccArmeabiv7aFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags, "-DIS_EGLFB"].flatten()
-DALVIK.prismES2.monocle.linker = linker
-DALVIK.prismES2.monocle.linkFlags = [linkFlags, linkArchFlags, "-ldl", "-llog", "-lGLESv2", "-lEGL"].flatten()
-DALVIK.prismES2.monocle.lib = "prism_es2_monocle"
+DALVIK.prismES2.armeabiv7a.linker = linker
+DALVIK.prismES2.armeabiv7a.linkFlags = [linkFlags, linkArmeabiv7aFlags, "-ldl", "-llog", "-lGLESv2", "-lEGL"].flatten()
+DALVIK.prismES2.armeabiv7a.lib = "prism_es2_monocle"
 
-DALVIK.prismES2.eglfb = [:]
-DALVIK.prismES2.eglfb.nativeSource = [
+DALVIK.prismES2.arm64v8a.nativeSource = [
     file("modules/graphics/src/main/native-prism-es2"),
     file("modules/graphics/src/main/native-prism-es2/GL"),
-    file("modules/graphics/src/main/native-prism-es2/wrapped"),
-    file("modules/graphics/src/main/native-prism-es2/eglfb")]
-DALVIK.prismES2.eglfb.compiler = compiler
-DALVIK.prismES2.eglfb.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
+    file("modules/graphics/src/main/native-prism-es2/eglWrapper"),
+    file("modules/graphics/src/main/native-prism-es2/monocle")
+]
+DALVIK.prismES2.arm64v8a.compiler = compiler
+DALVIK.prismES2.arm64v8a.ccFlags = [ccFlags, ccWarnFlags, ccArm64v8aFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags, "-DIS_EGLFB"].flatten()
-DALVIK.prismES2.eglfb.linker = linker
-DALVIK.prismES2.eglfb.linkFlags = [linkFlags, linkArchFlags, "-ldl", "-llog", "-lGLESv2", "-lEGL"].flatten()
-DALVIK.prismES2.eglfb.lib = "prism_es2_eglfb"
+DALVIK.prismES2.arm64v8a.linker = linker
+DALVIK.prismES2.arm64v8a.linkFlags = [linkFlags, linkArm64v8aFlags, "-ldl", "-llog", "-lGLESv2", "-lEGL"].flatten()
+DALVIK.prismES2.arm64v8a.lib = "prism_es2_monocle"
 
 DALVIK.font = [:]
+DALVIK.font.variants = ["armeabiv7a", "arm64v8a"]
+DALVIK.font.armeabiv7a = [:]
+DALVIK.font.arm64v8a = [:]
 DALVIK.font.javahInclude = [
         "com/sun/javafx/font/**/*",
         "com/sun/javafx/text/**/*"]
-DALVIK.font.nativeSource = [file("$closedDir/javafx-font-native/src")]
-DALVIK.font.compiler = compiler
-DALVIK.font.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
-    ccDebugFlags, ccDefaultIncludeFlags].flatten()
-DALVIK.font.linker = linker
-DALVIK.font.linkFlags = [linkFlags, linkArchFlags].flatten()
-DALVIK.font.lib = "javafx_font"
 
-if (BUILD_CLOSED) {
-    DALVIK.fontT2K = [:]
-    DALVIK.fontT2K.javahInclude = ["com/sun/javafx/font/t2k/**/*"]
-    DALVIK.fontT2K.nativeSource = [
-        file("$closedDir/javafx-font-t2k-native/src"),
-        file("$closedDir/javafx-font-t2k-native/src/layout"),
-        file("$closedDir/javafx-font-t2k-native/src/layoutfx")]
-    DALVIK.fontT2K.compiler = compiler
-    DALVIK.fontT2K.ccFlags = [ccFlags, "-fno-exceptions", "-fno-rtti", ccWarnFlags,
-        ccArchFlags, ccOptFlags, ccDebugFlags, ccDefaultIncludeFlags].flatten()
-    DALVIK.fontT2K.linker = linker
-    DALVIK.fontT2K.linkFlags = [linkFlags, linkArchFlags, "-lstdc++"].flatten()
-    DALVIK.fontT2K.lib = "javafx_font_t2k"
-} 
+DALVIK.font.armeabiv7a.nativeSource = [file("$closedDir/javafx-font-native/src")]
+DALVIK.font.armeabiv7a.compiler = compiler
+DALVIK.font.armeabiv7a.ccFlags = [ccFlags, ccWarnFlags, ccArmeabiv7aFlags, ccOptFlags,
+    ccDebugFlags, ccDefaultIncludeFlags].flatten()
+DALVIK.font.armeabiv7a.linker = linker
+DALVIK.font.armeabiv7a.linkFlags = [linkFlags, linkArmeabiv7aFlags].flatten()
+DALVIK.font.armeabiv7a.lib = "javafx_font"
+
+DALVIK.font.arm64v8a.nativeSource = [file("$closedDir/javafx-font-native/src")]
+DALVIK.font.arm64v8a.compiler = compiler
+DALVIK.font.arm64v8a.ccFlags = [ccFlags, ccWarnFlags, ccArm64v8aFlags, ccOptFlags,
+    ccDebugFlags, ccDefaultIncludeFlags].flatten()
+DALVIK.font.arm64v8a.linker = linker
+DALVIK.font.arm64v8a.linkFlags = [linkFlags, linkArm64v8aFlags].flatten()
+DALVIK.font.arm64v8a.lib = "javafx_font"
 
 if (compileNativeText) {
     DALVIK.fontNativeFreetype = [:]
+    DALVIK.fontNativeFreetype.variants = ["armeabiv7a", "arm64v8a"]
+    DALVIK.fontNativeFreetype.armeabiv7a = [:]
+    DALVIK.fontNativeFreetype.arm64v8a = [:]
     DALVIK.fontNativeFreetype.javahInclude = [
         "com/sun/javafx/font/freetype/OSFreetype.class"
     ]
-    DALVIK.fontNativeFreetype.nativeSource = [
+    DALVIK.fontNativeFreetype.armeabiv7a.nativeSource = [
         file("modules/graphics/src/main/native-font/freetype.c")
     ]
-    DALVIK.fontNativeFreetype.compiler = compiler
-    DALVIK.fontNativeFreetype.linker = linker
-    DALVIK.fontNativeFreetype.lib = "javafx_font_freetype"
+    DALVIK.fontNativeFreetype.armeabiv7a.compiler = compiler
+    DALVIK.fontNativeFreetype.armeabiv7a.linker = linker
+    DALVIK.fontNativeFreetype.armeabiv7a.lib = "javafx_font_freetype"
 
     ccFlags += ["-D_ENABLE_HARFBUZZ"]
 
-    DALVIK.fontNativeFreetype.ccFlags = 
-        [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
+    DALVIK.fontNativeFreetype.armeabiv7a.ccFlags = 
+        [ccFlags, ccWarnFlags, ccArmeabiv7aFlags, ccOptFlags,
         ccDebugFlags, ccDefaultIncludeFlags,
         "-I$freetypeDir/include", "-I$freetypeDir/include/freetype2"].flatten()  
         
-    DALVIK.fontNativeFreetype.linkFlags = 
-        [linkFlags, linkArchFlags, "-llog", 
+    DALVIK.fontNativeFreetype.armeabiv7a.linkFlags = 
+        [linkFlags, linkArmeabiv7aFlags, "-llog", 
+         "-L$freetypeDir/lib", "$freetypeDir/lib/libfreetype.a"].flatten()
+
+    DALVIK.fontNativeFreetype.arm64v8a.nativeSource = [
+        file("modules/graphics/src/main/native-font/freetype.c")
+    ]
+    DALVIK.fontNativeFreetype.arm64v8a.compiler = compiler
+    DALVIK.fontNativeFreetype.arm64v8a.linker = linker
+    DALVIK.fontNativeFreetype.arm64v8a.lib = "javafx_font_freetype"
+
+    DALVIK.fontNativeFreetype.arm64v8a.ccFlags = 
+        [ccFlags, ccWarnFlags, ccArm64v8aFlags, ccOptFlags,
+        ccDebugFlags, ccDefaultIncludeFlags,
+        "-I$freetypeDir/include", "-I$freetypeDir/include/freetype2"].flatten()  
+        
+    DALVIK.fontNativeFreetype.arm64v8a.linkFlags = 
+        [linkFlags, linkArm64v8aFlags, "-llog", 
          "-L$freetypeDir/lib", "$freetypeDir/lib/libfreetype.a"].flatten()
 }
 

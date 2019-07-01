@@ -931,10 +931,13 @@ void addNative(Project project, String name) {
                 cleanTask.delete ccOutput
             }
             def linkTask = project.task("link${t.capital}$capitalName$capitalVariant", type: LinkTask, dependsOn: ccTask, group: "Build") {
+                def useLipo = targetProperties.containsKey('useLipo') ? targetProperties.useLipo : false
                 description = "Creates native dynamic library for $name for ${t.name}${capitalVariant != '' ? ' for variant ' + capitalVariant : ''}"
                 objectDir = ccOutput
                 linkParams.addAll(variantProperties.linkFlags)
-                lib = file("$libRootDir/${t.name}/${variant == '' ? library(properties.lib) : library(variantProperties.lib)}")
+                lib = useLipo ?
+                    file("$libRootDir/${t.name}/${variant == '' ? library(properties.lib) : library(variantProperties.lib)}")  :
+                    file("$libRootDir/${t.name}/${variant == '' ? library(properties.lib) : variant+'/'+library(variantProperties.lib)}") 
                 linker = variantProperties.linker
                 cleanTask.delete "$libRootDir/${t.name}"
             }
