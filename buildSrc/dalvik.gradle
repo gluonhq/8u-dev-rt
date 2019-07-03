@@ -98,6 +98,7 @@ def closedDir = file("$projectDir/../rt-closed")
 
 def toolchainArchs = ["llvm", "aarch64-linux-android-4.9","arm-linux-androideabi", "mipsel-linux-android", "x86"]
 def armArchs = ["arm64-v8a", "armeabi-v7a"]
+def libArchs = ["arm64v8a", "armeabiv7a"]
 
 ext.DALVIK = [:]
 DALVIK.compileSwing = false;
@@ -106,7 +107,7 @@ DALVIK.compileFXPackager = false;
 DALVIK.compileDesignTime = false;
 DALVIK.glassPlatform = "android"
 DALVIK.armArch = armArchs[0]
-DALVIK.libDest = "lib/${DALVIK.armArch}"
+DALVIK.libDest = "lib"
 DALVIK.jfxdvklib = "jfxdvk.jar"
 DALVIK.library = { name -> return "lib${name}.so" as String }
 DALVIK.includeMonocole = true
@@ -320,9 +321,13 @@ project(":web") {
             dependsOn(jarWebJavaAndroid)
             doLast {
                 def props = project.ext["DALVIK"]
-                copy {
-                    from ("modules/web/build/libs/webview/dalvik/${props.library(props.webview.lib)}")
-                    into ("build/dalvik-sdk/rt/${props.libDest}")
+                (0..1).each {
+                    def lib = libArchs[it]
+                    def armArch = armArchs[it]
+                    copy {
+                        from("modules/web/build/libs/webview/dalvik/$lib")
+                        into("build/dalvik-sdk/rt/${props.libDest}/$armArch")
+                    }
                 }
             }
         }
@@ -454,11 +459,18 @@ project(":graphics") {
             dependsOn(jarDalvikLibs)
             doLast {
                 def props = project.ext["DALVIK"]
-                copy {
-                    from(
-                         "modules/graphics/build/libs/activity/dalvik/${props.library(props.activity.lib)}"
-                    )                    
-                    into ("build/dalvik-sdk/rt/${props.libDest}")
+                (0..1).each {
+                    def lib = libArchs[it]
+                    def armArch = armArchs[it]
+                    copy {
+                        from("modules/graphics/build/libs/activity/dalvik/$lib")
+                        from("modules/graphics/build/libs/font/dalvik/$lib")
+                        from("modules/graphics/build/libs/glass/dalvik/$lib")
+                        from("modules/graphics/build/libs/iio/dalvik/$lib")
+                        from("modules/graphics/build/libs/prism/dalvik/$lib")
+                        from("modules/graphics/build/libs/prismES2/dalvik/$lib")
+                        into("build/dalvik-sdk/rt/${props.libDest}/$armArch")
+                    }
                 }
                 copy {
                     from ("modules/graphics/build/libs/${props.jfxdvklib}")
@@ -471,9 +483,13 @@ project(":graphics") {
                 }
 */
                 if (compileNativeText) {
-                    copy {
-                        from ("modules/graphics/build/libs/fontNativeFreetype/dalvik")
-                        into ("build/dalvik-sdk/rt/${props.libDest}")
+                    (0..1).each {
+                        def lib = libArchs[it]
+                        def armArch = armArchs[it]
+                        copy {
+                            from("modules/graphics/build/libs/fontNativeFreetype/dalvik/$lib")
+                            into("build/dalvik-sdk/rt/${props.libDest}/$armArch")
+                        }
                     }
                 }
             }
@@ -920,11 +936,11 @@ if (compileNativeText) {
     DALVIK.fontNativeFreetype.armeabiv7a.ccFlags = 
         [ccFlags, ccWarnFlags, ccArmeabiv7aFlags, ccOptFlags,
         ccDebugFlags, ccDefaultIncludeFlags,
-        "-I$freetypeDir/include", "-I$freetypeDir/include/freetype2"].flatten()  
+         "-I$freetypeDir/armeabi-v7a/include", "-I$freetypeDir/armeabi-v7a/include/freetype2"].flatten()
         
     DALVIK.fontNativeFreetype.armeabiv7a.linkFlags = 
         [linkFlags, linkArmeabiv7aFlags, "-llog", 
-         "-L$freetypeDir/lib", "$freetypeDir/lib/libfreetype.a"].flatten()
+         "-L$freetypeDir/armeabi-v7a/lib", "$freetypeDir/armeabi-v7a/lib/libfreetype.a"].flatten()
 
     DALVIK.fontNativeFreetype.arm64v8a.nativeSource = [
         file("modules/graphics/src/main/native-font/freetype.c")
@@ -936,11 +952,11 @@ if (compileNativeText) {
     DALVIK.fontNativeFreetype.arm64v8a.ccFlags = 
         [ccFlags, ccWarnFlags, ccArm64v8aFlags, ccOptFlags,
         ccDebugFlags, ccDefaultIncludeFlags,
-        "-I$freetypeDir/include", "-I$freetypeDir/include/freetype2"].flatten()  
+         "-I$freetypeDir/arm64-v8a/include", "-I$freetypeDir/arm64-v8a/include/freetype2"].flatten()
         
     DALVIK.fontNativeFreetype.arm64v8a.linkFlags = 
         [linkFlags, linkArm64v8aFlags, "-llog", 
-         "-L$freetypeDir/lib", "$freetypeDir/lib/libfreetype.a"].flatten()
+         "-L$freetypeDir/arm64-v8a/lib", "$freetypeDir/arm64-v8a/lib/libfreetype.a"].flatten()
 }
 
 DALVIK.media = [:]
