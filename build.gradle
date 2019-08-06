@@ -3084,12 +3084,15 @@ compileTargets { t ->
                 if (IS_COMPILE_PANGO) {
                     libs += ['fontFreetype', 'fontPango'];
                 }
-                libs.each { lib ->
-                    def variants = targetProperties[lib].containsKey('variants') && !useLipo ? targetProperties[lib].variants : [null]
-                    variants.each { variant ->
-                        def variantProperties = variant ? targetProperties[lib][variant] : targetProperties[lib]
-                        println "modules/graphics/build/libs/$lib/$t.name/${library(variantProperties.lib)}"
-                        from ("modules/graphics/build/libs/$lib/$t.name/${library(variantProperties.lib)}")
+                if (t.name != "android"  && t.name != "dalvik") {
+                    libs.each { lib ->
+                        def variants = targetProperties[lib].containsKey('variants') && !useLipo ? targetProperties[lib].variants : [null]
+                        variants.each { variant ->
+                            def variantProperties = variant ? targetProperties[lib][variant] : targetProperties[lib]
+                            def variantDir = variant && ! useLipo ? "/" + variant : ""
+                            println "modules/graphics/build/libs/$lib/${t.name}${variantDir}/${library(variantProperties.lib)}"
+                            from("modules/graphics/build/libs/$lib/${t.name}${variantDir}/${library(variantProperties.lib)}")
+                        }
                     }
                 }
                 if (IS_WINDOWS) {
