@@ -541,6 +541,10 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
             }
             Log.e(TAG, "call native MultitouchEvent, density = "+density+", touchXs0 = "+touchXs[0]);
             try {
+                if (! myView.isFocused()) {
+                    Log.v(TAG, "view wasn't focused");
+                    myView.requestFocus();
+                }
                 onMultiTouchEventMethod.invoke(null, pcount, actions, ids, touchXs, touchYs);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onMultiTouchEvent method by reflection", e);
@@ -554,6 +558,7 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
         public InternalTextureView(Context context) {
             super(context);
             setFocusableInTouchMode(true);
+            setFocusable(true);
         }
 
 
@@ -576,6 +581,7 @@ public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutLis
         public InternalSurfaceView(Context context) {
             super(context);
             setFocusableInTouchMode(true);
+            setFocusable(true);
         }
 
 
